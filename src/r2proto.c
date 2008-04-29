@@ -426,6 +426,7 @@ int openr2_proto_set_idle(openr2_chan_t *r2chan)
 	r2chan->call_state = OR2_CALL_IDLE;
 	r2chan->direction = OR2_DIR_STOPPED;
 	r2chan->answered = 0;
+	r2chan->category_sent = 0;
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
 
@@ -1144,6 +1145,7 @@ static void mf_send_category(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->mf_state = OR2_MF_CATEGORY_TXD;
+	r2chan->category_sent = 1;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Sending category %s\n", 
 			openr2_proto_get_category_string(tone2category(r2chan)));
 	prepare_mf_tone(r2chan, r2chan->caller_category);
@@ -1189,7 +1191,7 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 						 GA_TONE(r2chan).request_category_and_change_to_gc;
 	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
 		mf_send_dnis(r2chan);
-	} else if (tone == GA_TONE(r2chan).request_next_ani_digit) {
+	} else if (r2chan->category_sent && (tone == GA_TONE(r2chan).request_next_ani_digit)) {
 		mf_send_ani(r2chan);
 	} else if (tone == request_category_tone) {
 		if (request_category_tone == GA_TONE(r2chan).request_category_and_change_to_gc) {
@@ -1211,7 +1213,7 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 		mf_send_ani(r2chan);
 	} else if (tone == GC_TONE(r2chan).request_change_to_g2) {
 		/* requesting change to Group II means we should
-		   send the calling party category again  */
+		   send the calling party category again?  */
 		r2chan->mf_group = OR2_MF_GII;
 		mf_send_category(r2chan);
 	} else if (tone == GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga) {

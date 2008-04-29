@@ -139,8 +139,11 @@ typedef struct openr2_chan_s {
 	int mf_write_fd;
 #endif
 
-	/* wether or not the call has been answered */
+	/* whether or not the call has been answered */
 	unsigned answered;
+
+	/* whether or not the category has been sent */
+	unsigned category_sent;
 
 	/* channel logging callback */
 	openr2_logging_func_t on_channel_log;
