@@ -776,7 +776,7 @@ static void request_calling_party_category(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	int tone = GA_TONE(r2chan).request_category ? GA_TONE(r2chan).request_category : GA_TONE(r2chan).request_category_and_change_to_gc;
-	r2chan->mf_group = OR2_MF_GC;
+	r2chan->mf_group = GA_TONE(r2chan).request_category ? OR2_MF_GA : OR2_MF_GC;
 	r2chan->mf_state = OR2_MF_CATEGORY_RQ_TXD;
 	prepare_mf_tone(r2chan, tone);
 }
@@ -803,6 +803,7 @@ static void request_change_to_g2(openr2_chan_t *r2chan)
 		                                          : GA_TONE(r2chan).request_change_to_g2;
 	r2chan->mf_group = OR2_MF_GB;
 	r2chan->mf_state = OR2_MF_CHG_GII_TXD;
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Requesting change to Group II with signal 0x%X\n", change_tone);
 	prepare_mf_tone(r2chan, change_tone);
 }
 
@@ -845,6 +846,7 @@ static void request_next_dnis_digit(openr2_chan_t *r2chan)
 		                      : GA_TONE(r2chan).request_next_dnis_digit;
 	r2chan->mf_group = OR2_MF_GA;
 	r2chan->mf_state = OR2_MF_DNIS_RQ_TXD;
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Requesting next DNIS with signal 0x%X.\n", request_tone);
 	prepare_mf_tone(r2chan, request_tone);
 }
 
@@ -1002,9 +1004,17 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 			break;
 		/* we requested the calling party category */
 		case OR2_MF_CATEGORY_RQ_TXD:
+			r2chan->caller_category = tone;
+			if (r2chan->r2context->max_ani > 0) {
+				mf_receive_expected_ani(r2chan, 0);
+			} else {
+				/* switch to Group B/II, we're ready to answer! */
+				request_change_to_g2(r2chan);
+			}
 			break;
 		/* we requested more ANI */
 		case OR2_MF_ANI_RQ_TXD:
+			mf_receive_expected_ani(r2chan, tone);
 			break;
 		/* hu? WTF we were doing?? */
 		default:
