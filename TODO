@@ -1,12 +1,6 @@
-- Since the signal used to request the calling party category and the signal
-  used to request the next ANI digit can be the same for some (all?) of the
-  R2 variants, a variable is needed to track if the category was already sent
-
 - warn users about -DTRACE_STACKS causing infinite recursion if calling openr2
   APIs from logging functions, probably we should not put OR2_CHAN_STACK on some
   functions?
-
-- when expected ANI = 0 should we send category request or just change to group II?
 
 - handle ANI restricted, set ANI restricted
 
