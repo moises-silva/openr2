@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <zaptel/zaptel.h>
 #include "openr2/r2chan.h"
@@ -184,9 +185,9 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->abcd_r2_bits = 0xC; /*  1100 */
 
 	/* set default values for the protocol timers */
-	r2context->timers.mf_back_cycle = 20000;
+	r2context->timers.mf_back_cycle = 1000;
 	r2context->timers.mf_back_resume_cycle = 150;
-	r2context->timers.mf_fwd_safety = 30000;
+	r2context->timers.mf_fwd_safety = 10000;
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 80000; 
 
@@ -465,9 +466,20 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 {
 	time_t currtime;
 	char stringbuf[512];
+	char currdir[512];
 	char timestr[30];
 	int res = 0;
+	char *cres = NULL;
 	int myerrno = 0;
+	if (!r2chan->r2context->logdir) {
+		cres = getcwd(currdir, sizeof(currdir));
+		if (!cres) {
+			myerrno = errno;
+			EMI(r2chan)->on_os_error(r2chan, myerrno);
+			openr2_log(r2chan, OR2_LOG_WARNING, "Could not get cwd: %s\n", strerror(myerrno));
+			return;
+		}
+	}
 	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%d-%s-%ld.call", 
 			r2chan->r2context->logdir ? r2chan->r2context->logdir : "", 
 			r2chan->number, 
@@ -475,29 +487,29 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 			r2chan->call_count++);
 	if (res >= sizeof(stringbuf)) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Failed to create file name of length %d.\n", res);
-	} else {
-		/* sanity check */
-		if (r2chan->logfile) {
-			openr2_log(r2chan, OR2_LOG_WARNING, "Yay, still have a log file, closing ...\n");
-			res = fclose(r2chan->logfile);
-			if (res) {
-				myerrno = errno;
-				EMI(r2chan)->on_os_error(r2chan, myerrno);
-				openr2_log(r2chan, OR2_LOG_ERROR, "fclose failed: %s\n", strerror(myerrno));
-			}
-			r2chan->logfile = NULL;
-		}
-		r2chan->logfile = fopen(stringbuf, "w");
-		if (!r2chan->logfile) {
+		return;
+	} 
+	/* sanity check */
+	if (r2chan->logfile) {
+		openr2_log(r2chan, OR2_LOG_WARNING, "Yay, still have a log file, closing ...\n");
+		res = fclose(r2chan->logfile);
+		if (res) {
 			myerrno = errno;
 			EMI(r2chan)->on_os_error(r2chan, myerrno);
-			openr2_log(r2chan, OR2_LOG_ERROR, "fopen failed: %s\n", strerror(myerrno));
-		} else {
-			currtime = time(NULL);
-			if (ctime_r(&currtime, timestr)) {
-				timestr[strlen(timestr)-1] = 0; /* remove end of line */
-				openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d\n", timestr, r2chan->number);
-			}
+			openr2_log(r2chan, OR2_LOG_ERROR, "fclose failed: %s\n", strerror(myerrno));
+		}
+		r2chan->logfile = NULL;
+	}
+	r2chan->logfile = fopen(stringbuf, "w");
+	if (!r2chan->logfile) {
+		myerrno = errno;
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+		openr2_log(r2chan, OR2_LOG_ERROR, "fopen failed: %s\n", strerror(myerrno));
+	} else {
+		currtime = time(NULL);
+		if (ctime_r(&currtime, timestr)) {
+			timestr[strlen(timestr)-1] = 0; /* remove end of line */
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d\n", timestr, r2chan->number);
 		}
 	}
 }

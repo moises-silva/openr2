@@ -356,3 +356,20 @@ int openr2_context_get_max_dnis(openr2_context_t *r2context)
 	return r2context->max_dnis;
 }
 
+void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
+{
+	OR2_CONTEXT_STACK;
+	/* ignore any timeout less than 0 */
+	if (ms < 0) {
+		return;
+	}
+	r2context->timers.mf_back_cycle = ms;
+}
+
+int openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->timers.mf_back_cycle;
+}
+
+

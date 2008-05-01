@@ -81,7 +81,8 @@ typedef struct {
 	int getanifirst;
 	int usezapmf;
 	int mf_threshold;
-	int callfile;
+	int mf_backtimeout;
+	int callfiles;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 } chan_group_data_t;
@@ -299,8 +300,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int getanifirst = 0;
 	int usezapmf = 0;
 	int mf_threshold = 0;
+	int mf_backtimeout = 0;
 	int threshold_test = 0;
-	int callfile = 0;
+	int callfiles = 0;
 	char strvalue[255];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
@@ -335,7 +337,8 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].loglevel = loglevel;
 			confdata[g].usezapmf = usezapmf;
 			confdata[g].mf_threshold = mf_threshold;
-			confdata[g].callfile = callfile;
+			confdata[g].mf_backtimeout = mf_backtimeout;
+			confdata[g].callfiles = callfiles;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			g++;
@@ -343,14 +346,14 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				printf("MAX_GROUPS reached, quitting loop ...\n");
 				break;
 			}
-		} else if (1 == sscanf(line, "callfile=%s", strvalue)) {
-			printf("found option callfile = %s\n", strvalue);
+		} else if (1 == sscanf(line, "callfiles=%s", strvalue)) {
+			printf("found option callfiles=%s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
-				callfile = 1;
+				callfiles = 1;
 			} else if (!strcasecmp(strvalue, "no")) {
-				callfile = 0;
+				callfiles = 0;
 			} else {
-				fprintf(stderr, "Invalid value '%s' for 'callfile' parameter.\n", strvalue);
+				fprintf(stderr, "Invalid value '%s' for 'callfiles' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "loglevel=%s", strvalue)) {
 			printf("found Log Level = %s\n", strvalue);
@@ -379,6 +382,14 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				continue;
 			}
 			mf_threshold = threshold_test;
+		} else if (1 == sscanf(line, "mfbacktimeout=%s", strvalue)) {
+			printf("found option MF backward timeout = %s\n", strvalue);
+			threshold_test = atoi(strvalue);
+			if (!threshold_test && strvalue[0] != '0') {
+				fprintf(stderr, "Invalid value '%s' for 'mfbacktimeout' parameter.\n", strvalue);
+				continue;
+			}
+			mf_backtimeout = threshold_test;
 		} else if (1 == sscanf(line, "getanifirst=%s", strvalue)) {
 			printf("found option Get ANI First = %s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
@@ -571,6 +582,7 @@ int main(int argc, char *argv[])
 		openr2_context_set_log_level(confdata[c].context, confdata[c].loglevel);
 		openr2_context_set_ani_first(confdata[c].context, confdata[c].getanifirst);
 		openr2_context_set_mf_threshold(confdata[c].context, confdata[c].mf_threshold);
+		openr2_context_set_mf_back_timeout(confdata[c].context, confdata[c].mf_backtimeout);
 	}
 	/* something failed, thus, at least 1 group did not get a context */
 	if (c != numgroups) {
@@ -598,7 +610,7 @@ int main(int argc, char *argv[])
 				break;
 			}
 			openr2_chan_set_client_data(confdata[c].channels[cnt].chan, &confdata[c]);
-			if (confdata[c].callfile) {
+			if (confdata[c].callfiles) {
 				openr2_chan_enable_call_files(confdata[c].channels[cnt].chan);
 			}
 			confdata[c].channels[cnt].zap_tx_state.r2chan = confdata[c].channels[cnt].chan;

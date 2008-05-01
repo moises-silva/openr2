@@ -250,6 +250,8 @@ void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 int openr2_context_get_mf_threshold(openr2_context_t *r2context);
 void openr2_context_set_log_directory(openr2_context_t *r2context, const char *directory);
 char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len);
+void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms);
+int openr2_context_get_mf_back_timeout(openr2_context_t *r2context);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */
