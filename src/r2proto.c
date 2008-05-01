@@ -475,7 +475,6 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 			r2chan->call_count++);
 	if (res >= sizeof(stringbuf)) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Failed to create file name of length %d.\n", res);
-		openr2_chan_disable_call_files(r2chan);
 	} else {
 		/* sanity check */
 		if (r2chan->logfile) {
@@ -493,7 +492,6 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 			myerrno = errno;
 			EMI(r2chan)->on_os_error(r2chan, myerrno);
 			openr2_log(r2chan, OR2_LOG_ERROR, "fopen failed: %s\n", strerror(myerrno));
-			openr2_chan_disable_call_files(r2chan);
 		} else {
 			currtime = time(NULL);
 			if (ctime_r(&currtime, timestr)) {
