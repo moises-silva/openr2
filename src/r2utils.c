@@ -19,8 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "config.h"
 
 const char *openr2_get_version()
 {
-	return "0.1.1";
+	return VERSION;
 }

@@ -7,4 +7,6 @@ LD_FLAGS=''
 AM_PROG_LIBTOOL
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
+AC_CHECK_HEADER([spandsp.h], [build_r2test=yes])
+AM_CONDITIONAL([WANT_R2TEST], [test "$build_r2test" = yes])
 AC_OUTPUT

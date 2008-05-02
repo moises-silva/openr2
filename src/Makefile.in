@@ -38,7 +38,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = r2test$(EXEEXT)
+@WANT_R2TEST_TRUE@bin_PROGRAMS = r2test$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(nobase_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -65,9 +65,10 @@ am_libopenr2_la_OBJECTS = r2chan.lo r2context.lo r2log.lo r2proto.lo \
 libopenr2_la_OBJECTS = $(am_libopenr2_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_r2test_OBJECTS = r2test.$(OBJEXT)
+am__r2test_SOURCES_DIST = r2test.c
+@WANT_R2TEST_TRUE@am_r2test_OBJECTS = r2test.$(OBJEXT)
 r2test_OBJECTS = $(am_r2test_OBJECTS)
-r2test_DEPENDENCIES = libopenr2.la
+@WANT_R2TEST_TRUE@r2test_DEPENDENCIES = libopenr2.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -80,7 +81,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libopenr2_la_SOURCES) $(r2test_SOURCES)
-DIST_SOURCES = $(libopenr2_la_SOURCES) $(r2test_SOURCES)
+DIST_SOURCES = $(libopenr2_la_SOURCES) $(am__r2test_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 nobase_includeHEADERS_INSTALL = $(install_sh_DATA)
 HEADERS = $(include_HEADERS) $(nobase_include_HEADERS)
@@ -142,6 +143,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WANT_R2TEST_FALSE = @WANT_R2TEST_FALSE@
+WANT_R2TEST_TRUE = @WANT_R2TEST_TRUE@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
@@ -198,8 +201,8 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2log.h
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c
-r2test_SOURCES = r2test.c 
-r2test_LDADD = -lspandsp libopenr2.la
+@WANT_R2TEST_TRUE@r2test_SOURCES = r2test.c 
+@WANT_R2TEST_TRUE@r2test_LDADD = -lspandsp libopenr2.la
 INCLUDES = -Iopenr2
 all: all-am
 
