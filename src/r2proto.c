@@ -411,7 +411,6 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_reason_t r
 int openr2_proto_set_idle(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	int ret;
 	/* cancel any event we could be waiting for */
 	openr2_chan_cancel_timer(r2chan);
 
@@ -435,16 +434,13 @@ int openr2_proto_set_idle(openr2_chan_t *r2chan)
 	r2chan->mf_read_tone = 0;
 
 	if (r2chan->logfile) {
-		ret = fclose(r2chan->logfile);
-		if (ret) {
-			openr2_log(r2chan, OR2_LOG_WARNING, "Failed to close log file.\n");
+		if (fclose(r2chan->logfile)) {
+			openr2_log(r2chan, OR2_LOG_WARNING, "Failed to close log file, leaking fds!.\n");
 		}
 		r2chan->logfile = NULL;
 	}
 
-	/* set ABCD to IDLE */
-	ret = set_abcd_signal(r2chan, OR2_ABCD_IDLE);
-	if (-1 == ret) {
+	if (set_abcd_signal(r2chan, OR2_ABCD_IDLE)) {
 		r2chan->r2context->last_error = OR2_LIBERR_CANNOT_SET_IDLE;
 		openr2_log(r2chan, OR2_LOG_ERROR, "failed to set channel %d to IDLE state.\n");
 		return -1;
@@ -523,11 +519,14 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	if (r2chan->call_files) {
 		open_logfile(r2chan, 1);
 	}
+	if (set_abcd_signal(r2chan, OR2_ABCD_SEIZE_ACK)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
+		return;
+	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
 	r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
 	r2chan->mf_group = OR2_MF_BACK_INIT;
 	r2chan->direction = OR2_DIR_BACKWARD;
-	set_abcd_signal(r2chan, OR2_ABCD_SEIZE_ACK);
 	/* now that we have sent the seize ack, we expect the first MF tone. 
 	   let's init our MF engine */
 	MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0);
@@ -770,17 +769,17 @@ int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_accept_t accept)
 
 int openr2_proto_answer_call(openr2_chan_t *r2chan)
 {
-	/* TODO: The user could decide to answer even before
-	   calling openr2_proto_accept_call and thus we should
-	   handle OR2_CALL_OFFERED state here as well */
 	OR2_CHAN_STACK;
 	if (r2chan->call_state != OR2_CALL_ACCEPTED) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Cannot answer call if the call is not accepted first\n");
 		return -1;
 	}
+	if (set_abcd_signal(r2chan, OR2_ABCD_ANSWER)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot send ANSWER signal, failed to answer call!\n");
+		return -1;
+	}
 	r2chan->call_state = OR2_CALL_ANSWERED;
 	r2chan->r2_state = OR2_ANSWER_TXD;
-	set_abcd_signal(r2chan, OR2_ABCD_ANSWER);
 	EMI(r2chan)->on_call_answered(r2chan);
 	r2chan->answered = 1;
 	return 0;
@@ -1447,6 +1446,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		open_logfile(r2chan, 0);
 	}
 	if (set_abcd_signal(r2chan, OR2_ABCD_SEIZE)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to seize line!, cannot make a call!\n");
 		return -1;
 	}	
 	r2chan->call_state = OR2_CALL_DIALING;
@@ -1488,20 +1488,20 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_reason
 	prepare_mf_tone(r2chan, tone);
 }
 
-static void send_clear_forward(openr2_chan_t *r2chan)
+static int send_clear_forward(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->r2_state = OR2_CLEAR_FWD_TXD;
 	r2chan->mf_state = OR2_MF_OFF_STATE;
-	set_abcd_signal(r2chan, OR2_ABCD_CLEAR_FORWARD);
+	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_FORWARD);
 }
 
-static void send_clear_backward(openr2_chan_t *r2chan)
+static int send_clear_backward(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->r2_state = OR2_CLEAR_BACK_TXD;
 	r2chan->mf_state = OR2_MF_OFF_STATE;
-	set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
+	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
 }
 
 int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
@@ -1523,10 +1523,16 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_r
 			report_call_end(r2chan);
 		} else {
 			/* this is a normal clear backward */
-			send_clear_backward(r2chan);
+			if (send_clear_backward(r2chan)) {
+				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, cannot disconnect call nicely!, may be try again?\n");
+				return -1;
+			}
 		}
 	} else {
-		send_clear_forward(r2chan);
+		if (send_clear_forward(r2chan)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
+			return -1;
+		}
 	}
 	return 0;
 }

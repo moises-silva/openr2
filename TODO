@@ -4,10 +4,8 @@
 
 - handle ANI restricted, set ANI restricted
 
-- remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
-
 - should check for error return in MF init routines
 
-- should check and report errors when calling set_abcd_signal in r2proto.c
+- remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
 
 - r2context access to members thread safe.
