@@ -233,9 +233,9 @@ static void on_call_read(openr2_chan_t *r2chan, const unsigned char *buf, int bu
 	openr2_chan_write(r2chan, buf, buflen);
 }
 
-static void on_call_disconnected(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+static void on_call_disconnected(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
-	printf("USER: got disconnect on chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(reason));
+	printf("USER: got disconnect on chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(cause));
 	openr2_chan_disconnect_call(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 }
 

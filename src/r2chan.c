@@ -427,10 +427,10 @@ int openr2_chan_answer_call(openr2_chan_t *r2chan)
 	return openr2_proto_answer_call(r2chan);
 }
 
-int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_disconnect_call(r2chan, reason);
+	return openr2_proto_disconnect_call(r2chan, cause);
 }
 
 int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)

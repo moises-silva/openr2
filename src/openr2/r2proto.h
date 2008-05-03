@@ -258,7 +258,7 @@ typedef enum {
 	OR2_CAUSE_UNSPECIFIED,
 	OR2_CAUSE_NO_ANSWER,
 	OR2_CAUSE_NORMAL_CLEARING
-} openr2_call_disconnect_reason_t;
+} openr2_call_disconnect_cause_t;
 
 /* possible causes of protocol error */
 typedef enum {
@@ -330,13 +330,13 @@ extern "C" {
 int openr2_proto_make_call(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
 int openr2_proto_accept_call(struct openr2_chan_s *r2chan, openr2_call_accept_t accept);
 int openr2_proto_answer_call(struct openr2_chan_s *r2chan);
-int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_reason_t reason);
+int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_proto_handle_abcd_change(struct openr2_chan_s *r2chan);
 int openr2_proto_set_idle(struct openr2_chan_s *r2chan);
 int openr2_proto_set_abcd_signal(struct openr2_chan_s *r2chan, openr2_abcd_signal_t signal);
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);
 const char *openr2_proto_get_error(openr2_protocol_error_t reason);
-const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_reason_t reason);
+const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
 void openr2_proto_handle_mf_tone(struct openr2_chan_s *r2chan, int tone);
 
 const char *openr2_proto_get_category_string(openr2_calling_party_category_t category);

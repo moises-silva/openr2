@@ -171,7 +171,7 @@ void openr2_chan_delete(openr2_chan_t *r2chan);
 int openr2_chan_process_event(openr2_chan_t *r2chan);
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_accept_t accept);
 int openr2_chan_answer_call(openr2_chan_t *r2chan);
-int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason);
+int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category);
 openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan);
 int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int len);

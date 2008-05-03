@@ -386,9 +386,9 @@ static const char *callstate2str(openr2_call_state_t state)
 	return "*Unknown*";
 }
 
-const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_reason_t reason)
+const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause)
 {
-	switch (reason) {
+	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
 		return "Busy Number";
 	case OR2_CAUSE_NETWORK_CONGESTION:
@@ -598,11 +598,11 @@ static void mf_send_dnis(openr2_chan_t *r2chan)
 	}
 }
 
-static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s\n", openr2_proto_get_disconnect_string(reason));
+	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s\n", openr2_proto_get_disconnect_string(cause));
 	r2chan->call_state = OR2_CALL_DISCONNECTED;
-	EMI(r2chan)->on_call_disconnect(r2chan, reason);
+	EMI(r2chan)->on_call_disconnect(r2chan, cause);
 }
 
 static void report_call_end(openr2_chan_t *r2chan)
@@ -1464,11 +1464,11 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	return 0;
 }
 
-static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	int tone;
 	r2chan->mf_state = OR2_MF_DISCONNECT_TXD;
-	switch (reason) {
+	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
 		tone = GB_TONE(r2chan).busy_number;
 		break;
@@ -1504,7 +1504,7 @@ static int send_clear_backward(openr2_chan_t *r2chan)
 	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
 }
 
-int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
 	/* cannot drop a call when there is none to drop */
@@ -1516,7 +1516,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_r
 			/* if the call has been offered we need to give a reason 
 			   to disconnect using a MF tone. That should make the other
 			   end send us a clear forward  */
-			send_disconnect(r2chan, reason);
+			send_disconnect(r2chan, cause);
 		} else if (r2chan->r2_state == OR2_CLEAR_FWD_RXD){
 			/* if the user want to hangup the call and the other end
 			   already said they want too, then just report the call end event */

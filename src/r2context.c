@@ -55,10 +55,10 @@ static void on_call_answered_default(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been answered at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
-static void on_call_disconnect_default(openr2_chan_t *r2chan, openr2_call_disconnect_reason_t reason)
+static void on_call_disconnect_default(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been disconnected at chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(reason));
+	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been disconnected at chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(cause));
 }
 
 static void on_call_end_default(openr2_chan_t *r2chan)
