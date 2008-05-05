@@ -124,7 +124,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = -lpthread
+LIBS = 
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -202,7 +202,7 @@ nobase_include_HEADERS = openr2/r2chan.h \
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c
 @WANT_R2TEST_TRUE@r2test_SOURCES = r2test.c 
-@WANT_R2TEST_TRUE@r2test_LDADD = -lspandsp libopenr2.la
+@WANT_R2TEST_TRUE@r2test_LDADD = -lspandsp -lpthread libopenr2.la
 INCLUDES = -Iopenr2
 all: all-am
 

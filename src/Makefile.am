@@ -12,9 +12,9 @@ libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c
 if WANT_R2TEST
 bin_PROGRAMS = r2test
 r2test_SOURCES = r2test.c 
-r2test_LDADD = -lspandsp libopenr2.la
+r2test_LDADD = -lspandsp -lpthread libopenr2.la
 endif
 
 INCLUDES = -Iopenr2
-LIBS = -lpthread
+LIBS = 
 

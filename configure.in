@@ -2,11 +2,26 @@ AC_INIT(Makefile.am)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE(OpenR2, 0.1.1)
 AC_PROG_CC
-CFLAGS='-ggdb3 -O0 -Wall -D_GNU_SOURCE'
-LD_FLAGS=''
 AM_PROG_LIBTOOL
+AC_DEFINE([_GNU_SOURCE], [], ["description"])
+
+CFLAGS='-ggdb3 -O0 -Wall'
+LD_FLAGS=''
+
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
-AC_CHECK_HEADER([spandsp.h], [build_r2test=yes])
+
+AC_ARG_WITH([r2test], [AS_HELP_STRING([--with-r2test], 
+	                [enable the r2test program. You will need spandsp installed.])],
+	                [],
+			[with_r2test=no])
+LIBSPANDSP=
+AS_IF([test "x$with_r2test" != xno],
+	[AC_CHECK_LIB([spandsp], [r2_mf_tx_init], 
+		[AC_CHECK_HEADER([spandsp.h], [build_r2test=yes], [AC_MSG_FAILURE([--with-r2test was given but spandsp.h was not found.])])],
+		[AC_MSG_FAILURE([--with-r2test was given but libspandsp.so was not found.])],	
+		[])])
+
 AM_CONDITIONAL([WANT_R2TEST], [test "$build_r2test" = yes])
+
 AC_OUTPUT
