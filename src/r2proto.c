@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <sys/ioctl.h>
 #include <zaptel/zaptel.h>
 #include "openr2/r2chan.h"
@@ -1430,6 +1431,10 @@ static void seize_timeout_expired(openr2_chan_t *r2chan, void *data)
 int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
+	const char *digit;
+	int copy_ani = 1;
+	int copy_dnis = 1;
+	openr2_log(r2chan, OR2_LOG_ERROR, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani, dnis, openr2_proto_get_category_string(category));
 	/* we can dial only if we're in IDLE */
 	if (r2chan->call_state != OR2_CALL_IDLE) {
 		return -1;
@@ -1442,24 +1447,53 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		openr2_log(r2chan, OR2_LOG_ERROR, "Trying to dial out in a non-idle channel\n");
 		return -1;
 	}
+	/* make sure both ANI and DNIS are numeric */
+	digit = ani;
+	while (*digit) {
+		if (!isdigit(*digit)) {
+			openr2_log(r2chan, OR2_LOG_NOTICE, "Char '%c' is not a digit, ANI will not be sent.\n", *digit);	
+			copy_ani = 0;
+			break;
+		}
+		digit++;
+	}
+	digit = dnis;
+	while (*digit) {
+		if (!isdigit(*digit)) {
+			openr2_log(r2chan, OR2_LOG_NOTICE, "Char '%c' is not a digit, DNIS will not be sent.\n", *digit);	
+			copy_dnis = 0;
+			break;
+			/* should we proceed with the call without DNIS? */
+		}
+		digit++;
+	}
 	if (r2chan->call_files) {
 		open_logfile(r2chan, 0);
 	}
 	if (set_abcd_signal(r2chan, OR2_ABCD_SEIZE)) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to seize line!, cannot make a call!\n");
 		return -1;
-	}	
+	}
 	r2chan->call_state = OR2_CALL_DIALING;
 	r2chan->r2_state = OR2_SEIZE_TXD;
 	r2chan->mf_group = OR2_MF_FWD_INIT;
 	r2chan->direction = OR2_DIR_FORWARD;
 	r2chan->caller_category = category2tone(r2chan, category);
-	strncpy(r2chan->ani, ani, sizeof(r2chan->ani)-1);
-	r2chan->ani[sizeof(r2chan->ani)-1] = '\0';
+	if (copy_ani) {
+		strncpy(r2chan->ani, ani, sizeof(r2chan->ani)-1);
+		r2chan->ani[sizeof(r2chan->ani)-1] = '\0';
+	} else {
+		r2chan->ani[0] = '\0';
+	}
 	r2chan->ani_ptr = r2chan->ani;
-	strncpy(r2chan->dnis, dnis, sizeof(r2chan->dnis)-1);
-	r2chan->dnis[sizeof(r2chan->dnis)-1] = '\0';
+	if (copy_dnis) {
+		strncpy(r2chan->dnis, dnis, sizeof(r2chan->dnis)-1);
+		r2chan->dnis[sizeof(r2chan->dnis)-1] = '\0';
+	} else {
+		r2chan->dnis[0] = '\0';
+	}	
 	r2chan->dnis_ptr = r2chan->dnis;
+	/* cannot wait forever for seize ack, put a timer */
 	openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, NULL);
 	return 0;
 }
