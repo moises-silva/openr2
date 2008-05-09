@@ -202,6 +202,9 @@ typedef enum {
 	/* The callee has answered the call */
 	OR2_ANSWER_RXD,
 
+	/* callee is asking us to end the call */
+	OR2_CLEAR_BACK_RXD,
+
 	/* The callee has answered the call but we
 	   still dont get the final MF tone off */
 	OR2_ANSWER_RXD_MF_PENDING,
@@ -217,6 +220,7 @@ typedef enum {
 	OR2VAR_BRAZIL,
 	OR2VAR_ITU,
 	OR2VAR_MEXICO,
+	OR2VAR_PHILIPPINES,
 	OR2VAR_UNKNOWN
 } openr2_variant_t;
 
@@ -272,7 +276,8 @@ typedef enum {
 	OR2_INVALID_R2_STATE,
 	OR2_INVALID_MF_STATE,
 	OR2_INVALID_MF_GROUP,
-	OR2_LIBRARY_BUG
+	OR2_LIBRARY_BUG,
+	OR2_INTERNAL_ERROR
 } openr2_protocol_error_t;
 
 /* names for the GA MF tones */

@@ -1,4 +1,4 @@
-- handle properly sending CLEAR BACK when in seize ack state? what to do, since CLEAR BACK and SEIZE ACK signals are the same
+- implement CAS persistence check for all signals
 
 - warn users about -DTRACE_STACKS causing infinite recursion if calling openr2
   APIs from logging functions, probably we should not put OR2_CHAN_STACK on some

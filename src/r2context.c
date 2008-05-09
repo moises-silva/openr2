@@ -372,4 +372,20 @@ int openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
 	return r2context->timers.mf_back_cycle;
 }
 
+void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms)
+{
+	OR2_CONTEXT_STACK;
+	/* ignore any timeout less than 0 */
+	if (ms < 0) {
+		return;
+	}
+	r2context->timers.r2_metering_pulse = ms;
+}
+
+int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->timers.r2_metering_pulse;
+}
+
 

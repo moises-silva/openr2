@@ -53,6 +53,7 @@ static void r2config_argentina(openr2_context_t *r2context)
 	OR2_CONTEXT_STACK;
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
+	r2context->timers.r2_metering_pulse = 400;
 }
 
 static void r2config_brazil(openr2_context_t *r2context)
@@ -191,11 +192,12 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->abcd_r2_bits = 0xC; /*  1100 */
 
 	/* set default values for the protocol timers */
-	r2context->timers.mf_back_cycle = 1000;
+	r2context->timers.mf_back_cycle = 1500;
 	r2context->timers.mf_back_resume_cycle = 150;
 	r2context->timers.mf_fwd_safety = 10000;
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 80000; 
+	r2context->timers.r2_metering_pulse = 0;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = max_dnis;
@@ -265,6 +267,8 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 		return "Accept Received";
 	case OR2_ANSWER_RXD:
 		return "Answer Received";
+	case OR2_CLEAR_BACK_RXD:
+		return "Clear Back Received";
 	case OR2_ANSWER_RXD_MF_PENDING:
 		return "Answer Received with MF Pending";
 	default: 
@@ -336,6 +340,8 @@ const char *openr2_proto_get_error(openr2_protocol_error_t error)
 		return "Broken MF Sequence";
 	case OR2_LIBRARY_BUG:
 		return "OpenR2 Library BUG";
+	case OR2_INTERNAL_ERROR:
+		return "OpenR2 Internal Error";
 	default:
 		return "*Unknown*";
 	}
@@ -522,18 +528,29 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	if (r2chan->call_files) {
 		open_logfile(r2chan, 1);
 	}
+	/* we have received the line seize, we expect the first MF tone. 
+	   let's init our MF engine, if we fail initing the MF engine
+	   there is no point sending the seize ack, lets ignore the
+	   call, the other end should timeout anyway */
+	if (!MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF writer\n");
+		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+		return;
+	}
+	if (!MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF reader\n");
+		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+		return;
+	}
 	if (set_abcd_signal(r2chan, OR2_ABCD_SEIZE_ACK)) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
+		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 		return;
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
 	r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
 	r2chan->mf_group = OR2_MF_BACK_INIT;
 	r2chan->direction = OR2_DIR_BACKWARD;
-	/* now that we have sent the seize ack, we expect the first MF tone. 
-	   let's init our MF engine */
-	MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0);
-	MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1);
 	/* notify the user that a new call is starting to arrive */
 	EMI(r2chan)->on_call_init(r2chan);
 }
@@ -564,8 +581,8 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 		ret = MFI(r2chan)->mf_select_tone(r2chan->mf_write_handle, tone);
 		if (-1 == ret) {
 			/* this is not a protocol error, but there is nothing else we can do anyway */
-			openr2_log(r2chan, OR2_LOG_ERROR, "BUG: failed to select MF tone\n");
-			handle_protocol_error(r2chan, OR2_LIBRARY_BUG);
+			openr2_log(r2chan, OR2_LOG_ERROR, "failed to select MF tone\n");
+			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 			return;
 		}
 		if (tone) {
@@ -603,6 +620,7 @@ static void mf_send_dnis(openr2_chan_t *r2chan)
 
 static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
+	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s\n", openr2_proto_get_disconnect_string(cause));
 	r2chan->call_state = OR2_CALL_DISCONNECTED;
 	EMI(r2chan)->on_call_disconnect(r2chan, cause);
@@ -610,9 +628,16 @@ static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconn
 
 static void report_call_end(openr2_chan_t *r2chan)
 {
+	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Call ended\n");
 	openr2_proto_set_idle(r2chan);
 	EMI(r2chan)->on_call_end(r2chan);
+}
+
+static void r2_metering_pulse(openr2_chan_t *r2chan, void *data)
+{
+	OR2_CHAN_STACK;
+	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 }
 
 int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
@@ -711,12 +736,14 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_ANSWER]) {
 			/* sometimes, since ABCD signaling is faster than MF detectors we
 			   may receive the ANSWER signal before actually receiving the
-			   MF tone that indicates the call has been accepted. We
-			   cannot turn off the tone detector because the tone off
+			   MF tone that indicates the call has been accepted (OR2_ACCEPT_RXD). We
+			   must not turn off the tone detector because the tone off
 			   condition is still missing */
 			r2chan->r2_state = OR2_ANSWER_RXD_MF_PENDING;
 		} else if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_BACK]) {
-			openr2_log(r2chan, OR2_LOG_ERROR, "Wah! clear back before answering, we should handle this.\n");
+			/* since Seize ACK and Clear Back have the same bit pattern I don't think we
+			   ever can fall into this state, can we? */
+			openr2_log(r2chan, OR2_LOG_ERROR, "Wah! clear back before answering, why did this happen?.\n");
 		} else {
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
@@ -724,10 +751,18 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 	case OR2_ANSWER_RXD_MF_PENDING:
 	case OR2_ANSWER_RXD:
 		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_BACK]) {
-			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+			r2chan->r2_state = OR2_CLEAR_BACK_RXD;
+			if (TIMER(r2chan).r2_metering_pulse) {
+				/* if the variant may have metering pulses, this clear back could be not really
+				   a clear back but a metering pulse, lets put the timer. If the ABCD signal does not
+				   come back to ANSWER then is really a clear back */
+				openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_metering_pulse, r2_metering_pulse, NULL);
+			} else {
+				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+			}
 		} else {
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
-		}	
+		}
 		break;
 	case OR2_CLEAR_BACK_TONE_RXD:
 		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
@@ -744,6 +779,19 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			} else {
 				report_call_end(r2chan);
 			}	
+		} else {
+			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
+		}
+		break;
+	case OR2_CLEAR_BACK_RXD:
+		/* we got clear back but we have not transmitted clear fwd yet, then, the only
+		   reason for ABCD change is a possible metering pulse, if we are not detecting a metering
+		   pulse then is a protocol error */
+		if (TIMER(r2chan).r2_metering_pulse && abcd == r2chan->r2context->abcd_signals[OR2_ABCD_ANSWER]) {
+			/* cancel the metering timer and let's pretend this never happened */
+			openr2_chan_cancel_timer(r2chan);
+			r2chan->r2_state = OR2_ANSWER_RXD;
+			openr2_log(r2chan, OR2_LOG_NOTICE, "Metering pulse received");
 		} else {
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}

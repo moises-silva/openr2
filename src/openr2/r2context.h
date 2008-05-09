@@ -146,6 +146,8 @@ typedef struct {
 	int r2_seize;
 	/* How much to wait for an answer once the call has been accepted */
 	int r2_answer;
+	/* How much to wait for metering pulse detection */
+	int r2_metering_pulse;
 } openr2_timers_t;
 
 /* Library errors */
@@ -252,6 +254,8 @@ void openr2_context_set_log_directory(openr2_context_t *r2context, const char *d
 char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len);
 void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms);
 int openr2_context_get_mf_back_timeout(openr2_context_t *r2context);
+void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms);
+int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */
