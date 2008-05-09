@@ -6,8 +6,6 @@
 
 - handle ANI restricted, set ANI restricted
 
-- should check for error return in MF init routines
-
 - remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
 
 - r2context access to members thread safe.
