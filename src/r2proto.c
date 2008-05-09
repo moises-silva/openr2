@@ -1484,9 +1484,10 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	const char *digit;
 	int copy_ani = 1;
 	int copy_dnis = 1;
-	openr2_log(r2chan, OR2_LOG_ERROR, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani, dnis, openr2_proto_get_category_string(category));
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani, dnis, openr2_proto_get_category_string(category));
 	/* we can dial only if we're in IDLE */
 	if (r2chan->call_state != OR2_CALL_IDLE) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Call state should be IDLE but is '%s'\n", openr2_proto_get_call_state_string(r2chan));
 		return -1;
 	}
 	/* try to handle last minute changes if any. 
