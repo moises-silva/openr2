@@ -20,6 +20,9 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -27,7 +30,13 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_LINUX_ZAPTEL_H
+#include <linux/zaptel.h>
+#elif HAVE_ZAPTEL_ZAPTEL_H
 #include <zaptel/zaptel.h>
+#else
+#error "wtf? either linux/zaptel.h or zaptel/zaptel.h should be present"
+#endif
 #include "openr2/r2chan.h"
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"

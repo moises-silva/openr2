@@ -20,6 +20,9 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -28,7 +31,13 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_LINUX_ZAPTEL_H
+#include <linux/zaptel.h>
+#elif HAVE_ZAPTEL_ZAPTEL_H
 #include <zaptel/zaptel.h>
+#else
+#error "wtf? either linux/zaptel.h or zaptel/zaptel.h should be present"
+#endif
 #include "openr2/r2context.h"
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"
@@ -195,8 +204,8 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	r2chan->r2context = r2context;
 
 	/* MF tone detection hooks handles */
-	r2chan->mf_write_handle = mf_write_handle;
-	r2chan->mf_read_handle = mf_read_handle;
+	r2chan->mf_write_handle = mf_write_handle ? mf_write_handle : &r2chan->default_mf_write_handle;
+	r2chan->mf_read_handle = mf_read_handle ? mf_read_handle : &r2chan->default_mf_read_handle;
 
 	/* set default logger and default logging level */
 	r2chan->on_channel_log = openr2_log_channel_default;

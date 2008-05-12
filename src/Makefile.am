@@ -5,16 +5,17 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2context.h \
 		         openr2/r2proto.h \
 		         openr2/r2utils.h \
-		         openr2/r2log.h
+		         openr2/r2log.h \
+			 openr2/r2engine.h
 
-libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c
+libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
 
 if WANT_R2TEST
 bin_PROGRAMS = r2test
 r2test_SOURCES = r2test.c 
-r2test_LDADD = -lspandsp -lpthread libopenr2.la
+r2test_LDADD = -lpthread libopenr2.la
 endif
 
 INCLUDES = -Iopenr2
-LIBS = 
+LIBS = -lm
 

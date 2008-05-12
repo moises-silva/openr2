@@ -29,6 +29,7 @@
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"
 #include "openr2/r2context.h"
+#include "openr2/r2engine.h"
 
 static void on_call_init_default(openr2_chan_t *r2chan)
 {
@@ -103,32 +104,48 @@ static void on_line_blocked_default(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end blocked!\n");
 }
 
+static int want_generate_default(openr2_mf_tx_state_t *state, int signal)
+{
+	return signal ? 1 : 0;
+}
+
+static const openr2_mf_read_init_func mf_read_init_default = (openr2_mf_read_init_func)openr2_mf_rx_init;
+static const openr2_mf_write_init_func mf_write_init_default = (openr2_mf_write_init_func)openr2_mf_tx_init;
+static const openr2_mf_detect_tone_func mf_detect_tone_default = (openr2_mf_detect_tone_func)openr2_mf_rx;
+static const openr2_mf_generate_tone_func mf_generate_tone_default = (openr2_mf_generate_tone_func)openr2_mf_tx;
+static const openr2_mf_select_tone_func mf_select_tone_default = (openr2_mf_select_tone_func)openr2_mf_tx_put;
+static const openr2_mf_want_generate_func mf_want_generate_default = (openr2_mf_want_generate_func)want_generate_default;
+
+static const openr2_alaw_to_linear_func alaw_to_linear_default = openr2_alaw_to_linear;
+static const openr2_linear_to_alaw_func linear_to_alaw_default = openr2_linear_to_alaw;
+
+static openr2_mflib_interface_t default_mf_interface = {
+	.mf_read_init = (openr2_mf_read_init_func)openr2_mf_rx_init,
+	.mf_write_init = (openr2_mf_write_init_func)openr2_mf_tx_init,
+	.mf_detect_tone = (openr2_mf_detect_tone_func)openr2_mf_rx,
+	.mf_generate_tone = (openr2_mf_generate_tone_func)openr2_mf_tx,
+	.mf_select_tone = (openr2_mf_select_tone_func)openr2_mf_tx_put,
+	.mf_want_generate = (openr2_mf_want_generate_func)want_generate_default,
+	.mf_read_dispose = NULL,
+	.mf_write_dispose = NULL
+};
+
+static openr2_transcoder_interface_t default_transcoder = {
+	.alaw_to_linear = openr2_alaw_to_linear,
+	.linear_to_alaw = openr2_linear_to_alaw
+};
+
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *evmanager, 
 		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis)
 {
 	/* TODO: set some error value when returning NULL */
 
-	/* all interfaces required */
-	if (!mflib || !evmanager || !transcoder) {
-		return NULL;
-	}	
-
-	/* check the MF iface */
-	if (!mflib->mf_read_init || !mflib->mf_write_init
-	     || !mflib->mf_detect_tone || !mflib->mf_generate_tone
-	     || !mflib->mf_select_tone
-	     || !mflib->mf_want_generate
-	    /* || !mflib->mf_read_dispose || !mflib->mf_write_dispose */ /* these 2 are optional */
-	     ) {
-		return NULL;
-	}	
-
-	/* check the transcoder interface */
-	if (!transcoder->alaw_to_linear || !transcoder->linear_to_alaw) {
+	/* event manager interface is required */
+	if (!evmanager) {
 		return NULL;
 	}
 
-	/* fix callmgmt if necessary */
+	/* fix callmgmt */
 	if (!evmanager->on_call_init) {
 		evmanager->on_call_init = on_call_init_default;
 	}	
@@ -168,10 +185,49 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	if (!evmanager->on_line_blocked) {
 		evmanager->on_line_blocked = on_line_blocked_default;
 	}
+
 	openr2_context_t *r2context = calloc(1, sizeof(*r2context));
 	if (!r2context) {
 		return NULL;
 	}
+
+	/* fix the MF iface */
+	if (!mflib) {
+		mflib = &default_mf_interface;
+	} else {
+		if (!mflib->mf_read_init) {
+			mflib->mf_read_init = mf_read_init_default;
+		}
+		if (!mflib->mf_write_init) {
+			mflib->mf_write_init = mf_write_init_default;
+		}
+		if (!mflib->mf_detect_tone) {
+			mflib->mf_detect_tone = mf_detect_tone_default;
+		}
+		if (!mflib->mf_generate_tone) {
+			mflib->mf_generate_tone = mf_generate_tone_default;
+		}
+		if (!mflib->mf_select_tone) {
+			mflib->mf_select_tone = mf_select_tone_default;
+		}
+		if (!mflib->mf_want_generate) {
+			mflib->mf_want_generate = mf_want_generate_default;
+		}
+		/* dispose routines are allowed to be NULL */
+	}
+
+	/* fix the transcoder interface */
+	if (!transcoder) {
+		transcoder = &default_transcoder;
+	} else {
+		if (!transcoder->alaw_to_linear) {
+			transcoder->alaw_to_linear = alaw_to_linear_default;
+		} 
+		if (!transcoder->linear_to_alaw) {
+			transcoder->linear_to_alaw = linear_to_alaw_default;
+		}
+	}
+
 	r2context->mflib = mflib;
 	r2context->evmanager = evmanager;
 	r2context->transcoder = transcoder;

@@ -19,13 +19,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <string.h>
 #include <unistd.h>
-#include <spandsp.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <stdlib.h>
+#ifdef ZAPTEL_HAS_MFR2
 #include <zaptel/zaptel.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -44,13 +48,14 @@
 	} 
 
 
-static const char zap_mf_names[] = "123456789ABCDEF";
-
 /* counter, lock and condition for listener threads 
    used to sync when outgoing threads should start */
 static int listener_count = 0;
 pthread_mutex_t listener_count_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t listener_threads_done = PTHREAD_COND_INITIALIZER;
+
+#ifdef ZAPTEL_HAS_MFR2
+static const char zap_mf_names[] = "123456789ABCDEF";
 
 typedef struct {
 	openr2_chan_t *r2chan;
@@ -58,11 +63,12 @@ typedef struct {
 	int signal;
 	int generate;
 } zap_mf_tx_state_t;
+#endif
 
 typedef struct {
+#ifdef ZAPTEL_HAS_MFR2
 	zap_mf_tx_state_t zap_tx_state;
-	r2_mf_tx_state_t dsp_tx_state;
-	r2_mf_rx_state_t rx_state;
+#endif
 	pthread_t thread_id;
 	openr2_chan_t *chan;
 } r2chan_data_t;
@@ -89,6 +95,7 @@ typedef struct {
 
 static chan_group_data_t confdata[MAX_GROUPS];
 
+#ifdef ZAPTEL_HAS_MFR2
 static void *zap_mf_tx_init(zap_mf_tx_state_t *handle, int forward_signals)
 {
 	ZT_DIAL_OPERATION zo = {
@@ -132,7 +139,7 @@ static int zap_mf_tx(zap_mf_tx_state_t *handle, int16_t buffer[], int samples)
 	res = ioctl(openr2_chan_get_fd(handle->r2chan), ZT_SENDTONE, &handle->signal);
 	if (-1 == res) {
 		perror("failed to set signal\n");
-		exit(1);
+		return -1;
 	}
 	handle->generate = 0;
 	return 0;
@@ -143,43 +150,20 @@ static int zap_mf_want_generate(zap_mf_tx_state_t *handle, int signal)
 	return handle->generate;
 }
 
-static int spandsp_want_generate(r2_mf_tx_state_t *state, int signal)
-{
-	return signal ? 1 : 0;
-}
-
 static openr2_mflib_interface_t g_mf_zap_iface = {
-	(openr2_mf_read_init_func)r2_mf_rx_init,
-	(openr2_mf_write_init_func)zap_mf_tx_init, 
+	.mf_read_init = NULL,
+	.mf_write_init = (openr2_mf_write_init_func)zap_mf_tx_init, 
 
-	(openr2_mf_detect_tone_func)r2_mf_rx,
-	(openr2_mf_generate_tone_func)zap_mf_tx,
+	.mf_detect_tone = NULL,
+	.mf_generate_tone = (openr2_mf_generate_tone_func)zap_mf_tx,
 
-	(openr2_mf_select_tone_func)zap_mf_tx_put,
+	.mf_select_tone = (openr2_mf_select_tone_func)zap_mf_tx_put,
 
-	(openr2_mf_want_generate_func)zap_mf_want_generate,
-	NULL,
-	NULL
+	.mf_want_generate = (openr2_mf_want_generate_func)zap_mf_want_generate,
+	.mf_read_dispose = NULL,
+	.mf_write_dispose = NULL
 };
-
-static openr2_mflib_interface_t g_mf_dsp_iface = {
-	(openr2_mf_read_init_func)r2_mf_rx_init,
-	(openr2_mf_write_init_func)r2_mf_tx_init, 
-
-	(openr2_mf_detect_tone_func)r2_mf_rx,
-	(openr2_mf_generate_tone_func)r2_mf_tx,
-
-	(openr2_mf_select_tone_func)r2_mf_tx_put,
-
-	(openr2_mf_want_generate_func)spandsp_want_generate,
-	NULL,
-	NULL
-};
-
-static openr2_transcoder_interface_t g_transcoder_iface = {
-	alaw_to_linear,
-	linear_to_alaw	
-};
+#endif /* ZAPTEL_HAS_MFR2 */
 
 static void on_call_init(openr2_chan_t *r2chan)
 {
@@ -400,6 +384,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				fprintf(stderr, "Invalid value '%s' for 'getanifirst' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "usezapmf=%s", strvalue)) {
+#ifdef ZAPTEL_HAS_MFR2
 			printf("found option Use Zaptel MF = %s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
 				usezapmf = 1;
@@ -408,6 +393,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'usezapmf' parameter.\n", strvalue);
 			}
+#else
+			printf("Zaptel R2 MF is not available, ignoring option usezapmf.\n");
+#endif
 		} else if (1 == sscanf(line, "maxani=%d", &max_ani)) {
 			printf("found MAX ANI= %d\n", max_ani);	
 		} else if (1 == sscanf(line, "maxdnis=%d", &max_dnis)) {
@@ -572,9 +560,13 @@ int main(int argc, char *argv[])
 
 	/* we have a bunch of channels, let's create contexts for each group of them */
 	for (c = 0; c < numgroups; c++) {
-		mf_iface = confdata[c].usezapmf ? &g_mf_zap_iface : &g_mf_dsp_iface;
+#ifdef ZAPTEL_HAS_MFR2 
+		if (confdata[c].usezapmf) {
+			mf_iface = &g_mf_zap_iface;
+		}
+#endif
 		confdata[c].context = openr2_context_new(mf_iface, &g_event_iface, 
-				&g_transcoder_iface, confdata[c].variant, confdata[c].max_ani, confdata[c].max_dnis);
+				NULL, confdata[c].variant, confdata[c].max_ani, confdata[c].max_dnis);
 		if (!confdata[c].context) {
 			fprintf(stderr, "failed to create R2 context when c = %d\n", c);
 			break;
@@ -597,13 +589,12 @@ int main(int argc, char *argv[])
 	/* now create channels for each context */
 	for (c = 0; c < numgroups; c++) {
 		for (i = confdata[c].lowchan, cnt = 0; i <= confdata[c].highchan; i++, cnt++) {
-			if (confdata[c].usezapmf)
+#ifdef ZAPTEL_HAS_MFR2 
+			if (confdata[c].usezapmf) {
 				tx_mf_state = &confdata[c].channels[cnt].zap_tx_state;
-			else
-				tx_mf_state = &confdata[c].channels[cnt].dsp_tx_state;
-			confdata[c].channels[cnt].chan = openr2_chan_new(confdata[c].context, i, 
-							 tx_mf_state,
-					                 &confdata[c].channels[cnt].rx_state);
+			}
+#endif
+			confdata[c].channels[cnt].chan = openr2_chan_new(confdata[c].context, i, tx_mf_state, NULL);
 			if (!confdata[c].channels[cnt].chan) {
 				fprintf(stderr, "failed to create R2 channel %d: %s\n", i,
 						openr2_context_error_string(openr2_context_get_last_error(confdata[c].context)));
@@ -613,7 +604,9 @@ int main(int argc, char *argv[])
 			if (confdata[c].callfiles) {
 				openr2_chan_enable_call_files(confdata[c].channels[cnt].chan);
 			}
+#ifdef ZAPTEL_HAS_MFR2 
 			confdata[c].channels[cnt].zap_tx_state.r2chan = confdata[c].channels[cnt].chan;
+#endif
 		}
 		/* something failed, thus, at least 1 channel could not be created */
 		if (cnt != ((confdata[c].highchan - confdata[c].lowchan)+1)) {

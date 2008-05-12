@@ -19,9 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 const char *openr2_get_version()
 {
+#ifdef VERSION
 	return VERSION;
+#else
+	return "???"
+#endif
 }

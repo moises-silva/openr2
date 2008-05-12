@@ -1,9 +1,10 @@
 AC_INIT(Makefile.am)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE(OpenR2, 0.1.1)
+AC_GNU_SOURCE
+
 AC_PROG_CC
 AM_PROG_LIBTOOL
-AC_DEFINE([_GNU_SOURCE], [], ["description"])
 
 CFLAGS='-ggdb3 -O0 -Wall'
 LD_FLAGS=''
@@ -11,17 +12,25 @@ LD_FLAGS=''
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
 
+AC_CHECK_LIB([m],[cosf], [], [AC_MSG_FAILURE([library libm is required but not present])])
+AC_CHECK_HEADER([math.h],[],[AC_MSG_FAILURE([header math.h is required but not present])])
+
+nozaptel=no
+nozaptelzaptel=no
+AC_CHECK_HEADERS([linux/zaptel.h],[],[nozaptel=yes])
+AC_CHECK_HEADERS([zaptel/zaptel.h],[],[nozaptelzaptel=yes])
+AC_CHECK_MEMBER(struct zt_dialparams.mfr2_tonelen, [AC_DEFINE([ZAPTEL_HAS_MFR2],[1],[define if you have Zaptel MFR2 Support])],[],[[#include <zaptel/zaptel.h>]])
+
+if [test "x$nozaptel" = xyes] && [test "x$nozaptelzaptel" = xyes]
+then
+	AC_MSG_FAILURE([zaptel is required but not present])
+fi
+
 AC_ARG_WITH([r2test], [AS_HELP_STRING([--with-r2test], 
-	                [enable the r2test program. You will need spandsp installed.])],
+	                [enable the r2test program.])],
 	                [],
 			[with_r2test=no])
-LIBSPANDSP=
-AS_IF([test "x$with_r2test" != xno],
-	[AC_CHECK_LIB([spandsp], [r2_mf_tx_init], 
-		[AC_CHECK_HEADER([spandsp.h], [build_r2test=yes], [AC_MSG_FAILURE([--with-r2test was given but spandsp.h was not found.])])],
-		[AC_MSG_FAILURE([--with-r2test was given but libspandsp.so was not found.])],	
-		[])])
-
-AM_CONDITIONAL([WANT_R2TEST], [test "$build_r2test" = yes])
+AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" != xno])
 
 AC_OUTPUT
+
