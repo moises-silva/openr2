@@ -1,1 +1,4 @@
 Moises Silva <moises.silva@gmail.com>
+
+r2engine.c and r2engine.h are basically
+code written by Steve Underwood for the SpanDSP LGPL library
