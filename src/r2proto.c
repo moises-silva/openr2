@@ -160,6 +160,7 @@ static void (*r2variants[])(openr2_context_t *) =
 	/* ARGENTINA */ r2config_argentina,
 	/* BRAZIL */ r2config_brazil,
 	/* CHINA */ r2config_china,
+	/* CZECH */ r2config_itu,
 	/* ITU */ r2config_itu,
 	/* MEXICO */ r2config_mexico,
 	/* PHILIPPINES */ r2config_itu
@@ -170,9 +171,10 @@ static char *r2variants_names[] =
 	/* ARGENTINA */ "AR",
 	/* BRAZIL */ "BR",
 	/* CHINA */ "CN",
+	/* CZECH */ "CZ",
 	/* ITU */ "ITU",
 	/* MEXICO */ "MX",
-	/* PHILIPPINES */ "PH",
+	/* PHILIPPINES */ "PH"
 };
 
 static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
