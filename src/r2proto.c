@@ -76,6 +76,24 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 }
 
+static void r2config_china(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	/* In the ITU line signaling specifications, the C and D bits are set to 0 and
+	   1 respectively, in China they are both set to 1. However, they are never
+	   used, so their value never changes during a call */
+	r2context->abcd_nonr2_bits = 0x3;    /* 0011 */
+
+	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
+	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+
+	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
+	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_6;
+
+	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
+}
+
 static void r2config_itu(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -141,6 +159,7 @@ static void (*r2variants[])(openr2_context_t *) =
 {
 	/* ARGENTINA */ r2config_argentina,
 	/* BRAZIL */ r2config_brazil,
+	/* CHINA */ r2config_china,
 	/* ITU */ r2config_itu,
 	/* MEXICO */ r2config_mexico,
 	/* PHILIPPINES */ r2config_itu
@@ -150,6 +169,7 @@ static char *r2variants_names[] =
 {
 	/* ARGENTINA */ "AR",
 	/* BRAZIL */ "BR",
+	/* CHINA */ "CN",
 	/* ITU */ "ITU",
 	/* MEXICO */ "MX",
 	/* PHILIPPINES */ "PH",
@@ -1268,7 +1288,7 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == request_category_tone) {
 		if (request_category_tone == GA_TONE(r2chan).request_category_and_change_to_gc) {
 			r2chan->mf_group = OR2_MF_GIII;
-		}	
+		}
 		mf_send_category(r2chan);
 	} else if (tone == GA_TONE(r2chan).request_change_to_g2) {
 		r2chan->mf_group = OR2_MF_GII;
@@ -1666,7 +1686,8 @@ openr2_variant_t openr2_proto_get_variant(const char *variant_name)
 	int i;
 
 	for (i = 0; i < sizeof(r2variants_names)/sizeof(r2variants_names[0]); i++) {
-		if (r2variants_names[i] && !strncasecmp(r2variants_names[i], variant_name, sizeof(r2variants[i])-1)) {
+		printf("comparing r2variant '%s' and '%s' with size = %zd\n", r2variants_names[i], variant_name, sizeof(r2variants_names[i])-1);
+		if (r2variants_names[i] && !strncasecmp(r2variants_names[i], variant_name, sizeof(r2variants_names[i])-1)) {
 			return (openr2_variant_t)i;
 		}
 	}
