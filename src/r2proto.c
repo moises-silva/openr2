@@ -1688,7 +1688,6 @@ openr2_variant_t openr2_proto_get_variant(const char *variant_name)
 	int i;
 
 	for (i = 0; i < sizeof(r2variants_names)/sizeof(r2variants_names[0]); i++) {
-		printf("comparing r2variant '%s' and '%s' with size = %zd\n", r2variants_names[i], variant_name, sizeof(r2variants_names[i])-1);
 		if (r2variants_names[i] && !strncasecmp(r2variants_names[i], variant_name, sizeof(r2variants_names[i])-1)) {
 			return (openr2_variant_t)i;
 		}
