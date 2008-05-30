@@ -71,9 +71,12 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
+	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
+
 	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -86,10 +89,11 @@ static void r2config_china(openr2_context_t *r2context)
 
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
-	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_6;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_INVALID;
 
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 }
@@ -113,6 +117,7 @@ static void r2config_mexico(openr2_context_t *r2context)
 	   calling party category AND switch to Group C */
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_INVALID;
 	r2context->mf_ga_tones.request_category_and_change_to_gc = OR2_MF_TONE_6;
+	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 
 	/* GA next ANI is replaces by GC next ANI signal */
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
@@ -122,6 +127,7 @@ static void r2config_mexico(openr2_context_t *r2context)
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_INVALID;
 
 	/* GROUP C */
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_1;
@@ -245,14 +251,18 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_5;
 	r2context->mf_ga_tones.request_category_and_change_to_gc = OR2_MF_TONE_INVALID;
 	r2context->mf_ga_tones.request_change_to_g2 = OR2_MF_TONE_3;
+        /* It's unusual, but an ITU-compliant switch can accept in Group A */
+	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_6;
+	r2context->mf_ga_tones.network_congestion = OR2_MF_TONE_4;
 
-	/* Groub B tones. Decisions about what to do with the call */
+	/* Group B tones. Decisions about what to do with the call */
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_6;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_3;
 	r2context->mf_gb_tones.network_congestion = OR2_MF_TONE_4;
 	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
 
 	/* Group C tones. Similar to Group A but for Mexico */
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
@@ -1277,6 +1287,40 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 	}
 }
 
+static void r2_answer_timeout_expired(openr2_chan_t *r2chan, void *data)
+{
+	OR2_CHAN_STACK;
+	report_call_disconnection(r2chan, OR2_CAUSE_NO_ANSWER);
+}
+
+static void handle_accept_tone(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+        if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
+                /* they answered before we even detected they accepted,
+                   lets just call on_call_accepted and immediately
+                   on_call_answered */
+
+                /* first accepted */
+                r2chan->r2_state = OR2_ACCEPT_RXD;
+                EMI(r2chan)->on_call_accepted(r2chan);
+
+                /* now answered */
+                openr2_chan_cancel_timer(r2chan);
+                r2chan->r2_state = OR2_ANSWER_RXD;
+                r2chan->call_state = OR2_CALL_ANSWERED;
+                r2chan->mf_state = OR2_MF_OFF_STATE;
+                r2chan->answered = 1;
+                EMI(r2chan)->on_call_answered(r2chan);
+        } else {
+                /* They have accepted the call. We do nothing but
+                   wait for answer. */
+                r2chan->r2_state = OR2_ACCEPT_RXD;
+                openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_answer, r2_answer_timeout_expired, NULL);
+                EMI(r2chan)->on_call_accepted(r2chan);
+        }
+}
+
 static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
@@ -1295,6 +1339,11 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GA_TONE(r2chan).request_change_to_g2) {
 		r2chan->mf_group = OR2_MF_GII;
 		mf_send_category(r2chan);
+        } else if (tone == GA_TONE(r2chan).address_complete_charge_setup) {
+		handle_accept_tone(r2chan);
+	} else if (tone == GA_TONE(r2chan).network_congestion) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
@@ -1318,40 +1367,12 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 	}
 }
 
-static void r2_answer_timeout_expired(openr2_chan_t *r2chan, void *data)
-{
-	OR2_CHAN_STACK;
-	report_call_disconnection(r2chan, OR2_CAUSE_NO_ANSWER);
-}
-
 static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
 	if (tone == GB_TONE(r2chan).accept_call_with_charge 
 	    || tone == GB_TONE(r2chan).accept_call_no_charge) {
-		if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
-			/* they answered before we even detected they accepted,
-			   lets just call on_call_accepted and immediately
-			   on_call_answered */
-
-			/* first accepted */
-			r2chan->r2_state = OR2_ACCEPT_RXD;
-			EMI(r2chan)->on_call_accepted(r2chan);
-
-			/* now answered */
-			openr2_chan_cancel_timer(r2chan);
-			r2chan->r2_state = OR2_ANSWER_RXD;
-			r2chan->call_state = OR2_CALL_ANSWERED;
-			r2chan->mf_state = OR2_MF_OFF_STATE;
-			r2chan->answered = 1;
-			EMI(r2chan)->on_call_answered(r2chan);
-		} else {
-			/* They have accepted the call. We do nothing but
-			   wait for answer. */
-			r2chan->r2_state = OR2_ACCEPT_RXD;
-			openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_answer, r2_answer_timeout_expired, NULL);
-			EMI(r2chan)->on_call_accepted(r2chan);
-		}	
+	    handle_accept_tone(r2chan);
 	} else if (tone == GB_TONE(r2chan).busy_number){
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_BUSY_NUMBER);
@@ -1362,6 +1383,11 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_UNASSIGNED_NUMBER);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
+	} else if (tone == GB_TONE(r2chan).special_info_tone) {
+		/* TODO: handle properly this signal */
+		openr2_log(r2chan, OR2_LOG_WARNING, "FIXME: Don't really know what to do with special info tone, dropping call!\n");
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
 	} else {

@@ -289,6 +289,8 @@ typedef struct {
 	openr2_mf_tone_t request_category;
 	openr2_mf_tone_t request_category_and_change_to_gc;
 	openr2_mf_tone_t request_change_to_g2;
+	openr2_mf_tone_t address_complete_charge_setup;
+	openr2_mf_tone_t network_congestion;
 } openr2_mf_ga_tones_t;
 
 /* names for the GB MF tones */
@@ -299,6 +301,7 @@ typedef struct {
 	openr2_mf_tone_t network_congestion;
 	openr2_mf_tone_t unassigned_number;
 	openr2_mf_tone_t line_out_of_order;
+	openr2_mf_tone_t special_info_tone;
 } openr2_mf_gb_tones_t;
 
 /* names for the GC MF tones */
