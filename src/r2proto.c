@@ -167,6 +167,7 @@ static void (*r2variants[])(openr2_context_t *) =
 	/* BRAZIL */ r2config_brazil,
 	/* CHINA */ r2config_china,
 	/* CZECH */ r2config_itu,
+	/* ECUADOR */ r2config_itu,
 	/* ITU */ r2config_itu,
 	/* MEXICO */ r2config_mexico,
 	/* PHILIPPINES */ r2config_itu
@@ -178,6 +179,7 @@ static char *r2variants_names[] =
 	/* BRAZIL */ "BR",
 	/* CHINA */ "CN",
 	/* CZECH */ "CZ",
+	/* ECUADOR */ "EC",
 	/* ITU */ "ITU",
 	/* MEXICO */ "MX",
 	/* PHILIPPINES */ "PH"
