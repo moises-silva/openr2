@@ -75,7 +75,7 @@ typedef void (*openr2_handle_call_disconnect_func)(struct openr2_chan_s *r2chan,
 typedef void (*openr2_handle_call_end_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_call_read_func)(struct openr2_chan_s *r2chan, const unsigned char *buf, int buflen);
 typedef void (*openr2_handle_os_error_func)(struct openr2_chan_s *r2chan, int oserrorcode);
-typedef void (*openr2_handle_zap_alarm_func)(struct openr2_chan_s *r2chan, int alarm);
+typedef void (*openr2_handle_hardware_alarm_func)(struct openr2_chan_s *r2chan, int alarm);
 typedef void (*openr2_handle_protocol_error_func)(struct openr2_chan_s *r2chan, openr2_protocol_error_t error);
 typedef void (*openr2_handle_line_blocked_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_line_idle_func)(struct openr2_chan_s *r2chan);
@@ -103,8 +103,8 @@ typedef struct {
 	/* Call has something to say */
 	openr2_handle_call_read_func on_call_read;
 
-	/* Zaptel interface alarm event */
-	openr2_handle_zap_alarm_func on_zap_alarm;
+	/* Hardware interface alarm event */
+	openr2_handle_hardware_alarm_func on_hardware_alarm;
 
 	/* some operating system error ocurred. 
 	   Usually all the user can do in this

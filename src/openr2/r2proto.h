@@ -371,4 +371,3 @@ int openr2_proto_get_mf_rx(struct openr2_chan_s *r2chan);
 #endif
 
 #endif /* endif defined _OPENR2_PROTO_H_ */
-

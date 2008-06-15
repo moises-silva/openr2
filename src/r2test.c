@@ -170,7 +170,7 @@ static void on_call_init(openr2_chan_t *r2chan)
 	printf("USER: new call detected on chan %d\n", openr2_chan_get_number(r2chan));
 }
 
-static void on_zap_alarm(openr2_chan_t *r2chan, int alarm)
+static void on_hardware_alarm(openr2_chan_t *r2chan, int alarm)
 {
 	printf("USER: zap alarm on chan %d!\n", openr2_chan_get_number(r2chan));
 }
@@ -261,7 +261,7 @@ static openr2_event_interface_t g_event_iface = {
 	on_call_disconnected,
 	on_call_end,
 	on_call_read,
-	on_zap_alarm,
+	on_hardware_alarm,
 	on_os_error,
 	on_protocol_error,
 	on_line_blocked,

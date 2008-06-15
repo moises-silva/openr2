@@ -80,7 +80,7 @@ static void on_os_error_default(openr2_chan_t *r2chan, int oserrorcode)
 	openr2_log(r2chan, OR2_LOG_ERROR, "OS error at chan %d: %s (%d)\n", openr2_chan_get_number(r2chan), strerror(oserrorcode), oserrorcode);
 }
 
-static void on_zap_alarm_default(openr2_chan_t *r2chan, int alarm)
+static void on_hardware_alarm_default(openr2_chan_t *r2chan, int alarm)
 {
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_WARNING, "Zap alarm at chan %d\n", openr2_chan_get_number(r2chan));
@@ -167,8 +167,8 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	if (!evmanager->on_call_read) {
 		evmanager->on_call_read = on_call_read_default;
 	}	
-	if (!evmanager->on_zap_alarm) {
-		evmanager->on_zap_alarm = on_zap_alarm_default;
+	if (!evmanager->on_hardware_alarm) {
+		evmanager->on_hardware_alarm = on_hardware_alarm_default;
 	}	
 	if (!evmanager->on_os_error) {
 		evmanager->on_os_error = on_os_error_default;
@@ -240,7 +240,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	return r2context;
 }
 
-/* Is this really needed? in anycase, read events from zaptel are likely to wake us up
+/* Is this really needed? in anycase, read events from hardware are likely to wake us up
    so probably we could trust on that instead of having the user to call this function? */
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 {
