@@ -1,4 +1,6 @@
-- Add API to manually put lines into BLOCKED (openr2_proto_set_blocked)
+- improve context error reporting 
+currently liberr sucks and its flawed, won't work on a multithread environment, 
+in fact, the whole r2context thing is not thread-safe, it should be
 
 - implement CAS persistence check for all signals
 
@@ -11,8 +13,6 @@
 - handle ANI restricted, set ANI restricted 
 
 - remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
-
-- r2context access to members thread safe.
 
 - Port to Windows
 

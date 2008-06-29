@@ -460,9 +460,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 	}
 }
 
-int openr2_proto_set_idle(openr2_chan_t *r2chan)
+static void openr2_proto_init(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* cancel any event we could be waiting for */
 	openr2_chan_cancel_timer(r2chan);
 
@@ -484,7 +483,6 @@ int openr2_proto_set_idle(openr2_chan_t *r2chan)
 	r2chan->category_sent = 0;
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
-
 	if (r2chan->logfile) {
 		if (fclose(r2chan->logfile)) {
 			openr2_log(r2chan, OR2_LOG_WARNING, "Failed to close log file, leaking fds!.\n");
@@ -492,9 +490,26 @@ int openr2_proto_set_idle(openr2_chan_t *r2chan)
 		r2chan->logfile = NULL;
 	}
 
+}
+
+int openr2_proto_set_idle(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	openr2_proto_init(r2chan);
 	if (set_abcd_signal(r2chan, OR2_ABCD_IDLE)) {
 		r2chan->r2context->last_error = OR2_LIBERR_CANNOT_SET_IDLE;
 		openr2_log(r2chan, OR2_LOG_ERROR, "failed to set channel %d to IDLE state.\n");
+		return -1;
+	}
+	return 0;
+}
+
+int openr2_proto_set_blocked(openr2_chan_t *r2chan)
+{
+	openr2_proto_init(r2chan);
+	r2chan->r2_state = OR2_BLOCKED;
+	if (set_abcd_signal(r2chan, OR2_ABCD_BLOCK)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "failed to set channel %d to BLOCKED state.\n");
 		return -1;
 	}
 	return 0;

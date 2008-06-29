@@ -210,8 +210,10 @@ typedef enum {
 	OR2_ANSWER_RXD_MF_PENDING,
 
 	/* Asked to hangup the call */
-	OR2_CLEAR_FWD_TXD
+	OR2_CLEAR_FWD_TXD,
 
+	/* Blocked line */
+	OR2_BLOCKED
 } openr2_abcd_state_t;
 
 /* MFC/R2 variants */
@@ -344,6 +346,7 @@ int openr2_proto_answer_call(struct openr2_chan_s *r2chan);
 int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_proto_handle_abcd_change(struct openr2_chan_s *r2chan);
 int openr2_proto_set_idle(struct openr2_chan_s *r2chan);
+int openr2_proto_set_blocked(struct openr2_chan_s *r2chan);
 int openr2_proto_set_abcd_signal(struct openr2_chan_s *r2chan, openr2_abcd_signal_t signal);
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);
 const char *openr2_proto_get_error(openr2_protocol_error_t reason);
