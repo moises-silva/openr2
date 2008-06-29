@@ -20,6 +20,8 @@
  *
  */
 
+#include <sys/types.h> /* mode_t */
+
 /* quick access to context Multi Frequency Interface */
 #define MFI(r2chan) (r2chan)->r2context->mflib
 
@@ -30,4 +32,6 @@
 #define TI(r2c) (r2chan)->r2context->transcoder
 
 const char *openr2_get_version();
+
+int openr2_mkdir_recursive(char *dir, mode_t mode);
 

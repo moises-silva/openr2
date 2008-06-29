@@ -1,11 +1,18 @@
+- Add API to manually put lines into BLOCKED (openr2_proto_set_blocked)
+
 - implement CAS persistence check for all signals
+
+- implement configuration file to alter tone definitions
 
 - warn users about -DTRACE_STACKS causing infinite recursion if calling openr2
   APIs from logging functions, probably we should not put OR2_CHAN_STACK on some
   functions?
 
-- handle ANI restricted, set ANI restricted
+- handle ANI restricted, set ANI restricted 
 
 - remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
 
 - r2context access to members thread safe.
+
+- Port to Windows
+

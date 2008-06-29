@@ -241,7 +241,6 @@ void openr2_context_remove_channel(openr2_context_t *r2context, struct openr2_ch
 openr2_liberr_t openr2_context_get_last_error(openr2_context_t *r2context);
 const char *openr2_context_error_string(openr2_liberr_t error);
 openr2_variant_t openr2_context_get_variant(openr2_context_t *r2context);
-void openr2_context_set_log_directory(openr2_context_t *r2context, const char *directory);
 int openr2_context_get_max_ani(openr2_context_t *r2context);
 int openr2_context_get_max_dnis(openr2_context_t *r2context);
 void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first);
@@ -250,7 +249,7 @@ void openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_
 openr2_log_level_t openr2_context_get_log_level(openr2_context_t *r2context);
 void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold);
 int openr2_context_get_mf_threshold(openr2_context_t *r2context);
-void openr2_context_set_log_directory(openr2_context_t *r2context, const char *directory);
+int openr2_context_set_log_directory(openr2_context_t *r2context, char *directory);
 char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len);
 void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms);
 int openr2_context_get_mf_back_timeout(openr2_context_t *r2context);

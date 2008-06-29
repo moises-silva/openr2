@@ -25,11 +25,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "openr2/r2chan.h"
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"
 #include "openr2/r2context.h"
 #include "openr2/r2engine.h"
+#include "openr2/r2utils.h"
 
 static void on_call_init_default(openr2_chan_t *r2chan)
 {
@@ -385,16 +389,41 @@ int openr2_context_get_mf_threshold(openr2_context_t *r2context)
 	return r2context->mf_threshold;
 }
 
-void openr2_context_set_log_directory(openr2_context_t *r2context, const char *directory)
+int openr2_context_set_log_directory(openr2_context_t *r2context, char *directory)
 {
 	OR2_CONTEXT_STACK;
+	struct stat buff;
+	mode_t perms = (S_IRWXU) | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH); /* rwx | rx | rx */
+	if (!directory) {
+		return -1;
+	}
+	/* make sure it will fit */
+	if (strlen(directory) >= sizeof(r2context->logdir)) {
+		return -1;
+	}
+	/* no point on checking whether or not is a directory, if it
+	   exists as a non-directory entry, oh well, logging will fail */
+	if (stat(directory, &buff)) {
+		/* stat failed, let's see if its because of a directory does not exists */
+		if (errno != ENOENT) {
+			return -1;
+		}
+		/* let's try to create the directory */
+		if (openr2_mkdir_recursive(directory, perms)) {
+			return -1;
+		}
+	}
 	strncpy(r2context->logdir, directory, sizeof(r2context->logdir)-1);
 	r2context->logdir[sizeof(r2context->logdir)-1] = 0;
+	return 0;
 }
 
 char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len)
 {
 	OR2_CONTEXT_STACK;
+	if (!directory) {
+		return NULL;
+	}
 	strncpy(directory, r2context->logdir, len-1);
 	directory[len-1] = 0;
 	return directory;

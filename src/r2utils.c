@@ -23,6 +23,11 @@
 #include "config.h"
 #endif
 
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+
 const char *openr2_get_version()
 {
 #ifdef VERSION
@@ -31,3 +36,28 @@ const char *openr2_get_version()
 	return "???"
 #endif
 }
+
+int openr2_mkdir_recursive(char *dir, mode_t mode)
+{
+	char *currslash = NULL;
+	char *str = dir;
+	if (!dir) {
+		return -1;
+	}
+	str++; /* in case the path starts with a slash */ 
+	while ((currslash = strchr(str, '/'))) {
+		*currslash = 0;
+		if (mkdir(dir, mode) && errno != EEXIST) {
+			return -1;
+		}
+		*currslash = '/';
+		str = currslash + 1;
+	}
+	if (str[0] != 0) {
+		if (mkdir(dir, mode)) {
+			return -1;
+		}
+	}
+	return 0;
+}
+
