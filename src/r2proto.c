@@ -73,10 +73,11 @@ static void r2config_brazil(openr2_context_t *r2context)
 
 	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 
-	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
+	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7;
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -860,19 +861,44 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 	return 0;
 }
 
-int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_accept_t accept)
+static const char *get_string_from_mode(openr2_call_mode_t mode)
+{
+	switch (mode) {
+	case OR2_CALL_WITH_CHARGE:
+		return "Call With Charge";
+	case OR2_CALL_NO_CHARGE:
+		return "Call With No Charge";
+	case OR2_CALL_SPECIAL:
+		return "Special Call";
+	default:
+		return "*UNKNOWN*";
+	}
+}
+
+static int get_tone_from_mode(openr2_chan_t *r2chan, openr2_call_mode_t mode)
+{
+	switch (mode) {
+	case OR2_CALL_WITH_CHARGE:
+		return GB_TONE(r2chan).accept_call_with_charge;
+	case OR2_CALL_NO_CHARGE:
+		return GB_TONE(r2chan).accept_call_no_charge;
+	case OR2_CALL_SPECIAL:
+		return GB_TONE(r2chan).special_info_tone;
+	default:
+		openr2_log(r2chan, OR2_LOG_WARNING, "Unkown call mode (%d), defaulting to %s\n", get_string_from_mode(OR2_CALL_NO_CHARGE));
+		return GB_TONE(r2chan).accept_call_no_charge;
+	}
+}
+
+int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
-	openr2_mf_tone_t tone;
 	if (OR2_CALL_OFFERED != r2chan->call_state) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Cannot accept call if the call has not been offered!\n");
 		return -1;
 	}
 	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
-	tone = (accept == OR2_ACCEPT_WITH_CHARGE) 
-	     ? GB_TONE(r2chan).accept_call_with_charge
-	     : GB_TONE(r2chan).accept_call_no_charge;
-	prepare_mf_tone(r2chan, tone);		
+	prepare_mf_tone(r2chan, get_tone_from_mode(r2chan, mode));		
 	return 0;
 }
 
@@ -1195,7 +1221,10 @@ static void ready_to_answer(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_STACK;
 	openr2_chan_cancel_timer(r2chan);
-	EMI(r2chan)->on_call_accepted(r2chan);
+	/* mode not important here, the BACKWARD side accepted the call so
+	   they already know that. 
+	   (we could save the tone they used to accept and pass the call type) */
+	EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
 }
 
 static void handle_forward_mf_silence(openr2_chan_t *r2chan)
@@ -1310,18 +1339,45 @@ static void r2_answer_timeout_expired(openr2_chan_t *r2chan, void *data)
 	report_call_disconnection(r2chan, OR2_CAUSE_NO_ANSWER);
 }
 
-static void handle_accept_tone(openr2_chan_t *r2chan)
+static openr2_call_mode_t get_mode_from_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
+	if (tone == GB_TONE(r2chan).accept_call_with_charge) {
+		return OR2_CALL_WITH_CHARGE;
+	} else if (GB_TONE(r2chan).accept_call_no_charge) {
+		return OR2_CALL_NO_CHARGE;
+	} else if (GB_TONE(r2chan).special_info_tone) {
+		return OR2_CALL_SPECIAL;
+	} else {
+		openr2_log(r2chan, OR2_LOG_WARNING, "Unknown call type\n");
+		return OR2_CALL_UNKNOWN;
+	}	
+}
+
+static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
+{
+	OR2_CHAN_STACK;
+	openr2_mf_state_t previous_mf_state;
+	openr2_call_state_t previous_call_state;
         if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
                 /* they answered before we even detected they accepted,
                    lets just call on_call_accepted and immediately
                    on_call_answered */
 
                 /* first accepted */
+		previous_mf_state = r2chan->mf_state;
+		previous_call_state = r2chan->mf_state;
                 r2chan->r2_state = OR2_ACCEPT_RXD;
-                EMI(r2chan)->on_call_accepted(r2chan);
+                EMI(r2chan)->on_call_accepted(r2chan, mode);
 
+		/* if the on_call_accepted callback calls some openr2 API
+		   it can change the state and we no longer want to continue answering */
+		if (r2chan->r2_state != OR2_ACCEPT_RXD 
+		    || r2chan->mf_state != previous_mf_state
+		    || r2chan->call_state != previous_call_state) {
+			openr2_log(r2chan, OR2_LOG_NOTICE, "Not proceeding with ANSWERED callback\n");
+			return;
+		}
                 /* now answered */
                 openr2_chan_cancel_timer(r2chan);
                 r2chan->r2_state = OR2_ANSWER_RXD;
@@ -1334,7 +1390,7 @@ static void handle_accept_tone(openr2_chan_t *r2chan)
                    wait for answer. */
                 r2chan->r2_state = OR2_ACCEPT_RXD;
                 openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_answer, r2_answer_timeout_expired, NULL);
-                EMI(r2chan)->on_call_accepted(r2chan);
+                EMI(r2chan)->on_call_accepted(r2chan, mode);
         }
 }
 
@@ -1357,7 +1413,7 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 		r2chan->mf_group = OR2_MF_GII;
 		mf_send_category(r2chan);
         } else if (tone == GA_TONE(r2chan).address_complete_charge_setup) {
-		handle_accept_tone(r2chan);
+		handle_accept_tone(r2chan, OR2_CALL_WITH_CHARGE);
 	} else if (tone == GA_TONE(r2chan).network_congestion) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
@@ -1388,8 +1444,9 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
 	if (tone == GB_TONE(r2chan).accept_call_with_charge 
-	    || tone == GB_TONE(r2chan).accept_call_no_charge) {
-	    handle_accept_tone(r2chan);
+	    || tone == GB_TONE(r2chan).accept_call_no_charge
+	    || tone == GB_TONE(r2chan).special_info_tone) {
+	    handle_accept_tone(r2chan, get_mode_from_tone(r2chan, tone));
 	} else if (tone == GB_TONE(r2chan).busy_number){
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_BUSY_NUMBER);
@@ -1400,11 +1457,6 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
-		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
-		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
-	} else if (tone == GB_TONE(r2chan).special_info_tone) {
-		/* TODO: handle properly this signal */
-		openr2_log(r2chan, OR2_LOG_WARNING, "FIXME: Don't really know what to do with special info tone, dropping call!\n");
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
 	} else {
@@ -1791,6 +1843,11 @@ const char *openr2_proto_get_mf_group_string(openr2_chan_t *r2chan)
 	return mfgroup2str(r2chan->mf_group);
 }
 
+const char *openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
+{
+	return get_string_from_mode(mode);
+}
+
 int openr2_proto_get_mf_tx(openr2_chan_t *r2chan)
 {
 	return r2chan->mf_write_tone;
@@ -1800,5 +1857,6 @@ int openr2_proto_get_mf_rx(openr2_chan_t *r2chan)
 {
 	return r2chan->mf_read_tone;
 }
+
 
 

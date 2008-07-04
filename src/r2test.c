@@ -194,9 +194,9 @@ static void on_call_ready(openr2_chan_t *r2chan, const char *ani, const char *dn
 	openr2_chan_accept_call(r2chan, OR2_ACCEPT_WITH_CHARGE);
 }
 
-static void on_call_accepted(openr2_chan_t *r2chan)
+static void on_call_accepted(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
-	printf("USER: call has been accepted on chan %d\n", openr2_chan_get_number(r2chan));
+	printf("USER: call has been accepted on chan %d with type: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_call_mode_string(mode));
 	if ( openr2_chan_get_direction(r2chan) == OR2_DIR_BACKWARD )
 		openr2_chan_answer_call(r2chan);
 }

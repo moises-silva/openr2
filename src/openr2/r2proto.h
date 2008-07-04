@@ -252,11 +252,13 @@ typedef enum {
 	OR2_CALL_DISCONNECTED
 } openr2_call_state_t;
 
-/* Accept modes */
+/* Call modes */
 typedef enum {
-	OR2_ACCEPT_WITH_CHARGE,
-	OR2_ACCEPT_NO_CHARGE
-} openr2_call_accept_t;
+	OR2_CALL_WITH_CHARGE,
+	OR2_CALL_NO_CHARGE,
+	OR2_CALL_SPECIAL,
+	OR2_CALL_UNKNOWN
+} openr2_call_mode_t;
 
 /* Disconnect causes */
 typedef enum {
@@ -341,7 +343,7 @@ extern "C" {
 #endif
 
 int openr2_proto_make_call(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
-int openr2_proto_accept_call(struct openr2_chan_s *r2chan, openr2_call_accept_t accept);
+int openr2_proto_accept_call(struct openr2_chan_s *r2chan, openr2_call_mode_t accept);
 int openr2_proto_answer_call(struct openr2_chan_s *r2chan);
 int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_proto_handle_abcd_change(struct openr2_chan_s *r2chan);
@@ -358,6 +360,7 @@ openr2_calling_party_category_t openr2_proto_get_category(const char *category);
 
 const char *openr2_proto_get_variant_string(openr2_variant_t variant);
 openr2_variant_t openr2_proto_get_variant(const char *variant);
+const char *openr2_proto_get_call_mode_string(openr2_call_mode_t mode);
 
 const char *openr2_proto_get_rx_state_string(struct openr2_chan_s *r2chan);
 const char *openr2_proto_get_tx_state_string(struct openr2_chan_s *r2chan);

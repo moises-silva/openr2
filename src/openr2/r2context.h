@@ -69,7 +69,7 @@ typedef struct {
    new call, read audio etc. */
 typedef void (*openr2_handle_new_call_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_call_offered_func)(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
-typedef void (*openr2_handle_call_accepted_func)(struct openr2_chan_s *r2chan);
+typedef void (*openr2_handle_call_accepted_func)(struct openr2_chan_s *r2chan, openr2_call_mode_t mode);
 typedef void (*openr2_handle_call_answered_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_call_disconnect_func)(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 typedef void (*openr2_handle_call_end_func)(struct openr2_chan_s *r2chan);

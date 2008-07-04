@@ -424,10 +424,10 @@ void openr2_chan_delete(openr2_chan_t *r2chan)
 	free(r2chan);
 }
 
-int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_accept_t accept)
+int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_accept_call(r2chan, accept);
+	return openr2_proto_accept_call(r2chan, mode);
 }
 
 int openr2_chan_answer_call(openr2_chan_t *r2chan)
