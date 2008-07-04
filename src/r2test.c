@@ -191,7 +191,7 @@ static void on_call_ready(openr2_chan_t *r2chan, const char *ani, const char *dn
 {
 	printf("USER: call ready on chan %d. DNIS = %s, ANI = %s, Category = %d\n", 
 			openr2_chan_get_number(r2chan), dnis, ani, category);
-	openr2_chan_accept_call(r2chan, OR2_ACCEPT_WITH_CHARGE);
+	openr2_chan_accept_call(r2chan, OR2_CALL_WITH_CHARGE);
 }
 
 static void on_call_accepted(openr2_chan_t *r2chan, openr2_call_mode_t mode)
