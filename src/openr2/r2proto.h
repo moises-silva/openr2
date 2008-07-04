@@ -262,7 +262,7 @@ typedef enum {
 typedef enum {
 	OR2_CAUSE_BUSY_NUMBER,
 	OR2_CAUSE_NETWORK_CONGESTION,
-	OR2_CAUSE_UNASSIGNED_NUMBER,
+	OR2_CAUSE_UNALLOCATED_NUMBER,
 	OR2_CAUSE_OUT_OF_ORDER,
 	OR2_CAUSE_UNSPECIFIED,
 	OR2_CAUSE_NO_ANSWER,
@@ -302,7 +302,7 @@ typedef struct {
 	openr2_mf_tone_t accept_call_no_charge;
 	openr2_mf_tone_t busy_number;
 	openr2_mf_tone_t network_congestion;
-	openr2_mf_tone_t unassigned_number;
+	openr2_mf_tone_t unallocated_number;
 	openr2_mf_tone_t line_out_of_order;
 	openr2_mf_tone_t special_info_tone;
 } openr2_mf_gb_tones_t;

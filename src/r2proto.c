@@ -73,7 +73,7 @@ static void r2config_brazil(openr2_context_t *r2context)
 
 	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 
-	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_7;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
@@ -126,7 +126,7 @@ static void r2config_mexico(openr2_context_t *r2context)
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
-	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_INVALID;
 
 	/* GROUP C */
@@ -262,7 +262,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_3;
 	r2context->mf_gb_tones.network_congestion = OR2_MF_TONE_4;
-	r2context->mf_gb_tones.unassigned_number = OR2_MF_TONE_5;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
 
@@ -445,8 +445,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "Busy Number";
 	case OR2_CAUSE_NETWORK_CONGESTION:
 		return "Network Congestion";
-	case OR2_CAUSE_UNASSIGNED_NUMBER:
-		return "Unassigned Number";
+	case OR2_CAUSE_UNALLOCATED_NUMBER:
+		return "Unallocated Number";
 	case OR2_CAUSE_OUT_OF_ORDER:
 		return "Line Out Of Order";
 	case OR2_CAUSE_UNSPECIFIED:
@@ -1396,9 +1396,9 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).network_congestion) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
-	} else if (tone == GB_TONE(r2chan).unassigned_number) {
+	} else if (tone == GB_TONE(r2chan).unallocated_number) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
-		report_call_disconnection(r2chan, OR2_CAUSE_UNASSIGNED_NUMBER);
+		report_call_disconnection(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
@@ -1634,8 +1634,8 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 	case OR2_CAUSE_NETWORK_CONGESTION:
 		tone = GB_TONE(r2chan).network_congestion;
 		break;
-	case OR2_CAUSE_UNASSIGNED_NUMBER:
-		tone = GB_TONE(r2chan).unassigned_number;
+	case OR2_CAUSE_UNALLOCATED_NUMBER:
+		tone = GB_TONE(r2chan).unallocated_number;
 		break;
 	case OR2_CAUSE_OUT_OF_ORDER:
 		tone = GB_TONE(r2chan).line_out_of_order;
