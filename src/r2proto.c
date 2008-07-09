@@ -290,7 +290,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 
 static const char *r2state2str(openr2_abcd_state_t r2state)
 {
-	switch ( r2state ) {
+	switch (r2state) {
 	case OR2_IDLE:
 		return "Idle";
 	case OR2_SEIZE_ACK_TXD:
@@ -299,14 +299,14 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 		return "Answer Transmitted";
 	case OR2_CLEAR_BACK_TXD:
 		return "Clear Back Transmitted";
-	case OR2_CLEAR_BACK_TONE_RXD:
-		return "Clear Back Tone Received";
-	case OR2_CLEAR_FWD_TXD:
-		return "Clear Forward Transmitted";
+	case OR2_CLEAR_FWD_RXD:
+		return "Clear Forward Received";
 	case OR2_SEIZE_TXD:
 		return "Seize Transmitted";
 	case OR2_SEIZE_ACK_RXD:
 		return "Seize ACK Received";
+	case OR2_CLEAR_BACK_TONE_RXD:
+		return "Clear Back Tone Received";
 	case OR2_ACCEPT_RXD:
 		return "Accept Received";
 	case OR2_ANSWER_RXD:
@@ -315,14 +315,18 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 		return "Clear Back Received";
 	case OR2_ANSWER_RXD_MF_PENDING:
 		return "Answer Received with MF Pending";
+	case OR2_CLEAR_FWD_TXD:
+		return "Clear Forward Transmitted";
+	case OR2_BLOCKED:
+		return "Blocked";
 	default: 
-		return "*Unknown*";
+		return "*Unknown*(%d)";
 	}
 }
 
 static const char *mfstate2str(openr2_mf_state_t mf_state)
 {
-	switch ( mf_state ) {
+	switch (mf_state) {
 	case OR2_MF_OFF_STATE:
 		return "MF Engine Off";
 
@@ -854,6 +858,9 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 		} else {
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
+		break;
+	case OR2_BLOCKED:
+		openr2_log(r2chan, OR2_LOG_NOTICE, "Doing nothing on ABCD change, we're blocked.\n");
 		break;
 	default:
 		handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
