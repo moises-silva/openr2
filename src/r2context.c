@@ -48,7 +48,7 @@ static void on_call_offered_default(openr2_chan_t *r2chan, const char *ani, cons
 			openr2_chan_get_number(r2chan), ani, dnis, openr2_proto_get_category_string(category));
 }
 
-static void on_call_accepted_default(openr2_chan_t *r2chan)
+static void on_call_accepted_default(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been accepted at chan %d\n", openr2_chan_get_number(r2chan));
@@ -302,13 +302,13 @@ void openr2_context_remove_channel(openr2_context_t *r2context, openr2_chan_t *r
 {
 	OR2_CONTEXT_STACK;
 	openr2_chan_t *curr = r2context->chanlist;
-	openr2_chan_t *prev;
-	while ( curr ) {
-		if ( curr == r2chan ) {
-			if ( prev ) {
+	openr2_chan_t *prev = NULL;
+	while (curr) {
+		if(curr == r2chan) {
+			if (prev) {
 				prev->next = curr->next;
 			}	
-			if ( curr == r2context->chanlist ) {
+			if (curr == r2context->chanlist) {
 				r2context->chanlist = NULL;
 			}	
 			break;

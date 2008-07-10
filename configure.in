@@ -6,9 +6,6 @@ AC_GNU_SOURCE
 AC_PROG_CC
 AM_PROG_LIBTOOL
 
-CFLAGS='-ggdb3 -O0 -Wall'
-LD_FLAGS=''
-
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
 
@@ -31,6 +28,18 @@ AC_ARG_WITH([r2test], [AS_HELP_STRING([--with-r2test],
 	                [],
 			[with_r2test=no])
 AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" != xno])
+
+AC_PATH_PROGS(svnversioncommand,svnversion)
+
+if [test "x$svnversioncommand" = "x"]
+then
+	openr2_revision="(release)"
+else
+	openr2_revision="svnversion -n"
+fi
+
+AM_CONDITIONAL([HAVE_SVNVERSION], [test "x$svnversioncommand" != "x"])
+
 
 AC_OUTPUT
 

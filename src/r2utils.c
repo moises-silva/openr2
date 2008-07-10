@@ -28,12 +28,23 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+/* VERSION should be always defined */
 const char *openr2_get_version()
 {
 #ifdef VERSION
 	return VERSION;
 #else
-	return "???"
+	return "wtf?"
+#endif
+}
+
+/* REVISION will be only defined if built via SVN */
+const char *openr2_get_revision()
+{
+#ifdef REVISION
+	return REVISION;
+#else
+	return "(release)";
 #endif
 }
 

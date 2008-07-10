@@ -32,6 +32,7 @@
 #define TI(r2c) (r2chan)->r2context->transcoder
 
 const char *openr2_get_version();
+const char *openr2_get_revision();
 
 int openr2_mkdir_recursive(char *dir, mode_t mode);
 
