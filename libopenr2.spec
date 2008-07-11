@@ -1,7 +1,7 @@
 %define r2test %{?_with_r2test:1}%{!?_with_r2test:0}
 Name:           libopenr2
 Version:        0.1.1
-Release:        4%{?dist}
+Release:        33%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 
@@ -42,8 +42,6 @@ developing applications that use %{name}.
 %else
 %configure --libdir=%{_libdir} --disable-static --disable-rpath
 %endif
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 make %{?_smp_mflags}
 
 
@@ -92,6 +90,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jul 10 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to latest SVN release
+- Removed rpath and libdir perl fix script as we don't need it
+
+* Tue Jun 24 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to lastest SVN release and changed release number to SVN
+
 * Tue May 13 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update to lastest SVN release and add r2engine.h header
 - Removed SpanDSP dependency to reflect upstream
