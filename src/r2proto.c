@@ -836,12 +836,7 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 		break;
 	case OR2_CLEAR_FWD_TXD:
 		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
-			/* if the call never was answered don't report call end */
-			if (!r2chan->answered) {
-				openr2_proto_set_idle(r2chan);
-			} else {
-				report_call_end(r2chan);
-			}	
+			report_call_end(r2chan);
 		} else {
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
