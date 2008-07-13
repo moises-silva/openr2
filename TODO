@@ -1,3 +1,4 @@
+- implement immediate accept calls (forward side, backward side already accepts this (address complete charge setup))
 - call files should have uniqueid
 - include thread id in the call logging
 - improve context error reporting 

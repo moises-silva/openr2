@@ -116,117 +116,115 @@ typedef enum {
 /* possible backward MF states */
 typedef enum {
 	/* the MF engine is not turned on */
-	OR2_MF_OFF_STATE,
+	OR2_MF_OFF_STATE = 100,
 
 	/**** possible backward MF states ****/
 
 	/* seize ACK has been sent, MF tones can start */
-	OR2_MF_SEIZE_ACK_TXD,
+	OR2_MF_SEIZE_ACK_TXD = 200,
 
 	/* We have requested the calling party category and are waiting for it */
-	OR2_MF_CATEGORY_RQ_TXD,
+	OR2_MF_CATEGORY_RQ_TXD = 201,
 
 	/* we have sent next DNIS digit request. We're waiting for a DNIS digit or end of DNIS signal */
-	OR2_MF_DNIS_RQ_TXD,
+	OR2_MF_DNIS_RQ_TXD = 202,
 
 	/* we have sent next ANI digit request. We're waiting either for ANI digit or end of ANI signal */
-	OR2_MF_ANI_RQ_TXD,
+	OR2_MF_ANI_RQ_TXD = 203,
 
 	/* We have sent change to group II signal. ANI and DNIS has been already transmited, We are expecting 
 	  confirmation to finally decide if we accept or reject the call */
-	OR2_MF_CHG_GII_TXD,
+	OR2_MF_CHG_GII_TXD = 204,
 
 	/* call has been accepted */
-	OR2_MF_ACCEPTED_TXD,
+	OR2_MF_ACCEPTED_TXD = 205,
 
 	/* We have notified that we are not accepting the call */
-	OR2_MF_DISCONNECT_TXD,
+	OR2_MF_DISCONNECT_TXD = 206,
 
 	/**** possible forward MF states ****/
 
 	/* we received category request and have answered given the category to the other end */
-	OR2_MF_CATEGORY_TXD,
+	OR2_MF_CATEGORY_TXD = 300,
 
 	/* we received some DNIS request and have already sent a DNIS digit */
-	OR2_MF_DNIS_TXD,
+	OR2_MF_DNIS_TXD = 301,
 
 	/* we received some DNIS request and have already sent 'end of DNIS' signal */
-	OR2_MF_DNIS_END_TXD,
+	OR2_MF_DNIS_END_TXD = 302,
 
 	/* we received some ANI request and have already sent an ANI digit */
-	OR2_MF_ANI_TXD,
+	OR2_MF_ANI_TXD = 303,
 
 	/* we received some ANI request and have already sent 'end of ANI' signal */
-	OR2_MF_ANI_END_TXD,
+	OR2_MF_ANI_END_TXD = 304,
 
 	/* we did not sent a tone, we are waiting for the other side to timeout
 	   expecting our tone */
-	OR2_MF_WAITING_TIMEOUT
+	OR2_MF_WAITING_TIMEOUT = 305
 } openr2_mf_state_t;
 
 /* R2 state machine */
 typedef enum {
 	/* we are waiting to start or receive a call */
-	OR2_IDLE,
+	OR2_IDLE = 100,
 
 	/** BACKWARD STATES **/
 
 	/* we have been sized and have answered with a Size ACK */
-	OR2_SEIZE_ACK_TXD,
+	OR2_SEIZE_ACK_TXD = 200,
 
 	/* we just decided to answer the call */
-	OR2_ANSWER_TXD,
+	OR2_ANSWER_TXD = 201,
 
 	/* We just requested to hangup the call */
-	OR2_CLEAR_BACK_TXD,
+	OR2_CLEAR_BACK_TXD = 202,
 
 	/* The Forward side requested to hangup the call.
 	   This could be in response to a disconnection tone
 	   we sent. */
-	OR2_CLEAR_FWD_RXD,
-
-	/* Forward side decided to hangup the call */
+	OR2_CLEAR_FWD_RXD = 203,
 
 	/** FORWARD STATES **/
-	OR2_SEIZE_TXD,
+	OR2_SEIZE_TXD = 300,
 
 	/* The callee has sent the seize ack */
-	OR2_SEIZE_ACK_RXD,
+	OR2_SEIZE_ACK_RXD = 301,
 
 	/* The callee did no accepted the call */
-	OR2_CLEAR_BACK_TONE_RXD,
+	OR2_CLEAR_BACK_TONE_RXD = 302,
 
 	/* The calle has accepted the call */
-	OR2_ACCEPT_RXD,
+	OR2_ACCEPT_RXD = 303,
 
 	/* The callee has answered the call */
-	OR2_ANSWER_RXD,
+	OR2_ANSWER_RXD = 304,
 
 	/* callee is asking us to end the call */
-	OR2_CLEAR_BACK_RXD,
+	OR2_CLEAR_BACK_RXD = 305,
 
 	/* The callee has answered the call but we
 	   still dont get the final MF tone off */
-	OR2_ANSWER_RXD_MF_PENDING,
+	OR2_ANSWER_RXD_MF_PENDING = 306,
 
 	/* Asked to hangup the call */
-	OR2_CLEAR_FWD_TXD,
+	OR2_CLEAR_FWD_TXD = 307,
 
 	/* Blocked line */
-	OR2_BLOCKED
+	OR2_BLOCKED = 400
 } openr2_abcd_state_t;
 
 /* MFC/R2 variants */
 typedef enum {
-	OR2VAR_ARGENTINA = 0,
-	OR2VAR_BRAZIL,
-	OR2VAR_CHINA,
-	OR2VAR_CZECH,
-	OR2VAR_ECUADOR,
-	OR2VAR_ITU,
-	OR2VAR_MEXICO,
-	OR2VAR_PHILIPPINES,
-	OR2VAR_UNKNOWN
+	OR2_VAR_ARGENTINA = 0,
+	OR2_VAR_BRAZIL = 20,
+	OR2_VAR_CHINA = 40,
+	OR2_VAR_CZECH = 60,
+	OR2_VAR_ECUADOR = 80,
+	OR2_VAR_ITU = 100,
+	OR2_VAR_MEXICO = 120,
+	OR2_VAR_PHILIPPINES = 140,
+	OR2_VAR_UNKNOWN = 999
 } openr2_variant_t;
 
 /* at any given time we either are stopped (idle or blocked), forward or backward */

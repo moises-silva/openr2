@@ -89,6 +89,7 @@ typedef struct {
 	int mf_threshold;
 	int mf_backtimeout;
 	int callfiles;
+	int meteringpulse_timeout;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 } chan_group_data_t;
@@ -274,7 +275,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	char line[255];
 	int g = 0;
 	openr2_calling_party_category_t category = OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
-	openr2_variant_t variant = OR2VAR_UNKNOWN;
+	openr2_variant_t variant = OR2_VAR_UNKNOWN;
 	openr2_log_level_t loglevel = OR2_LOG_NOTHING;
 	openr2_log_level_t tmplevel = OR2_LOG_NOTHING;
 	int lowchan = -1;
@@ -285,8 +286,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int usezapmf = 0;
 	int mf_threshold = 0;
 	int mf_backtimeout = 0;
-	int threshold_test = 0;
+	int int_test = 0;
 	int callfiles = 0;
+	int meteringpulse_timeout = -1;
 	char strvalue[255];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
@@ -323,6 +325,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].mf_threshold = mf_threshold;
 			confdata[g].mf_backtimeout = mf_backtimeout;
 			confdata[g].callfiles = callfiles;
+			confdata[g].meteringpulse_timeout = meteringpulse_timeout;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			g++;
@@ -339,6 +342,14 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'callfiles' parameter.\n", strvalue);
 			}
+		} else if (1 == sscanf(line, "meteringpulsetimeout=%s", strvalue)) {
+			printf("found option meteringpulsetimeout=%s\n", strvalue);
+			int_test = atoi(strvalue);
+			if (!int_test && strvalue[0] != '0') {
+				fprintf(stderr, "Invalid value '%s' for 'meteringpulsetimeout' parameter.\n", strvalue);
+				continue;
+			}
+			meteringpulse_timeout = int_test;
 		} else if (1 == sscanf(line, "loglevel=%s", strvalue)) {
 			printf("found Log Level = %s\n", strvalue);
 			toklevel = strtok(strvalue, ",");
@@ -360,20 +371,20 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			}
 		} else if (1 == sscanf(line, "mfthreshold=%s", strvalue)) {
 			printf("found option MF threshold = %s\n", strvalue);
-			threshold_test = atoi(strvalue);
-			if (!threshold_test && strvalue[0] != '0') {
+			int_test = atoi(strvalue);
+			if (!int_test && strvalue[0] != '0') {
 				fprintf(stderr, "Invalid value '%s' for 'mfthreshold' parameter.\n", strvalue);
 				continue;
 			}
-			mf_threshold = threshold_test;
+			mf_threshold = int_test;
 		} else if (1 == sscanf(line, "mfbacktimeout=%s", strvalue)) {
 			printf("found option MF backward timeout = %s\n", strvalue);
-			threshold_test = atoi(strvalue);
-			if (!threshold_test && strvalue[0] != '0') {
+			int_test = atoi(strvalue);
+			if (!int_test && strvalue[0] != '0') {
 				fprintf(stderr, "Invalid value '%s' for 'mfbacktimeout' parameter.\n", strvalue);
 				continue;
 			}
-			mf_backtimeout = threshold_test;
+			mf_backtimeout = int_test;
 		} else if (1 == sscanf(line, "getanifirst=%s", strvalue)) {
 			printf("found option Get ANI First = %s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
@@ -414,7 +425,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 		} else if (1 == sscanf(line, "variant=%s", strvalue)) {
 			printf("found R2 variant = %s\n", strvalue);
 			variant = openr2_proto_get_variant(strvalue);
-			if (OR2VAR_UNKNOWN == variant) {
+			if (OR2_VAR_UNKNOWN == variant) {
 				fprintf(stderr, "Unknown variant %s\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "caller=%s", strvalue)) {
@@ -575,6 +586,7 @@ int main(int argc, char *argv[])
 		openr2_context_set_ani_first(confdata[c].context, confdata[c].getanifirst);
 		openr2_context_set_mf_threshold(confdata[c].context, confdata[c].mf_threshold);
 		openr2_context_set_mf_back_timeout(confdata[c].context, confdata[c].mf_backtimeout);
+		openr2_context_set_metering_pulse_timeout(confdata[c].context, confdata[c].meteringpulse_timeout);
 	}
 	/* something failed, thus, at least 1 group did not get a context */
 	if (c != numgroups) {

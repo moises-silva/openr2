@@ -162,28 +162,63 @@ static const char *abcd_names[OR2_NUM_ABCD_SIGNALS] =
 	/* OR2_ABCD_ANSWER */ "ANSWER" 
 };
 
-static void (*r2variants[])(openr2_context_t *) =
-{
-	/* ARGENTINA */ r2config_argentina,
-	/* BRAZIL */ r2config_brazil,
-	/* CHINA */ r2config_china,
-	/* CZECH */ r2config_itu,
-	/* ECUADOR */ r2config_itu,
-	/* ITU */ r2config_itu,
-	/* MEXICO */ r2config_mexico,
-	/* PHILIPPINES */ r2config_itu
-};
+typedef void (*openr2_variant_config_func)(openr2_context_t *);
+typedef struct {
+	openr2_variant_t id;
+	const char *name;
+	openr2_variant_config_func config;
+} openr2_variant_entry_t;
 
-static char *r2variants_names[] =
+static openr2_variant_entry_t r2variants[] =
 {
-	/* ARGENTINA */ "AR",
-	/* BRAZIL */ "BR",
-	/* CHINA */ "CN",
-	/* CZECH */ "CZ",
-	/* ECUADOR */ "EC",
-	/* ITU */ "ITU",
-	/* MEXICO */ "MX",
-	/* PHILIPPINES */ "PH"
+	/* ARGENTINA */ 
+	{
+		.id = OR2_VAR_ARGENTINA,
+		.name = "AR",
+		.config = r2config_argentina,
+	},	
+	/* BRAZIL */ 
+	{
+		.id = OR2_VAR_BRAZIL,
+		.name = "BR",
+		.config = r2config_brazil
+	},
+	/* CHINA */ 
+	{
+		.id = OR2_VAR_CHINA,
+		.name = "CN",
+		.config = r2config_china
+	},	
+	/* CZECH */ 
+	{
+		.id = OR2_VAR_CZECH,
+		.name = "CZ",
+		.config = r2config_itu
+	},		
+	/* ECUADOR */ 
+	{
+		.id = OR2_VAR_ECUADOR,
+		.name = "EC",
+		.config = r2config_itu,
+	},	
+	/* ITU */
+	{
+		.id = OR2_VAR_ITU,
+		.name = "ITU",
+		.config = r2config_itu
+	},
+	/* MEXICO */ 
+	{
+		.id = OR2_VAR_MEXICO,
+		.name = "MX",
+		.config = r2config_mexico
+	},
+	/* PHILIPPINES */ 
+	{
+		.id = OR2_VAR_PHILIPPINES,
+		.name = "PH",
+		.config = r2config_itu
+	}
 };
 
 static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
@@ -210,15 +245,15 @@ static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
 int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t variant, int max_ani, int max_dnis)
 {
 	OR2_CONTEXT_STACK;
-
+	unsigned i = 0;
+	unsigned limit = sizeof(r2variants)/sizeof(r2variants[0]);
 	/* if we don't know that variant, return failure */
-	if (variant < 0 || variant >= (sizeof(r2variants)/sizeof(r2variants[0]))) {
-		return -1;
+	for (i = 0; i < limit; i++) {
+		if (variant == r2variants[i].id) {
+			break;
+		}
 	}
-
-	/* if we have the variant, but we don't have a configuration 
-	   function for it return failure */
-	if (!r2variants[variant]) {
+	if (i == limit) {
 		return -1;
 	}
 
@@ -284,7 +319,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_g2_tones.international_priority_subscriber = OR2_MF_TONE_9;
 
 	/* now configure the country specific variations */
-	r2variants[variant](r2context);
+	r2variants[i].config(r2context);
 	return 0;
 }
 
@@ -1783,21 +1818,25 @@ openr2_calling_party_category_t openr2_proto_get_category(const char *category)
 openr2_variant_t openr2_proto_get_variant(const char *variant_name)
 {
 	int i;
-
-	for (i = 0; i < sizeof(r2variants_names)/sizeof(r2variants_names[0]); i++) {
-		if (r2variants_names[i] && !strncasecmp(r2variants_names[i], variant_name, sizeof(r2variants_names[i])-1)) {
-			return (openr2_variant_t)i;
+	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
+	for (i = 0; i < limit; i++) {
+		if (!strncasecmp(r2variants[i].name, variant_name, sizeof(r2variants[i].name)-1)) {
+			return r2variants[i].id;
 		}
 	}
-	return OR2VAR_UNKNOWN;
+	return OR2_VAR_UNKNOWN;
 }
 
 const char *openr2_proto_get_variant_string(openr2_variant_t variant)
 {
-	if (variant < 0 || variant > (sizeof(r2variants_names)/sizeof(r2variants_names[0]))) {
-		return "*Unknown*";
-	}	
-	return r2variants_names[variant];
+	int i;
+	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
+	for (i = 0; i < limit; i++) {
+		if (variant == r2variants[i].id) {
+			return r2variants[i].name;
+		}
+	}
+	return "*UNKNOWN*";
 }
 
 const char *openr2_proto_get_state(openr2_chan_t *r2chan, int tx)
