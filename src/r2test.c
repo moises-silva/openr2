@@ -90,6 +90,7 @@ typedef struct {
 	int mf_backtimeout;
 	int callfiles;
 	int meteringpulse_timeout;
+	int collect_calls;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 } chan_group_data_t;
@@ -188,10 +189,16 @@ static void on_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t rea
 	pthread_exit((void *)1);
 }
 
-static void on_call_ready(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
+static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
+	chan_group_data_t *confdata = openr2_chan_get_client_data(r2chan);
 	printf("USER: call ready on chan %d. DNIS = %s, ANI = %s, Category = %d\n", 
 			openr2_chan_get_number(r2chan), dnis, ani, category);
+	/* if collect calls are not allowed and this is a collect call, reject it */
+	if (!confdata->collect_calls && category == OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL) {
+		openr2_chan_disconnect_call(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
+		return;
+	}
 	openr2_chan_accept_call(r2chan, OR2_CALL_WITH_CHARGE);
 }
 
@@ -256,7 +263,7 @@ static void on_line_idle(openr2_chan_t *r2chan)
 
 static openr2_event_interface_t g_event_iface = {
 	on_call_init,
-	on_call_ready,
+	on_call_offered,
 	on_call_accepted,
 	on_call_answered,
 	on_call_disconnected,
@@ -289,6 +296,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int int_test = 0;
 	int callfiles = 0;
 	int meteringpulse_timeout = -1;
+	int collect_calls = 0;
 	char strvalue[255];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
@@ -326,12 +334,22 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].mf_backtimeout = mf_backtimeout;
 			confdata[g].callfiles = callfiles;
 			confdata[g].meteringpulse_timeout = meteringpulse_timeout;
+			confdata[g].collect_calls = collect_calls;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			g++;
 			if (g == (MAX_GROUPS - 1)) {
 				printf("MAX_GROUPS reached, quitting loop ...\n");
 				break;
+			}
+		} else if (1 == sscanf(line, "collectcalls=%s", strvalue)) {
+			printf("found option collectcalls=%s\n", strvalue);
+			if (!strcasecmp(strvalue, "yes")) {
+				collect_calls = 1;
+			} else if (!strcasecmp(strvalue, "no")) {
+				collect_calls = 0;
+			} else {
+				fprintf(stderr, "Invalid value '%s' for 'collectcalls' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "callfiles=%s", strvalue)) {
 			printf("found option callfiles=%s\n", strvalue);

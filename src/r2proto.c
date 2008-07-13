@@ -71,13 +71,18 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
+	r2context->mf_g2_tones.collect_call = OR2_MF_TONE_8;
+
 	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
-	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7;
+	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_7;
+	/* use out of order for unallocated, I could not find a special
+	   tone for unallocated number on the Brazil spec */
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_8;
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -301,6 +306,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_INVALID;
 
 	/* Group C tones. Similar to Group A but for Mexico */
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
@@ -317,6 +323,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_g2_tones.national_priority_subscriber = OR2_MF_TONE_2;
 	r2context->mf_g2_tones.international_subscriber = OR2_MF_TONE_7;
 	r2context->mf_g2_tones.international_priority_subscriber = OR2_MF_TONE_9;
+	r2context->mf_g2_tones.collect_call = OR2_MF_TONE_INVALID;
 
 	/* now configure the country specific variations */
 	r2variants[i].config(r2context);
@@ -495,6 +502,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "Normal Clearing";
 	case OR2_CAUSE_NO_ANSWER:
 		return "No Answer";
+	case OR2_CAUSE_COLLECT_CALL_REJECTED:
+		return "Collect Call Rejected";
 	default:
 		return "*Unknown*";
 	}
@@ -1087,7 +1096,8 @@ static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 
 	} else if (GII_TONE(r2chan).international_priority_subscriber == r2chan->caller_category) {
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
-
+	} else if (GII_TONE(r2chan).collect_call == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	} else {
 		return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 	}
@@ -1105,6 +1115,8 @@ static int category2tone(openr2_chan_t *r2chan, openr2_calling_party_category_t 
 		return GII_TONE(r2chan).international_subscriber;
 	case OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER:
 		return GII_TONE(r2chan).international_priority_subscriber;
+	case OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL:
+		return GII_TONE(r2chan).collect_call;
 	default:
 		return GII_TONE(r2chan).national_subscriber;;
 	}
@@ -1496,6 +1508,9 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
+	} else if (tone == GB_TONE(r2chan).reject_collect_call) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
@@ -1715,6 +1730,11 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	int tone;
+	/* TODO: should we verify that the tone exists? (ie not OR2_MF_TONE_INVALID)? 
+	   and use default line out of order if not or better yet, warning about it?
+	   particularly I am thinking on the case where collect calls do not apply on
+	   some countries and the user may still use OR2_CAUSE_COLLECT_CALL_REJECTED, silly,
+	   but could confuse users */
 	r2chan->mf_state = OR2_MF_DISCONNECT_TXD;
 	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
@@ -1728,6 +1748,9 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 		break;
 	case OR2_CAUSE_OUT_OF_ORDER:
 		tone = GB_TONE(r2chan).line_out_of_order;
+		break;
+	case OR2_CAUSE_COLLECT_CALL_REJECTED:
+		tone = GB_TONE(r2chan).reject_collect_call;
 		break;
 	default:
 		tone = GB_TONE(r2chan).line_out_of_order;
@@ -1796,6 +1819,8 @@ const char *openr2_proto_get_category_string(openr2_calling_party_category_t cat
 		return "International Subscriber";
 	case OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER:
 		return "International Priority Subscriber";
+	case OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL:
+		return "Collect Call";
 	default:
 		return "*Unknown*";
 	}
@@ -1811,6 +1836,8 @@ openr2_calling_party_category_t openr2_proto_get_category(const char *category)
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER;
 	} else if (!strncasecmp(category, "INTERNATIONAL_PRIORITY_SUBSCRIBER", sizeof("INTERNATIONAL_PRIORITY_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
+	} else if (!strncasecmp(category, "COLLECT_CALL", sizeof("COLLECT_CALL")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	}	
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 }

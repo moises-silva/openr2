@@ -266,7 +266,8 @@ typedef enum {
 	OR2_CAUSE_OUT_OF_ORDER,
 	OR2_CAUSE_UNSPECIFIED,
 	OR2_CAUSE_NO_ANSWER,
-	OR2_CAUSE_NORMAL_CLEARING
+	OR2_CAUSE_NORMAL_CLEARING,
+	OR2_CAUSE_COLLECT_CALL_REJECTED
 } openr2_call_disconnect_cause_t;
 
 /* possible causes of protocol error */
@@ -305,6 +306,7 @@ typedef struct {
 	openr2_mf_tone_t unallocated_number;
 	openr2_mf_tone_t line_out_of_order;
 	openr2_mf_tone_t special_info_tone;
+	openr2_mf_tone_t reject_collect_call;
 } openr2_mf_gb_tones_t;
 
 /* names for the GC MF tones */
@@ -326,6 +328,7 @@ typedef struct {
 	openr2_mf_tone_t national_priority_subscriber;
 	openr2_mf_tone_t international_subscriber;
 	openr2_mf_tone_t international_priority_subscriber;
+	openr2_mf_tone_t collect_call;
 } openr2_mf_g2_tones_t;
 
 typedef enum {
@@ -333,6 +336,7 @@ typedef enum {
 	OR2_CALLING_PARTY_CATEGORY_NATIONAL_PRIORITY_SUBSCRIBER,
 	OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER,
 	OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER,
+	OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL,
 	OR2_CALLING_PARTY_CATEGORY_UNKNOWN
 } openr2_calling_party_category_t;
 
