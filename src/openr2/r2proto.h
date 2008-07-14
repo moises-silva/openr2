@@ -185,6 +185,11 @@ typedef enum {
 	   we sent. */
 	OR2_CLEAR_FWD_RXD = 203,
 
+	/* We answered but then sent clear back as part of the 
+	   block-collect-calls process and we need to resume
+	   the answer state  */
+	OR2_EXECUTING_DOUBLE_ANSWER = 204,
+
 	/** FORWARD STATES **/
 	OR2_SEIZE_TXD = 300,
 

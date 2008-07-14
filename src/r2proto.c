@@ -278,6 +278,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 80000; 
 	r2context->timers.r2_metering_pulse = 0;
+	r2context->timers.r2_double_answer = 0;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = max_dnis;
@@ -948,6 +949,35 @@ int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 	return 0;
 }
 
+static int send_clear_backward(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	r2chan->r2_state = OR2_CLEAR_BACK_TXD;
+	r2chan->mf_state = OR2_MF_OFF_STATE;
+	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
+}
+
+static void double_answer_handler(openr2_chan_t *r2chan, void *data)
+{
+	OR2_CHAN_STACK;
+	if (r2chan->r2_state == OR2_ANSWER_TXD) {
+		if (send_clear_backward(r2chan)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, cannot send double answer!\n");
+			return;
+		}
+		r2chan->r2_state = OR2_EXECUTING_DOUBLE_ANSWER;
+		openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_double_answer, double_answer_handler, NULL);
+	} else if (r2chan->r2_state == OR2_EXECUTING_DOUBLE_ANSWER) {
+		if (set_abcd_signal(r2chan, OR2_ABCD_ANSWER)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Cannot re-send ANSWER signal, failed to answer call!\n");
+			return;
+		}
+		r2chan->r2_state = OR2_ANSWER_TXD;
+	} else {
+		openr2_log(r2chan, OR2_LOG_ERROR, "BUG: double_answer_handler called with an invalid state\n");
+	}
+}
+
 int openr2_proto_answer_call(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -961,8 +991,11 @@ int openr2_proto_answer_call(openr2_chan_t *r2chan)
 	}
 	r2chan->call_state = OR2_CALL_ANSWERED;
 	r2chan->r2_state = OR2_ANSWER_TXD;
-	EMI(r2chan)->on_call_answered(r2chan);
 	r2chan->answered = 1;
+	EMI(r2chan)->on_call_answered(r2chan);
+	if (TIMER(r2chan).r2_double_answer) {
+		openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_double_answer, double_answer_handler, NULL);
+	}
 	return 0;
 }
 
@@ -1765,14 +1798,6 @@ static int send_clear_forward(openr2_chan_t *r2chan)
 	r2chan->r2_state = OR2_CLEAR_FWD_TXD;
 	r2chan->mf_state = OR2_MF_OFF_STATE;
 	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_FORWARD);
-}
-
-static int send_clear_backward(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	r2chan->r2_state = OR2_CLEAR_BACK_TXD;
-	r2chan->mf_state = OR2_MF_OFF_STATE;
-	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
 }
 
 int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)

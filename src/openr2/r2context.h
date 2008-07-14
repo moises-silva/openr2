@@ -148,6 +148,8 @@ typedef struct {
 	int r2_answer;
 	/* How much to wait for metering pulse detection */
 	int r2_metering_pulse;
+	/* Interval between ANSWER - CLEAR BACK - ANSWER when double answer is in effect */
+	int r2_double_answer;
 } openr2_timers_t;
 
 /* Library errors */
@@ -255,6 +257,8 @@ void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms);
 int openr2_context_get_mf_back_timeout(openr2_context_t *r2context);
 void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms);
 int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
+void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
+int openr2_context_get_double_answer(openr2_context_t *r2context);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

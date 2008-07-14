@@ -473,4 +473,15 @@ int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context)
 	return r2context->timers.r2_metering_pulse;
 }
 
+void openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
+{
+	OR2_CONTEXT_STACK;
+	r2context->timers.r2_double_answer = enable ? 400 : 0;
+}
+
+int openr2_context_get_double_answer(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->timers.r2_double_answer ? 1 : 0;
+}
 
