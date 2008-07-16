@@ -229,6 +229,7 @@ typedef enum {
 	OR2_VAR_ITU = 100,
 	OR2_VAR_MEXICO = 120,
 	OR2_VAR_PHILIPPINES = 140,
+	OR2_VAR_VENEZUELA = 160,
 	OR2_VAR_UNKNOWN = 999
 } openr2_variant_t;
 

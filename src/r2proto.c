@@ -145,6 +145,15 @@ static void r2config_mexico(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 }
 
+static void r2config_venezuela(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+
+	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_9;
+
+	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
+}
+
 static const openr2_abcd_signal_t standard_abcd_signals[OR2_NUM_ABCD_SIGNALS] =
 {
 	/* OR2_ABCD_IDLE */ 0x8,
@@ -223,6 +232,12 @@ static openr2_variant_entry_t r2variants[] =
 		.id = OR2_VAR_PHILIPPINES,
 		.name = "PH",
 		.config = r2config_itu
+	},
+	/* VENEZUELA */ 
+	{
+		.id = OR2_VAR_VENEZUELA,
+		.name = "VE",
+		.config = r2config_venezuela
 	}
 };
 
