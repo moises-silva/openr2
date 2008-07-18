@@ -304,6 +304,9 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	   and continuing with DNIS at the end  */
 	r2context->get_ani_first = 1;
 
+	/* accept the call bypassing the use of group B and II tones */
+	r2context->immediate_accept = 0;
+
 	/* Group A tones. Requests of ANI, DNIS and Calling Party Category */
 	r2context->mf_ga_tones.request_next_dnis_digit = OR2_MF_TONE_1;
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_5;
@@ -1049,6 +1052,40 @@ static void request_change_to_g2(openr2_chan_t *r2chan)
 	prepare_mf_tone(r2chan, change_tone);
 }
 
+static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	if (GII_TONE(r2chan).national_subscriber == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
+
+	} else if (GII_TONE(r2chan).national_priority_subscriber == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_PRIORITY_SUBSCRIBER;
+
+	} else if (GII_TONE(r2chan).international_subscriber == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER;
+
+	} else if (GII_TONE(r2chan).international_priority_subscriber == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
+	} else if (GII_TONE(r2chan).collect_call == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
+	} else {
+		return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
+	}
+}
+
+static void bypass_change_to_g2(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	/* Most variants of MFC/R2 offer a way to go directly to the call accepted state,
+	   bypassing the use of group B and II tones */
+	int accept_tone = GA_TONE(r2chan).address_complete_charge_setup;
+	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
+	r2chan->call_state = OR2_CALL_OFFERED;
+	openr2_log(r2chan, OR2_LOG_DEBUG, "By-passing B/II signals, accept the call with signal 0x%X\n", accept_tone);
+	prepare_mf_tone(r2chan, accept_tone);
+	EMI(r2chan)->on_call_offered(r2chan, r2chan->ani, r2chan->dnis, tone2category(r2chan));
+}
+
 static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_STACK;
@@ -1071,8 +1108,13 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 			request_calling_party_category(r2chan);
 		} else {
 			/* ANI must have been retrieved already (before DNIS),
-			   let's go directly to GII, the final stage */
-			request_change_to_g2(r2chan);
+			   let's go directly to GII or directly accept the call without changing
+			   to GII if immediate_accept has been setted, the final stage */
+			if (r2chan->r2context->immediate_accept) {
+				bypass_change_to_g2(r2chan);
+			} else {
+				request_change_to_g2(r2chan);
+			}
 		}
 	} else {
 		openr2_log(r2chan, OR2_LOG_WARNING, "MF back cycle timed out!\n");
@@ -1108,7 +1150,11 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 			if (1 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
 				request_calling_party_category(r2chan);
 			} else {
-				request_change_to_g2(r2chan);
+				if (r2chan->r2context->immediate_accept) {
+					bypass_change_to_g2(r2chan);
+				} else {
+					request_change_to_g2(r2chan);
+				}
 			} 
 		} else if (1 == r2chan->dnis_len && r2chan->r2context->get_ani_first) {
 			request_calling_party_category(r2chan);
@@ -1121,33 +1167,16 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 		if (0 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
 			request_calling_party_category(r2chan);
 		} else {
-			request_change_to_g2(r2chan);
+			if (r2chan->r2context->immediate_accept) {
+				bypass_change_to_g2(r2chan);
+			} else {
+				request_change_to_g2(r2chan);
+			}
 		}
 	} else {
 		/* we were supposed to handle DNIS, but the tone
 		   is not in the range of valid digits */
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
-	}
-}
-
-static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	if (GII_TONE(r2chan).national_subscriber == r2chan->caller_category) {
-		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
-
-	} else if (GII_TONE(r2chan).national_priority_subscriber == r2chan->caller_category) {
-		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_PRIORITY_SUBSCRIBER;
-
-	} else if (GII_TONE(r2chan).international_subscriber == r2chan->caller_category) {
-		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER;
-
-	} else if (GII_TONE(r2chan).international_priority_subscriber == r2chan->caller_category) {
-		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
-	} else if (GII_TONE(r2chan).collect_call == r2chan->caller_category) {
-		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
-	} else {
-		return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 	}
 }
 
@@ -1194,7 +1223,11 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 		} else {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Done getting ANI!\n");
 			if (!r2chan->r2context->get_ani_first || DNIS_COMPLETE(r2chan)) {
-				request_change_to_g2(r2chan);
+				if (r2chan->r2context->immediate_accept) {
+					bypass_change_to_g2(r2chan);
+				} else {
+					request_change_to_g2(r2chan);
+				}
 			} else {
 				request_next_dnis_digit(r2chan);
 			}	
@@ -1209,7 +1242,11 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 			r2chan->caller_ani_is_restricted = 1;
 		}	
 		if (!r2chan->r2context->get_ani_first || DNIS_COMPLETE(r2chan)) {
-			request_change_to_g2(r2chan);
+			if (r2chan->r2context->immediate_accept) {
+				bypass_change_to_g2(r2chan);
+			} else {
+				request_change_to_g2(r2chan);
+			}
 		} else {
 			request_next_dnis_digit(r2chan);
 		}	
@@ -1254,7 +1291,11 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 				mf_receive_expected_ani(r2chan, 0);
 			} else {
 				/* switch to Group B/II, we're ready to answer! */
-				request_change_to_g2(r2chan);
+				if (r2chan->r2context->immediate_accept) {
+					bypass_change_to_g2(r2chan);
+				} else {
+					request_change_to_g2(r2chan);
+				}
 			}
 			break;
 		/* we requested more ANI */
@@ -1333,8 +1374,19 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 	set_silence(r2chan);
 	switch (r2chan->mf_group) {
 	case OR2_MF_GA:
-		/* no further action required. The other end should 
-		   handle our previous request */
+		switch (r2chan->mf_state) {
+			/* a bypass of the change to B/II signals has been setted, 
+			   proceed to accept the call */
+			case OR2_MF_ACCEPTED_TXD:
+				r2chan->mf_state = OR2_MF_OFF_STATE;
+				r2chan->call_state = OR2_CALL_ACCEPTED;
+				openr2_chan_set_timer(r2chan, OR2_PROTO_ANSWER_WAIT_TIME, ready_to_answer, NULL);
+				break;
+			default:
+				/* no further action required. The other end should 
+				   handle our previous request */
+				break;
+		}
 		break;
 	case OR2_MF_GB:
 		switch (r2chan->mf_state) {

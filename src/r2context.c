@@ -365,6 +365,18 @@ int openr2_context_get_ani_first(openr2_context_t *r2context)
 	return r2context->get_ani_first;
 }
 
+void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
+{
+	OR2_CONTEXT_STACK;
+	r2context->immediate_accept = immediate_accept ? 1 : 0;
+}
+
+int openr2_context_get_immediate_accept(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->immediate_accept;
+}
+
 void openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_t level)
 {
 	OR2_CONTEXT_STACK;

@@ -216,6 +216,9 @@ typedef struct openr2_context_s {
 	/* whether or not to get the ANI before getting DNIS */
 	int get_ani_first;
 
+	/* whether or not accept the call bypassing the use of group B and II tones */
+	int immediate_accept;
+
 	/* MF threshold time in ms */
 	int mf_threshold;
 
@@ -247,6 +250,8 @@ int openr2_context_get_max_ani(openr2_context_t *r2context);
 int openr2_context_get_max_dnis(openr2_context_t *r2context);
 void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first);
 int openr2_context_get_ani_first(openr2_context_t *r2context);
+void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept);
+int openr2_context_get_immediate_accept(openr2_context_t *r2context);
 void openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_t level);
 openr2_log_level_t openr2_context_get_log_level(openr2_context_t *r2context);
 void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold);
