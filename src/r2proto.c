@@ -260,8 +260,9 @@ static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
 	return 0;
 }
 
-/* here we configure R2 as ITU and finally call a country specific function to alter the protocol description acording
-   to the specified R2 variant */
+/* Here we configure R2 as ITU and finally call a country specific function to alter the protocol description acording
+   to the specified R2 variant. The ITU blue book Q400 - Q490 defines other tones, but lets just use this for starters,
+   other tones will be added as needed */
 int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t variant, int max_ani, int max_dnis)
 {
 	OR2_CONTEXT_STACK;
