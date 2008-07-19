@@ -92,6 +92,7 @@ typedef struct {
 	int meteringpulse_timeout;
 	int collect_calls;
 	int double_answer;
+	int immediateaccept;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 } chan_group_data_t;
@@ -299,6 +300,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int meteringpulse_timeout = -1;
 	int collect_calls = 0;
 	int double_answer = 0;
+	int immediateaccept = 0;
 	char strvalue[255];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
@@ -338,6 +340,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].meteringpulse_timeout = meteringpulse_timeout;
 			confdata[g].collect_calls = collect_calls;
 			confdata[g].double_answer = double_answer;
+			confdata[g].immediateaccept = immediateaccept;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			g++;
@@ -371,6 +374,15 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				double_answer = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'doubleanswer' parameter.\n", strvalue);
+			}
+		} else if (1 == sscanf(line, "immediateaccept=%s", strvalue)) {
+			printf("found option immediateaccept=%s\n", strvalue);
+			if (!strcasecmp(strvalue, "yes")) {
+				immediateaccept = 1;
+			} else if (!strcasecmp(strvalue, "no")) {
+				immediateaccept = 0;
+			} else {
+				fprintf(stderr, "Invalid value '%s' for 'immediateaccept' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "meteringpulsetimeout=%s", strvalue)) {
 			printf("found option meteringpulsetimeout=%s\n", strvalue);
@@ -618,6 +630,7 @@ int main(int argc, char *argv[])
 		openr2_context_set_mf_back_timeout(confdata[c].context, confdata[c].mf_backtimeout);
 		openr2_context_set_metering_pulse_timeout(confdata[c].context, confdata[c].meteringpulse_timeout);
 		openr2_context_set_double_answer(confdata[c].context, confdata[c].double_answer);
+		openr2_context_set_immediate_accept(confdata[c].context, confdata[c].immediateaccept);
 	}
 	/* something failed, thus, at least 1 group did not get a context */
 	if (c != numgroups) {
