@@ -600,6 +600,7 @@ static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t
 static void open_logfile(openr2_chan_t *r2chan, int backward)
 {
 	time_t currtime;
+	struct tm loctime;
 	char stringbuf[512];
 	char currdir[512];
 	char timestr[30];
@@ -615,11 +616,24 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 			return;
 		}
 	}
-	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%d-%s-%ld.call", 
-			r2chan->r2context->logdir ? r2chan->r2context->logdir : "", 
+	currtime = time(NULL);
+	if ((time_t)-1 == currtime) {
+		myerrno = errno;
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot get time: %s\n", strerror(myerrno));
+		return;
+	}
+	if (!localtime_r(&currtime, &loctime)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get local time\n");
+		return;
+	}
+	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%d-%s-%ld-%d%02d%02d%02d%02d%02d.call", 
+			r2chan->r2context->logdir ? r2chan->r2context->logdir : currdir, 
 			r2chan->number, 
 			backward ? "backward" : "forward",
-			r2chan->call_count++);
+			r2chan->call_count++,
+			(1900 + loctime.tm_year), (1 + loctime.tm_mon), loctime.tm_mday, 
+			loctime.tm_hour, loctime.tm_min, loctime.tm_sec);
 	if (res >= sizeof(stringbuf)) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Failed to create file name of length %d.\n", res);
 		return;
@@ -645,6 +659,8 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		if (ctime_r(&currtime, timestr)) {
 			timestr[strlen(timestr)-1] = 0; /* remove end of line */
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d\n", timestr, r2chan->number);
+		} else {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get call starting time\n");
 		}
 	}
 }

@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <time.h>
+#include <pthread.h>
 #include "openr2/r2log.h"
 #include "openr2/r2chan.h"
 #include "openr2/r2context.h"
@@ -68,7 +69,8 @@ static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 	}
 	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
 	   because that will call openr2_log */
-	fprintf(r2chan->logfile, "[%d:%d:%d:%lu] Chan %d - ", currtime_tm.tm_hour, currtime_tm.tm_min, currtime_tm.tm_sec, currtime.tv_usec/1000, r2chan->number);
+	fprintf(r2chan->logfile, "[%02d:%02d:%02d:%03lu] [Thread: %02lu] [Chan %d] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
+			currtime_tm.tm_sec, currtime.tv_usec/1000, (unsigned long)pthread_self(), r2chan->number);
 	vfprintf(r2chan->logfile, fmt, ap);
 }
 

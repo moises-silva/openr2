@@ -1,9 +1,7 @@
-- implement immediate accept calls (forward side, backward side already accepts this (address complete charge setup))
-- call files should have uniqueid
 - include thread id in the call logging
 - improve context error reporting 
 currently liberr sucks and its flawed, won't work on a multithread environment, 
-in fact, the whole r2context thing is not thread-safe, it should be
+in fact, the whole r2context thing is not thread-safe, probably some parts should be?
 
 - implement CAS persistence check for all signals
 
