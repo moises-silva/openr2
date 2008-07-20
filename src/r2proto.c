@@ -264,7 +264,7 @@ static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
 	return 0;
 }
 
-/* Here we configure R2 as ITU and finally call a country specific function to alter the protocol description acording
+/* Here we configure R2 as ITU and finally call a country specific function to alter the protocol description according
    to the specified R2 variant. The ITU blue book Q400 - Q490 defines other tones, but lets just use this for starters,
    other tones will be added as needed */
 int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t variant, int max_ani, int max_dnis)
@@ -590,6 +590,26 @@ int openr2_proto_set_blocked(openr2_chan_t *r2chan)
 	return 0;
 }
 
+/* This function is called when our side will no longer do R2 signaling
+   ie, on call end and on protocol error, to fix the rx signal state */
+static void fix_rx_signal(openr2_chan_t *r2chan)
+{
+	/* if the last received signal is clear forward, we won't see
+	   a bit change to idle because clear forward and idle
+	   use the same bit pattern, change it to idle now that
+	   the call is end */
+	if (r2chan->abcd_rx_signal == OR2_ABCD_CLEAR_FORWARD) {
+		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
+	} 
+	/* also could happen protocol error because of an idle signal
+	   in an invalid stage. On protocol error the abcd_rx_signal 
+	   is set to invalid to promote displaying the hex value, but its 
+	   time to restore it */
+	else if (r2chan->abcd_read == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
+		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
+	}
+}
+
 static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t reason)
 {
 	OR2_CHAN_STACK;
@@ -601,13 +621,7 @@ static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t
 	MFI(r2chan)->mf_select_tone(r2chan->mf_write_handle, 0);
 	openr2_proto_set_idle(r2chan);
 	EMI(r2chan)->on_protocol_error(r2chan, reason);
-	/* if the last received signal is clear forward, we won't see
-	   a bit change to idle because clear forward and idle
-	   use the same bit pattern, change it to idle now that
-	   the call is end */
-	if (r2chan->abcd_rx_signal == OR2_ABCD_CLEAR_FORWARD) {
-		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
-	}
+	fix_rx_signal(r2chan);
 }
 
 static void open_logfile(openr2_chan_t *r2chan, int backward)
@@ -788,13 +802,7 @@ static void report_call_end(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Call ended\n");
 	openr2_proto_set_idle(r2chan);
 	EMI(r2chan)->on_call_end(r2chan);
-	/* if the last received signal is clear forward, we won't see
-	   a bit change to idle because clear forward and idle
-	   use the same bit pattern, change it to idle now that
-	   the call is end */
-	if (r2chan->abcd_rx_signal == OR2_ABCD_CLEAR_FORWARD) {
-		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
-	}
+	fix_rx_signal(r2chan);
 }
 
 static void r2_metering_pulse(openr2_chan_t *r2chan, void *data)
@@ -803,10 +811,11 @@ static void r2_metering_pulse(openr2_chan_t *r2chan, void *data)
 	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 }
 
+#define ABCD_LOG_RX(argsignal) r2chan->abcd_rx_signal = argsignal; \
+		openr2_log(r2chan, OR2_LOG_CAS_TRACE, "ABCD Rx << [%s] 0x%02X\n", \
+		(argsignal != OR2_ABCD_INVALID) ? abcd_names[argsignal] : openr2_proto_get_rx_state_string(r2chan), abcd); 
 int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 {
-#define ABCD_LOG_RX(argsignal) openr2_log(r2chan, OR2_LOG_CAS_TRACE, "ABCD Rx << [%s] 0x%02X\n", abcd_names[argsignal], abcd); \
-	r2chan->abcd_rx_signal = argsignal;
 	OR2_CHAN_STACK;
 	int abcd, res, myerrno;
 	res = ioctl(r2chan->fd, ZT_GETRXBITS, &abcd);
