@@ -88,11 +88,20 @@ typedef struct openr2_chan_s {
 	/* Call state for this channel */
 	openr2_call_state_t call_state;
 
-	/* last ABCD signal read on this channel */
-	openr2_abcd_signal_t abcd_read;
+	/* last raw R2 signal read on this channel */
+	int abcd_read;
 
-	/* last ABCD signal written to this channel */
-	openr2_abcd_signal_t abcd_write;
+	/* last raw R2 signal written to this channel */
+	int abcd_write;
+
+	/* Meaning of last R2 signal read on this channel */
+	openr2_abcd_signal_t abcd_rx_signal;
+
+	/* Meaning of last R2 signal written to this channel */
+	openr2_abcd_signal_t abcd_tx_signal;
+
+	/* Private buffer to store the string ABCD representation */
+	char abcd_buff[10];
 
 	/* R2 context this channel belongs to */
 	openr2_context_t *r2context;

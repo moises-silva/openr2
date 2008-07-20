@@ -33,6 +33,8 @@ struct openr2_context_s;
    known as line supervisory signaling  */
 #define OR2_NUM_ABCD_SIGNALS 7
 typedef enum {
+	/* Invalid signal */
+	OR2_ABCD_INVALID = -1,
 	/* The line is ready to receive or make calls */
 	OR2_ABCD_IDLE = 0,
 	/* The line is not ready to receive or make calls */
