@@ -497,3 +497,98 @@ int openr2_context_get_double_answer(openr2_context_t *r2context)
 	return r2context->timers.r2_double_answer ? 1 : 0;
 }
 
+#define LOADTONE(mytone) \
+	else if (1 == sscanf(line, #mytone "=%c", (char *)&intvalue)) { \
+		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for tone %s\n", intvalue, #mytone); \
+		if (strchr("1234567890BCDEF", intvalue)) { \
+			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing tone %s from %02X to %02X\n", \
+			#mytone, r2context->mytone, intvalue); \
+			r2context->mytone = intvalue; \
+		} else { \
+			openr2_log2(r2context, OR2_LOG_DEBUG, "Disabling tone %s, its value was %02X\n", \
+			#mytone, r2context->mytone); \
+			r2context->mytone = OR2_MF_TONE_INVALID; \
+		} \
+	}
+
+#define LOADTIMER(mytimer) \
+	else if (1 == sscanf(line, #mytimer "=%d", &intvalue)) { \
+		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for timer %s\n", intvalue, #mytimer); \
+		if (intvalue >= 0) { \
+			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing timer %s from %d to %d\n", \
+			#mytimer, r2context->mytimer, intvalue); \
+			r2context->mytimer = intvalue; \
+		} \
+	}
+
+int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
+{
+	OR2_CONTEXT_STACK;
+	FILE *variant_file = fopen(filename, "r");
+	int intvalue = 0;
+	char line[255];
+	if (!filename) {
+		return -1;
+	}
+	if (!variant_file) {
+		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open R2 variant file '%s'\n", filename);
+		return -1;
+	}
+	while (fgets(line, sizeof(line), variant_file))	{
+
+		if ('#' == line[0] || '\n' == line[0] || ' ' == line[0]) {
+			continue;
+		}
+
+		/* Group A tones */
+		LOADTONE(mf_ga_tones.request_next_dnis_digit)
+		LOADTONE(mf_ga_tones.request_next_ani_digit)
+		LOADTONE(mf_ga_tones.request_category)
+		LOADTONE(mf_ga_tones.request_category_and_change_to_gc)
+		LOADTONE(mf_ga_tones.request_change_to_g2)
+		LOADTONE(mf_ga_tones.address_complete_charge_setup)
+		LOADTONE(mf_ga_tones.network_congestion)
+
+		/* Group B tones */
+		LOADTONE(mf_gb_tones.accept_call_with_charge)
+		LOADTONE(mf_gb_tones.accept_call_no_charge)
+		LOADTONE(mf_gb_tones.busy_number)
+		LOADTONE(mf_gb_tones.network_congestion)
+		LOADTONE(mf_gb_tones.unallocated_number)
+		LOADTONE(mf_gb_tones.line_out_of_order)
+		LOADTONE(mf_gb_tones.special_info_tone)
+		LOADTONE(mf_gb_tones.reject_collect_call)
+
+		/* Group C tones */
+		LOADTONE(mf_gc_tones.request_next_ani_digit)
+		LOADTONE(mf_gc_tones.request_change_to_g2)
+		LOADTONE(mf_gc_tones.request_next_dnis_digit_and_change_to_ga)
+
+		/* Group I tones */
+		LOADTONE(mf_g1_tones.no_more_dnis_available)
+		LOADTONE(mf_g1_tones.no_more_ani_available)
+		LOADTONE(mf_g1_tones.caller_ani_is_restricted)
+
+		/* Group II tones */
+		LOADTONE(mf_g2_tones.national_subscriber)
+		LOADTONE(mf_g2_tones.national_priority_subscriber)
+		LOADTONE(mf_g2_tones.international_subscriber)
+		LOADTONE(mf_g2_tones.international_priority_subscriber)
+		LOADTONE(mf_g2_tones.collect_call)
+
+		/* Timers */
+		LOADTIMER(timers.mf_back_cycle)
+		LOADTIMER(timers.mf_back_resume_cycle)
+		LOADTIMER(timers.mf_fwd_safety)
+		LOADTIMER(timers.r2_seize)
+		LOADTIMER(timers.r2_answer)
+		LOADTIMER(timers.r2_metering_pulse)
+		LOADTIMER(timers.r2_double_answer)
+		LOADTIMER(timers.r2_answer_delay)
+	}
+	r2context->configured_from_file = 1;
+	fclose(variant_file);
+	return 0;
+}
+#undef LOADTONE
+

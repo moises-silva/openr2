@@ -42,8 +42,6 @@
 #include "openr2/r2proto.h"
 #include "openr2/r2utils.h"
 
-#define OR2_PROTO_ANSWER_WAIT_TIME 150
-
 #define GA_TONE(r2chan) (r2chan)->r2context->mf_ga_tones
 #define GB_TONE(r2chan) (r2chan)->r2context->mf_gb_tones
 #define GC_TONE(r2chan) (r2chan)->r2context->mf_gc_tones
@@ -301,6 +299,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_answer = 80000; 
 	r2context->timers.r2_metering_pulse = 0;
 	r2context->timers.r2_double_answer = 0;
+	r2context->timers.r2_answer_delay = 150;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = max_dnis;
@@ -1452,7 +1451,7 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 			case OR2_MF_ACCEPTED_TXD:
 				r2chan->mf_state = OR2_MF_OFF_STATE;
 				r2chan->call_state = OR2_CALL_ACCEPTED;
-				openr2_chan_set_timer(r2chan, OR2_PROTO_ANSWER_WAIT_TIME, ready_to_answer, NULL);
+				openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_answer_delay, ready_to_answer, NULL);
 				break;
 			default:
 				/* no further action required. The other end should 
@@ -1479,7 +1478,7 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 			   consider it a protocol error */
 			r2chan->mf_state = OR2_MF_OFF_STATE;
 			r2chan->call_state = OR2_CALL_ACCEPTED;
-			openr2_chan_set_timer(r2chan, OR2_PROTO_ANSWER_WAIT_TIME, ready_to_answer, NULL);
+			openr2_chan_set_timer(r2chan, TIMER(r2chan).r2_answer_delay, ready_to_answer, NULL);
 			break;
 		case OR2_MF_DISCONNECT_TXD:	
 			/* we did not accept the call and sent some disconnect tone 

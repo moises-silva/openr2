@@ -95,6 +95,7 @@ typedef struct {
 	int immediateaccept;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
+	char r2file[512];
 } chan_group_data_t;
 
 static chan_group_data_t confdata[MAX_GROUPS];
@@ -281,7 +282,7 @@ static openr2_event_interface_t g_event_iface = {
 
 static int parse_config(FILE *conf, chan_group_data_t *confdata)
 {
-	char line[255];
+	char line[512];
 	int g = 0;
 	openr2_calling_party_category_t category = OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
 	openr2_variant_t variant = OR2_VAR_UNKNOWN;
@@ -301,7 +302,8 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int collect_calls = 0;
 	int double_answer = 0;
 	int immediateaccept = 0;
-	char strvalue[255];
+	char strvalue[512];
+	char r2file[512];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
@@ -309,6 +311,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	dnid[0] = 0;
 	cid[0] = 0;
 	strvalue[0] = 0;
+	r2file[0] = 0;
 	while (fgets(line, sizeof(line), conf)) {
 		if ('#' == line[0] || '\n' == line[0] || ' ' == line[0]) {
 			continue;
@@ -343,11 +346,14 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].immediateaccept = immediateaccept;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
+			strcpy(confdata[g].r2file, r2file);
 			g++;
 			if (g == (MAX_GROUPS - 1)) {
 				printf("MAX_GROUPS reached, quitting loop ...\n");
 				break;
 			}
+		} else if (1 == sscanf(line, "advancedprotocolfile=%s", r2file)) {
+			printf("found option advancedprotocolfile=%s\n", r2file);
 		} else if (1 == sscanf(line, "collectcalls=%s", strvalue)) {
 			printf("found option collectcalls=%s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
@@ -631,6 +637,11 @@ int main(int argc, char *argv[])
 		openr2_context_set_metering_pulse_timeout(confdata[c].context, confdata[c].meteringpulse_timeout);
 		openr2_context_set_double_answer(confdata[c].context, confdata[c].double_answer);
 		openr2_context_set_immediate_accept(confdata[c].context, confdata[c].immediateaccept);
+		if (confdata[c].r2file[0] != 0) {
+			if (openr2_context_configure_from_advanced_file(confdata[c].context, confdata[c].r2file)) {
+				fprintf(stderr, "failed to configure R2 context with file %s\n", confdata[c].r2file);
+			}
+		}	
 	}
 	/* something failed, thus, at least 1 group did not get a context */
 	if (c != numgroups) {

@@ -150,6 +150,8 @@ typedef struct {
 	int r2_metering_pulse;
 	/* Interval between ANSWER - CLEAR BACK - ANSWER when double answer is in effect */
 	int r2_double_answer;
+	/* Minimum delay time between the Accept tone signal and the R2 answer signal */
+	int r2_answer_delay;
 } openr2_timers_t;
 
 /* Library errors */
@@ -228,6 +230,9 @@ typedef struct openr2_context_s {
 	/* R2 logging directory */
 	char logdir[OR2_MAX_LOGDIR];
 
+	/* whether or not the advanced configuration file was used */
+	int configured_from_file;
+
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;
 
@@ -264,6 +269,7 @@ void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int 
 int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
 int openr2_context_get_double_answer(openr2_context_t *r2context);
+int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

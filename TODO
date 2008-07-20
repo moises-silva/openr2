@@ -1,6 +1,4 @@
 - implement CAS persistence check for all signals
 
-- implement configuration file to alter tone definitions
-
 - Port to Windows
 

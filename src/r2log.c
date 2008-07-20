@@ -45,13 +45,20 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level,
 	}
 	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
 	   because that will call openr2_log */
-	printf("[%d:%d:%lu][%s] Channel %d -- ", currtime_tm.tm_min, currtime_tm.tm_sec, currtime.tv_usec/1000, openr2_log_get_level_string(level), r2chan->number);
+	printf("[%02d:%02d:%03lu][%s] Channel %d -- ", currtime_tm.tm_min, currtime_tm.tm_sec, 
+			currtime.tv_usec/1000, openr2_log_get_level_string(level), r2chan->number);
+	if (r2chan->r2context->configured_from_file) {
+		printf("M -- ");
+	}
 	vprintf(fmt, ap);
 }
 
 void openr2_log_context_default(openr2_context_t *r2context, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	printf("[%s] Context -- ", openr2_log_get_level_string(level));
+	if (r2context->configured_from_file) {
+		printf("M -- ");
+	}
 	vprintf(fmt, ap);
 }
 
@@ -71,6 +78,9 @@ static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 	   because that will call openr2_log */
 	fprintf(r2chan->logfile, "[%02d:%02d:%02d:%03lu] [Thread: %02lu] [Chan %d] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
 			currtime_tm.tm_sec, currtime.tv_usec/1000, (unsigned long)pthread_self(), r2chan->number);
+	if (r2chan->r2context->configured_from_file) {
+		fprintf(r2chan->logfile, "M - ");
+	}	
 	vfprintf(r2chan->logfile, fmt, ap);
 }
 
