@@ -1,19 +1,8 @@
-- include thread id in the call logging
-- improve context error reporting 
-currently liberr sucks and its flawed, won't work on a multithread environment, 
-in fact, the whole r2context thing is not thread-safe, probably some parts should be?
-
 - implement CAS persistence check for all signals
 
 - implement configuration file to alter tone definitions
 
-- warn users about -DTRACE_STACKS causing infinite recursion if calling openr2
-  APIs from logging functions, probably we should not put OR2_CHAN_STACK on some
-  functions?
-
 - handle ANI restricted, set ANI restricted 
-
-- remove openr2_proto public APIs? leave just openr2_context and openr2_chan APIs?
 
 - Port to Windows
 

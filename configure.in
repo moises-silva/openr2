@@ -11,6 +11,7 @@ AC_CONFIG_FILES([Makefile
 
 AC_CHECK_LIB([m],[cosf], [], [AC_MSG_FAILURE([library libm is required but not present])])
 AC_CHECK_HEADER([math.h],[],[AC_MSG_FAILURE([header math.h is required but not present])])
+AC_CHECK_HEADER([pthread.h],[],[AC_MSG_FAILURE([header pthread.h is required but not present])])
 
 nozaptel=no
 nozaptelzaptel=no
