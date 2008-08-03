@@ -2,3 +2,10 @@
 
 - Port to Windows
 
+- Be able to alter max_dnis in runtime for a specific channel. This could help
+  when multiple length of DNIS is expected (ie from a PBX) and we're in a variant
+  that works with DNIS timeout as signal to END of DNIS. Instead of waiting for
+  the timeout, Asterisk or FreeSwitch or x Client could change the MAX DNIS in
+  a per call/per channel basis with dial plan rules, therefore, if the DNIS starts
+  with a given prefix, it could set MAX DNIS to 8 digits or whatever
+
