@@ -524,12 +524,13 @@ int openr2_context_get_double_answer(openr2_context_t *r2context)
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
 {
 	OR2_CONTEXT_STACK;
-	FILE *variant_file = fopen(filename, "r");
+	FILE *variant_file;
 	int intvalue = 0;
 	char line[255];
 	if (!filename) {
 		return -1;
 	}
+	variant_file = fopen(filename, "r");
 	if (!variant_file) {
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open R2 variant file '%s'\n", filename);
 		return -1;
@@ -591,4 +592,5 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 	return 0;
 }
 #undef LOADTONE
+#undef LOADTIMER
 
