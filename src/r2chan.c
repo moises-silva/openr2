@@ -210,6 +210,10 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	/* set default logger and default logging level */
 	r2chan->on_channel_log = openr2_log_channel_default;
 
+	/* set ABCD indicators to invalid */
+	r2chan->abcd_rx_signal = OR2_ABCD_INVALID;
+	r2chan->abcd_tx_signal = OR2_ABCD_INVALID;
+
 	/* add ourselves to the queue of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
 
