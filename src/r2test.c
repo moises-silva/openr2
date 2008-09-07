@@ -27,8 +27,8 @@
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdlib.h>
-#ifdef ZAPTEL_HAS_MFR2
-#include <zaptel/zaptel.h>
+#ifdef HAVE_DAHDI_USER_H
+#include <dahdi/user.h>
 #endif
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -54,20 +54,20 @@ static int listener_count = 0;
 pthread_mutex_t listener_count_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t listener_threads_done = PTHREAD_COND_INITIALIZER;
 
-#ifdef ZAPTEL_HAS_MFR2
-static const char zap_mf_names[] = "123456789ABCDEF";
+#ifdef HAVE_DAHDI_USER_H
+static const char dahdi_mf_names[] = "123456789ABCDEF";
 
 typedef struct {
 	openr2_chan_t *r2chan;
 	int forward;
 	int signal;
 	int generate;
-} zap_mf_tx_state_t;
+} dahdi_mf_tx_state_t;
 #endif
 
 typedef struct {
-#ifdef ZAPTEL_HAS_MFR2
-	zap_mf_tx_state_t zap_tx_state;
+#ifdef HAVE_DAHDI_USER_H
+	dahdi_mf_tx_state_t dahdi_tx_state;
 #endif
 	pthread_t thread_id;
 	openr2_chan_t *chan;
@@ -85,7 +85,7 @@ typedef struct {
 	int max_ani;
 	int max_dnis;
 	int getanifirst;
-	int usezapmf;
+	int usedahdimf;
 	int mf_threshold;
 	int mf_backtimeout;
 	int callfiles;
@@ -100,16 +100,16 @@ typedef struct {
 
 static chan_group_data_t confdata[MAX_GROUPS];
 
-#ifdef ZAPTEL_HAS_MFR2
-static void *zap_mf_tx_init(zap_mf_tx_state_t *handle, int forward_signals)
+#ifdef HAVE_DAHDI_USER_H
+static void *dahdi_mf_tx_init(dahdi_mf_tx_state_t *handle, int forward_signals)
 {
-	ZT_DIAL_OPERATION zo = {
-		.op = ZT_DIAL_OP_REPLACE
+	struct dahdi_dialoperation dahdi_operation = {
+		.op = DAHDI_DIAL_OP_REPLACE
 	};
 	int res;
 	/* choose either forward or backward signals */
-	strcpy(zo.dialstr, forward_signals ? "O" : "R");
-	res = ioctl(openr2_chan_get_fd(handle->r2chan), ZT_DIAL, &zo);
+	strcpy(dahdi_operation.dialstr, forward_signals ? "O" : "R");
+	res = ioctl(openr2_chan_get_fd(handle->r2chan), DAHDI_DIAL, &dahdi_operation);
 	if (-1 == res) {
 		perror("init failed");
 		return NULL;
@@ -119,13 +119,13 @@ static void *zap_mf_tx_init(zap_mf_tx_state_t *handle, int forward_signals)
 	return handle;
 }
 
-static int zap_mf_tx_put(zap_mf_tx_state_t *handle, char signal)
+static int dahdi_mf_tx_put(dahdi_mf_tx_state_t *handle, char signal)
 {
-	/* 0 is really A in zaptel */
+	/* 0 is really A in DAHDI */
 	signal = (signal == '0') ? 'A' : signal;
-	if (signal && strchr(zap_mf_names, signal)) {
-		handle->signal = handle->forward ? (ZT_TONE_MFR2_FWD_BASE + (signal - zap_mf_names[0])) 
-			                         : (ZT_TONE_MFR2_REV_BASE + (signal - zap_mf_names[0]));
+	if (signal && strchr(dahdi_mf_names, signal)) {
+		handle->signal = handle->forward ? (DAHDI_TONE_MFR2_FWD_BASE + (signal - dahdi_mf_names[0])) 
+			                         : (DAHDI_TONE_MFR2_REV_BASE + (signal - dahdi_mf_names[0]));
 		if (signal >= 'A') {
 			handle->signal -= 7;
 		}
@@ -138,10 +138,10 @@ static int zap_mf_tx_put(zap_mf_tx_state_t *handle, char signal)
 	return 0;
 }
 
-static int zap_mf_tx(zap_mf_tx_state_t *handle, int16_t buffer[], int samples)
+static int dahdi_mf_tx(dahdi_mf_tx_state_t *handle, int16_t buffer[], int samples)
 {
 	int res;
-	res = ioctl(openr2_chan_get_fd(handle->r2chan), ZT_SENDTONE, &handle->signal);
+	res = ioctl(openr2_chan_get_fd(handle->r2chan), DAHDI_SENDTONE, &handle->signal);
 	if (-1 == res) {
 		perror("failed to set signal\n");
 		return -1;
@@ -150,25 +150,25 @@ static int zap_mf_tx(zap_mf_tx_state_t *handle, int16_t buffer[], int samples)
 	return 0;
 }
 
-static int zap_mf_want_generate(zap_mf_tx_state_t *handle, int signal)
+static int dahdi_mf_want_generate(dahdi_mf_tx_state_t *handle, int signal)
 {
 	return handle->generate;
 }
 
-static openr2_mflib_interface_t g_mf_zap_iface = {
+static openr2_mflib_interface_t g_mf_dahdi_iface = {
 	.mf_read_init = NULL,
-	.mf_write_init = (openr2_mf_write_init_func)zap_mf_tx_init, 
+	.mf_write_init = (openr2_mf_write_init_func)dahdi_mf_tx_init, 
 
 	.mf_detect_tone = NULL,
-	.mf_generate_tone = (openr2_mf_generate_tone_func)zap_mf_tx,
+	.mf_generate_tone = (openr2_mf_generate_tone_func)dahdi_mf_tx,
 
-	.mf_select_tone = (openr2_mf_select_tone_func)zap_mf_tx_put,
+	.mf_select_tone = (openr2_mf_select_tone_func)dahdi_mf_tx_put,
 
-	.mf_want_generate = (openr2_mf_want_generate_func)zap_mf_want_generate,
+	.mf_want_generate = (openr2_mf_want_generate_func)dahdi_mf_want_generate,
 	.mf_read_dispose = NULL,
 	.mf_write_dispose = NULL
 };
-#endif /* ZAPTEL_HAS_MFR2 */
+#endif /* HAVE_DAHDI_USER_H */
 
 static void on_call_init(openr2_chan_t *r2chan)
 {
@@ -177,7 +177,7 @@ static void on_call_init(openr2_chan_t *r2chan)
 
 static void on_hardware_alarm(openr2_chan_t *r2chan, int alarm)
 {
-	printf("USER: zap alarm on chan %d!\n", openr2_chan_get_number(r2chan));
+	printf("USER: alarm on chan %d!\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_os_error(openr2_chan_t *r2chan, int errorcode)
@@ -293,7 +293,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int max_ani = 0;
 	int max_dnis = 0;
 	int getanifirst = 0;
-	int usezapmf = 0;
+	int usedahdimf = 0;
 	int mf_threshold = 0;
 	int mf_backtimeout = 0;
 	int int_test = 0;
@@ -317,7 +317,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			continue;
 		}
 		if (2 == sscanf(line, "channel=%d-%d", &lowchan, &highchan)) {
-			printf("found zap range = %d-%d\n", lowchan, highchan);
+			printf("found channel range = %d-%d\n", lowchan, highchan);
 			if (lowchan > highchan) {
 				fprintf(stderr, "invalid channel range, low chan must not be bigger than high chan\n");
 				return -1;
@@ -336,7 +336,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].max_dnis = max_dnis;
 			confdata[g].max_ani = max_ani;
 			confdata[g].loglevel = loglevel;
-			confdata[g].usezapmf = usezapmf;
+			confdata[g].usedahdimf = usedahdimf;
 			confdata[g].mf_threshold = mf_threshold;
 			confdata[g].mf_backtimeout = mf_backtimeout;
 			confdata[g].callfiles = callfiles;
@@ -442,18 +442,18 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'getanifirst' parameter.\n", strvalue);
 			}
-		} else if (1 == sscanf(line, "usezapmf=%s", strvalue)) {
-#ifdef ZAPTEL_HAS_MFR2
-			printf("found option Use Zaptel MF = %s\n", strvalue);
+		} else if (1 == sscanf(line, "usedahdimf=%s", strvalue)) {
+#ifdef HAVE_DAHDI_USER_H
+			printf("found option Use DAHDI MF = %s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
-				usezapmf = 1;
+				usedahdimf = 1;
 			} else if (!strcasecmp(strvalue, "no")) {
-				usezapmf = 0;
+				usedahdimf = 0;
 			} else {
-				fprintf(stderr, "Invalid value '%s' for 'usezapmf' parameter.\n", strvalue);
+				fprintf(stderr, "Invalid value '%s' for 'usedahdimf' parameter.\n", strvalue);
 			}
 #else
-			printf("Zaptel R2 MF is not available, ignoring option usezapmf.\n");
+			printf("DAHDI R2 MF is not available, ignoring option usedahdimf.\n");
 #endif
 		} else if (1 == sscanf(line, "maxani=%d", &max_ani)) {
 			printf("found MAX ANI= %d\n", max_ani);	
@@ -619,9 +619,9 @@ int main(int argc, char *argv[])
 
 	/* we have a bunch of channels, let's create contexts for each group of them */
 	for (c = 0; c < numgroups; c++) {
-#ifdef ZAPTEL_HAS_MFR2 
-		if (confdata[c].usezapmf) {
-			mf_iface = &g_mf_zap_iface;
+#ifdef HAVE_DAHDI_USER_H
+		if (confdata[c].usedahdimf) {
+			mf_iface = &g_mf_dahdi_iface;
 		}
 #endif
 		confdata[c].context = openr2_context_new(mf_iface, &g_event_iface, 
@@ -656,9 +656,9 @@ int main(int argc, char *argv[])
 	/* now create channels for each context */
 	for (c = 0; c < numgroups; c++) {
 		for (i = confdata[c].lowchan, cnt = 0; i <= confdata[c].highchan; i++, cnt++) {
-#ifdef ZAPTEL_HAS_MFR2 
-			if (confdata[c].usezapmf) {
-				tx_mf_state = &confdata[c].channels[cnt].zap_tx_state;
+#ifdef HAVE_DAHDI_USER_H
+			if (confdata[c].usedahdimf) {
+				tx_mf_state = &confdata[c].channels[cnt].dahdi_tx_state;
 			}
 #endif
 			confdata[c].channels[cnt].chan = openr2_chan_new(confdata[c].context, i, tx_mf_state, NULL);
@@ -671,8 +671,8 @@ int main(int argc, char *argv[])
 			if (confdata[c].callfiles) {
 				openr2_chan_enable_call_files(confdata[c].channels[cnt].chan);
 			}
-#ifdef ZAPTEL_HAS_MFR2 
-			confdata[c].channels[cnt].zap_tx_state.r2chan = confdata[c].channels[cnt].chan;
+#ifdef HAVE_DAHDI_USER_H
+			confdata[c].channels[cnt].dahdi_tx_state.r2chan = confdata[c].channels[cnt].chan;
 #endif
 		}
 		/* something failed, thus, at least 1 channel could not be created */

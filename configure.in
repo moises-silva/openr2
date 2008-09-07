@@ -15,11 +15,12 @@ AC_CHECK_HEADER([pthread.h],[],[AC_MSG_FAILURE([header pthread.h is required but
 
 nozaptel=no
 nozaptelzaptel=no
+nodahdiuser=no
 AC_CHECK_HEADERS([linux/zaptel.h],[],[nozaptel=yes])
 AC_CHECK_HEADERS([zaptel/zaptel.h],[],[nozaptelzaptel=yes])
-AC_CHECK_MEMBER(struct zt_dialparams.mfr2_tonelen, [AC_DEFINE([ZAPTEL_HAS_MFR2],[1],[define if you have Zaptel MFR2 Support])],[],[[#include <zaptel/zaptel.h>]])
+AC_CHECK_HEADERS([dahdi/user.h],[],[nodahdiuser=yes])
 
-if [test "x$nozaptel" = xyes] && [test "x$nozaptelzaptel" = xyes]
+if [test "x$nozaptel" = xyes] && [test "x$nozaptelzaptel" = xyes] && [test "x$nodahdiuser" = xyes]
 then
 	AC_MSG_FAILURE([zaptel is required but not present])
 fi

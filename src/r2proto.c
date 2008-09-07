@@ -30,13 +30,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_LINUX_ZAPTEL_H
-#include <linux/zaptel.h>
-#elif HAVE_ZAPTEL_ZAPTEL_H
-#include <zaptel/zaptel.h>
-#else
-#error "wtf? either linux/zaptel.h or zaptel/zaptel.h should be present"
-#endif
+#include "openr2/r2hwcompat.h"
 #include "openr2/r2chan.h"
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"
@@ -253,11 +247,11 @@ static int set_abcd_signal(openr2_chan_t *r2chan, openr2_abcd_signal_t signal)
 	r2chan->abcd_tx_signal = signal;
 	/* set the NON R2 bits to 1 */
 	abcd |= r2chan->r2context->abcd_nonr2_bits; 
-	res = ioctl(r2chan->fd, ZT_SETTXBITS, &abcd);
+	res = ioctl(r2chan->fd, OR2_HW_OP_SET_TX_BITS, &abcd);
 	if (res) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "ZT_SETTXBITS failed: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_LOG_ERROR, "Setting ABCD bits failed: %s\n", strerror(myerrno));
 		return -1;
 	} 
 	openr2_log(r2chan, OR2_LOG_CAS_TRACE, "ABCD Raw Tx >> 0x%02X\n", abcd);
@@ -734,15 +728,15 @@ static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan, void *data)
 static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
-	int flush_write = ZT_FLUSH_WRITE, ret;
+	int flush_write = OR2_HW_FLUSH_WRITE, ret;
 	int myerrno = 0;
 	/* put silence only if we have a write tone */
 	if (!tone && r2chan->mf_write_tone) {
 		openr2_log(r2chan, OR2_LOG_MF_TRACE, "MF Tx >> %c [OFF]\n", r2chan->mf_write_tone);
-		if (ioctl(r2chan->fd, ZT_FLUSH, &flush_write)) {
+		if (ioctl(r2chan->fd, OR2_HW_OP_FLUSH, &flush_write)) {
 			myerrno = errno;
 			EMI(r2chan)->on_os_error(r2chan, myerrno);
-			openr2_log(r2chan, OR2_LOG_ERROR, "ZT_FLUSH failed: %s\n", strerror(myerrno));
+			openr2_log(r2chan, OR2_LOG_ERROR, "Flush write buffer failed: %s\n", strerror(myerrno));
 			return;
 		}
 	} 
@@ -818,11 +812,11 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	int abcd, res, myerrno;
-	res = ioctl(r2chan->fd, ZT_GETRXBITS, &abcd);
+	res = ioctl(r2chan->fd, OR2_HW_OP_GET_RX_BITS, &abcd);
 	if (res) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "ZT_GETRXBITS failed: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_LOG_ERROR, "Getting ABCD bits failed: %s\n", strerror(myerrno));
 		return -1;
 	}
 	openr2_log(r2chan, OR2_LOG_CAS_TRACE, "ABCD Raw Rx << 0x%02X\n", abcd);

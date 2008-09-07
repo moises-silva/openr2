@@ -31,13 +31,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_LINUX_ZAPTEL_H
-#include <linux/zaptel.h>
-#elif HAVE_ZAPTEL_ZAPTEL_H
-#include <zaptel/zaptel.h>
-#else
-#error "wtf? either linux/zaptel.h or zaptel/zaptel.h should be present"
-#endif
+#include "openr2/r2hwcompat.h"
 #include "openr2/r2context.h"
 #include "openr2/r2log.h"
 #include "openr2/r2proto.h"
@@ -49,13 +43,13 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	int res, zapval, channo;
 	unsigned i;
 	openr2_chan_t *r2chan = NULL;
-	ZT_GAINS chan_gains;
-	ZT_BUFFERINFO chan_buffers;
-	ZT_PARAMS chan_params;
+	OR2_HW_GAINS chan_gains;
+	OR2_HW_BUFFER_INFO chan_buffers;
+	OR2_HW_PARAMS chan_params;
 #ifdef OR2_MF_DEBUG
 	char logfile[1024];
 #endif
-	res = ioctl(chanfd, ZT_CHANNO, &channo);
+	res = ioctl(chanfd, OR2_HW_OP_CHANNO, &channo);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get channel number from descriptor %d (%s)\n", chanfd, strerror(errno));
@@ -65,7 +59,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 		return NULL;
 	}
 	/* let's check the signaling */
-	res = ioctl(chanfd, ZT_GET_PARAMS, &chan_params);
+	res = ioctl(chanfd, OR2_HW_OP_GET_PARAMS, &chan_params);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get signaling information for channel %d (%s)\n", channo, strerror(errno));
@@ -74,7 +68,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 		}	
 		return NULL;
 	}
-	if (ZT_SIG_CAS != chan_params.sigtype) {
+	if (OR2_HW_SIG_CAS != chan_params.sigtype) {
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_SIGNALING;
 		openr2_log2(r2context, OR2_LOG_ERROR, "chan %d does not has CAS signaling\n", channo);
 		if (fdcreated) {
@@ -84,7 +78,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	}
 
 	/* setup buffers and gains  */
-	res = ioctl(chanfd, ZT_GET_BUFINFO, &chan_buffers);
+	res = ioctl(chanfd, OR2_HW_OP_GET_BUFINFO, &chan_buffers);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to retrieve buffer information for chan %d (%s)\n", 
@@ -94,11 +88,11 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 		}	
 		return NULL;
 	}
-	chan_buffers.txbufpolicy = ZT_POLICY_IMMEDIATE;
-	chan_buffers.rxbufpolicy = ZT_POLICY_IMMEDIATE;
+	chan_buffers.txbufpolicy = OR2_HW_POLICY_IMMEDIATE;
+	chan_buffers.rxbufpolicy = OR2_HW_POLICY_IMMEDIATE;
 	chan_buffers.numbufs = 4;
 	chan_buffers.bufsize = OR2_CHAN_READ_SIZE;
-	res = ioctl(chanfd, ZT_SET_BUFINFO, &chan_buffers);
+	res = ioctl(chanfd, OR2_HW_OP_SET_BUFINFO, &chan_buffers);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set buffer information for chan %d (%s)\n", channo, strerror(errno));
@@ -113,7 +107,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 		chan_gains.rxgain[i] = chan_gains.txgain[i] = i;
 	}
 
-	res = ioctl(chanfd, ZT_SETGAINS, &chan_gains);
+	res = ioctl(chanfd, OR2_HW_OP_SET_GAINS, &chan_gains);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set gains on channel %d (%s)\n", channo, strerror(errno));
@@ -123,8 +117,8 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 		return NULL;
 	}
 
-	zapval = ZT_LAW_ALAW;
-	res = ioctl(chanfd, ZT_SETLAW, &zapval);
+	zapval = OR2_HW_LAW_ALAW;
+	res = ioctl(chanfd, OR2_HW_OP_SET_LAW, &zapval);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set ALAW codec on channel %d (%s)\n", channo, strerror(errno));
@@ -135,7 +129,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	}
 
 	zapval = 0;
-	res = ioctl(chanfd, ZT_ECHOCANCEL, &zapval);
+	res = ioctl(chanfd, OR2_HW_OP_SET_ECHO_CANCEL, &zapval);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to put echo-cancel off on channel %d (%s)\n", channo, strerror(errno));
@@ -226,7 +220,7 @@ openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf
 	int chanfd, res;
 
 	/* open the zap generic channel interface */
-	chanfd = open("/dev/zap/channel", O_RDWR | O_NONBLOCK);
+	chanfd = open(OR2_HW_CHANNEL_FILE_NAME, O_RDWR | O_NONBLOCK);
 	if (-1 == chanfd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open zap control device (%s)\n", strerror(errno));
@@ -234,7 +228,7 @@ openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf
 	}
 
 	/* choose the requested channel */
-	res = ioctl(chanfd, ZT_SPECIFY, &channo);
+	res = ioctl(chanfd, OR2_HW_OP_SPECIFY, &channo);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to choose channel %d (%s)\n", channo, strerror(errno));
@@ -253,16 +247,16 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 {
 	OR2_CHAN_STACK;
 	switch (event) {
-	case ZT_EVENT_BITSCHANGED:
+	case OR2_HW_EVENT_BITS_CHANGED:
 		openr2_proto_handle_abcd_change(r2chan);
 		break;
-	case ZT_EVENT_ALARM:
-	case ZT_EVENT_NOALARM:
-		openr2_log(r2chan, OR2_LOG_DEBUG, (event == ZT_EVENT_ALARM) ? "Alarm Raised\n" : "Alarm Cleared\n");
-		EMI(r2chan)->on_hardware_alarm(r2chan, ((event == ZT_EVENT_ALARM) ? 1 : 0));
+	case OR2_HW_EVENT_ALARM:
+	case OR2_HW_EVENT_NO_ALARM:
+		openr2_log(r2chan, OR2_LOG_DEBUG, (event == OR2_HW_EVENT_ALARM) ? "Alarm Raised\n" : "Alarm Cleared\n");
+		EMI(r2chan)->on_hardware_alarm(r2chan, ((event == OR2_HW_EVENT_NO_ALARM) ? 1 : 0));
 		break;
 	default:
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Unhandled event %d\n", event);
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Unhandled hardware event %d\n", event);
 		break;
 	}
 	return 0;
@@ -294,19 +288,19 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 	while(1) {
 
 		/* we're always interested in ABCD bit events and we don't want not block */
-		interesting_events = ZT_IOMUX_SIGEVENT | ZT_IOMUX_NOWAIT;
+		interesting_events = OR2_HW_IO_MUX_SIG_EVENT | OR2_HW_IO_MUX_NO_WAIT;
 
-		/* we also want ZT_IOMUX_READ if we have read enabled */
+		/* we also want to be notified about read-ready if we have read enabled */
 		if (r2chan->read_enabled) {
-			interesting_events |= ZT_IOMUX_READ;
+			interesting_events |= OR2_HW_IO_MUX_READ;
 		}
 
-		/* we also want ZT_IOMUX_WRITE if we're in the MF process and have some tone to write */
+		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
 		if (OR2_MF_OFF_STATE != r2chan->mf_state && MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
-			interesting_events |= ZT_IOMUX_WRITE;
+			interesting_events |= OR2_HW_IO_MUX_WRITE;
 		}
 
-		res = ioctl(r2chan->fd, ZT_IOMUX, &interesting_events);
+		res = ioctl(r2chan->fd, OR2_HW_OP_IO_MUX, &interesting_events);
 		if (res) {
 			EMI(r2chan)->on_os_error(r2chan, errno);
 			return -1;
@@ -315,15 +309,15 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		if (!interesting_events) {
 			return -1;
 		}
-		/* if ZT_IOMUX_SIGEVENT is set, probably ABCD may have changed */
-		if ( ZT_IOMUX_SIGEVENT & interesting_events ) {
-			res = ioctl(r2chan->fd, ZT_GETEVENT, &events);
+		/* if there is a signaling eventset, probably ABCD bits just changed */
+		if (OR2_HW_IO_MUX_SIG_EVENT & interesting_events) {
+			res = ioctl(r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
 			if ( !res && events ) {
 				openr2_chan_handle_zap_event(r2chan, events);
 			}
 			continue;
 		}
-		if ( ZT_IOMUX_READ & interesting_events ) {
+		if (OR2_HW_IO_MUX_READ & interesting_events) {
 			res = read(r2chan->fd, read_buf, sizeof(read_buf));
 			if (-1 == res) {
 				EMI(r2chan)->on_os_error(r2chan, errno);
@@ -349,7 +343,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
-		if ( ZT_IOMUX_WRITE & interesting_events ) {
+		if (OR2_HW_IO_MUX_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->zap_buf_size);
 			/* if there are no samples to convert and write then continue,
 			   the generate routine already took care of it */
