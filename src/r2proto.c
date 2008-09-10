@@ -2081,7 +2081,6 @@ const char *openr2_proto_get_mf_group_string(openr2_chan_t *r2chan)
 
 const char *openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
 {
-	OR2_CHAN_STACK;
 	return get_string_from_mode(mode);
 }
 
