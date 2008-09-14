@@ -22,7 +22,7 @@ LIBS = -lm
 
 if HAVE_SVNVERSION
 SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
-AM_CFLAGS := -ggdb3 -O0 -Wall $(SVNDEF)
+AM_CFLAGS := -ggdb3 -O0 -Wall -Werror $(SVNDEF)
 endif
 
 

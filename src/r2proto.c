@@ -36,6 +36,8 @@
 #include "openr2/r2proto.h"
 #include "openr2/r2utils.h"
 
+#define R2(r2chan, signal) (r2chan)->r2context->abcd_signals[OR2_ABCD_##signal]
+
 #define GA_TONE(r2chan) (r2chan)->r2context->mf_ga_tones
 #define GB_TONE(r2chan) (r2chan)->r2context->mf_gb_tones
 #define GC_TONE(r2chan) (r2chan)->r2context->mf_gc_tones
@@ -153,6 +155,7 @@ static const int standard_abcd_signals[OR2_NUM_ABCD_SIGNALS] =
 	/* OR2_ABCD_SEIZE */ 0x0,
 	/* OR2_ABCD_SEIZE_ACK */ 0xC,
 	/* OR2_ABCD_CLEAR_BACK */ 0xC,
+	/* OR2_ABCD_FORCED_RELEASE */ 0x0,
 	/* OR2_ABCD_CLEAR_FORWARD */ 0x8,
 	/* OR2_ABCD_ANSWER */ 0x4
 };
@@ -164,6 +167,7 @@ static const char *abcd_names[OR2_NUM_ABCD_SIGNALS] =
 	/* OR2_ABCD_SEIZE */ "SEIZE",
 	/* OR2_ABCD_SEIZE_ACK */ "SEIZE ACK",
 	/* OR2_ABCD_CLEAR_BACK */ "CLEAR BACK",
+	/* OR2_ABCD_FORCED_RELEASE */ "FORCED RELEASE",
 	/* OR2_ABCD_CLEAR_FORWARD */ "CLEAR FORWARD",
 	/* OR2_ABCD_ANSWER */ "ANSWER" 
 };
@@ -286,11 +290,11 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->abcd_r2_bits = 0xC; /*  1100 */
 
 	/* set default values for the protocol timers */
-	r2context->timers.mf_back_cycle = 1500;
+	r2context->timers.mf_back_cycle = 5000;
 	r2context->timers.mf_back_resume_cycle = 150;
 	r2context->timers.mf_fwd_safety = 10000;
 	r2context->timers.r2_seize = 8000;
-	r2context->timers.r2_answer = 80000; 
+	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
 	r2context->timers.r2_double_answer = 0;
 	r2context->timers.r2_answer_delay = 150;
@@ -360,6 +364,8 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 		return "Answer Transmitted";
 	case OR2_CLEAR_BACK_TXD:
 		return "Clear Back Transmitted";
+	case OR2_FORCED_RELEASE_TXD:
+		return "Forced Release Transmitted";
 	case OR2_CLEAR_FWD_RXD:
 		return "Clear Forward Received";
 	case OR2_SEIZE_TXD:
@@ -374,6 +380,8 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 		return "Answer Received";
 	case OR2_CLEAR_BACK_RXD:
 		return "Clear Back Received";
+	case OR2_FORCED_RELEASE_RXD:
+		return "Forced Release Received";
 	case OR2_ANSWER_RXD_MF_PENDING:
 		return "Answer Received with MF Pending";
 	case OR2_CLEAR_FWD_TXD:
@@ -381,7 +389,7 @@ static const char *r2state2str(openr2_abcd_state_t r2state)
 	case OR2_BLOCKED:
 		return "Blocked";
 	default: 
-		return "*Unknown*(%d)";
+		return "*Unknown*";
 	}
 }
 
@@ -523,6 +531,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "No Answer";
 	case OR2_CAUSE_COLLECT_CALL_REJECTED:
 		return "Collect Call Rejected";
+	case OR2_CAUSE_FORCED_RELEASE:
+		return "Forced Release";
 	default:
 		return "*Unknown*";
 	}
@@ -588,18 +598,19 @@ int openr2_proto_set_blocked(openr2_chan_t *r2chan)
    ie, on call end and on protocol error, to fix the rx signal state */
 static void fix_rx_signal(openr2_chan_t *r2chan)
 {
-	/* if the last received signal is clear forward, we won't see
-	   a bit change to idle because clear forward and idle
-	   use the same bit pattern, change it to idle now that
-	   the call is end */
-	if (r2chan->abcd_rx_signal == OR2_ABCD_CLEAR_FORWARD) {
+	/* if the last received signal is clear forward, we may not see
+	   a bit change to idle if clear forward and idle
+	   use the same bit pattern (AFAIK this is always the case), 
+	   change it to idle now that the call is end */
+	if (R2(r2chan, CLEAR_FORWARD) == R2(r2chan, IDLE)
+	   && r2chan->abcd_rx_signal == OR2_ABCD_CLEAR_FORWARD) {
 		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
 	} 
 	/* also could happen protocol error because of an idle signal
 	   in an invalid stage. On protocol error the abcd_rx_signal 
 	   is set to invalid to promote displaying the hex value, but its 
 	   time to restore it */
-	else if (r2chan->abcd_read == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
+	else if (r2chan->abcd_read == R2(r2chan, IDLE)) {
 		r2chan->abcd_rx_signal = OR2_ABCD_IDLE;
 	}
 }
@@ -805,13 +816,39 @@ static void r2_metering_pulse(openr2_chan_t *r2chan, void *data)
 	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 }
 
-#define ABCD_LOG_RX(argsignal) r2chan->abcd_rx_signal = argsignal; \
+#define ABCD_LOG_RX(signal_name) r2chan->abcd_rx_signal = OR2_ABCD_##signal_name; \
 		openr2_log(r2chan, OR2_LOG_CAS_TRACE, "ABCD Rx << [%s] 0x%02X\n", \
-		(argsignal != OR2_ABCD_INVALID) ? abcd_names[argsignal] : openr2_proto_get_rx_state_string(r2chan), abcd); 
+		(OR2_ABCD_##signal_name != OR2_ABCD_INVALID) \
+		? abcd_names[OR2_ABCD_##signal_name] : openr2_proto_get_rx_state_string(r2chan), abcd); 
+/* verify if the received bits are a disconnection signal of some sort */
+static int check_backward_disconnection(openr2_chan_t *r2chan, int abcd, 
+		openr2_call_disconnect_cause_t *cause, openr2_abcd_state_t *state)
+{
+	if (abcd == R2(r2chan, CLEAR_BACK)) {
+		ABCD_LOG_RX(CLEAR_BACK);
+		*state = OR2_CLEAR_BACK_RXD;
+		*cause = OR2_CAUSE_NORMAL_CLEARING;
+		return -1;
+	}
+	/* this is apparently just used in Brazil, but I don't think it's a bad idea to
+	   to have it here for other variants as well just in case. If we ever find a reason to
+	   just accept this signal for Brazil, we need just to check the variant here 
+	   as well, or use some sort of per-variant flag to accept it */
+	if (abcd == R2(r2chan, FORCED_RELEASE)) {
+		ABCD_LOG_RX(FORCED_RELEASE);
+		*state = OR2_FORCED_RELEASE_RXD;
+		*cause = OR2_CAUSE_FORCED_RELEASE;
+		return -1;
+	}	
+	return 0;
+}
+
 int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	int abcd, res, myerrno;
+	openr2_abcd_state_t out_r2_state = OR2_INVALID_STATE;
+	openr2_call_disconnect_cause_t out_disconnect_cause = OR2_CAUSE_NORMAL_CLEARING;
 	res = ioctl(r2chan->fd, OR2_HW_OP_GET_RX_BITS, &abcd);
 	if (res) {
 		myerrno = errno;
@@ -834,23 +871,23 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 	   ABCD state we are to know what to do */
 	switch (r2chan->r2_state) {
 	case OR2_IDLE:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_BLOCK]) {
-			ABCD_LOG_RX(OR2_ABCD_BLOCK);
+		if (abcd == R2(r2chan, BLOCK)) {
+			ABCD_LOG_RX(BLOCK);
 			EMI(r2chan)->on_line_blocked(r2chan);
 			return 0;
 		}
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
-			ABCD_LOG_RX(OR2_ABCD_IDLE);
+		if (abcd == R2(r2chan, IDLE)) {
+			ABCD_LOG_RX(IDLE);
 			EMI(r2chan)->on_line_idle(r2chan);
 			return 0;
 		}
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_SEIZE]) {
-			ABCD_LOG_RX(OR2_ABCD_SEIZE);
+		if (abcd == R2(r2chan, SEIZE)) {
+			ABCD_LOG_RX(SEIZE);
 			/* we are in IDLE and just received a seize request
 			   lets handle this new call */
 			handle_incoming_call(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
@@ -859,21 +896,21 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 		/* if call setup already started or the call is answered 
 		   the only valid bit pattern is a clear forward, everything
 		   else is protocol error */
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_FORWARD]) {
-			ABCD_LOG_RX(OR2_ABCD_CLEAR_FORWARD);
+		if (abcd == R2(r2chan, CLEAR_FORWARD)) {
+			ABCD_LOG_RX(CLEAR_FORWARD);
 			r2chan->r2_state = OR2_CLEAR_FWD_RXD;
 			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_SEIZE_TXD:
 		/* if we transmitted a seize we expect the seize ACK */
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_SEIZE_ACK]) {
+		if (abcd == R2(r2chan, SEIZE_ACK)) {
 			/* When the other side send us the seize ack, MF tones
 			   can start, we start transmitting DNIS */
-			ABCD_LOG_RX(OR2_ABCD_SEIZE_ACK);
+			ABCD_LOG_RX(SEIZE_ACK);
 			openr2_chan_cancel_timer(r2chan);
 			r2chan->r2_state = OR2_SEIZE_ACK_RXD;
 			r2chan->mf_group = OR2_MF_GI;
@@ -881,60 +918,67 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
 			mf_send_dnis(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_CLEAR_BACK_TXD:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_FORWARD]) {
-			ABCD_LOG_RX(OR2_ABCD_CLEAR_FORWARD);
+	case OR2_FORCED_RELEASE_TXD:
+		if (abcd == R2(r2chan, CLEAR_FORWARD)) {
+			ABCD_LOG_RX(CLEAR_FORWARD);
 			report_call_end(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_ACCEPT_RXD:
-		/* once we got MF ACCEPT tone, we expect the ABCD Answer */
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_ANSWER]) {
-			ABCD_LOG_RX(OR2_ABCD_ANSWER);
+		/* once we got MF ACCEPT tone, we expect the ABCD Answer 
+		   or some disconnection signal, anything else, protocol error */
+		if (abcd == R2(r2chan, ANSWER)) {
+			ABCD_LOG_RX(ANSWER);
 			openr2_chan_cancel_timer(r2chan);
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			r2chan->call_state = OR2_CALL_ANSWERED;
 			r2chan->mf_state = OR2_MF_OFF_STATE;
 			r2chan->answered = 1;
 			EMI(r2chan)->on_call_answered(r2chan);
-		} else if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_BACK]) {
-			ABCD_LOG_RX(OR2_ABCD_CLEAR_BACK);
-			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+		} else if (check_backward_disconnection(r2chan, abcd, &out_disconnect_cause, &out_r2_state)) {
+			r2chan->r2_state = out_r2_state;
+			report_call_disconnection(r2chan, out_disconnect_cause);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_SEIZE_ACK_RXD:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_ANSWER]) {
+		/* This state means we're during call setup (ANI/DNIS transmission) and the ACCEPT signal
+		   has not been received, which requires some special handling, read below for more info ... */
+		if (abcd == R2(r2chan, ANSWER)) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Answer before accept detected!");
 			/* sometimes, since ABCD signaling is faster than MF detectors we
 			   may receive the ANSWER signal before actually receiving the
 			   MF tone that indicates the call has been accepted (OR2_ACCEPT_RXD). We
-			   must not turn off the tone detector because the tone off
-			   condition is still missing */
-			ABCD_LOG_RX(OR2_ABCD_ANSWER);
+			   must not turn off the tone detector because the tone off condition is still missing */
+			ABCD_LOG_RX(ANSWER);
 			r2chan->r2_state = OR2_ANSWER_RXD_MF_PENDING;
-		} else if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_BACK]) {
-			/* since Seize ACK and Clear Back have the same bit pattern I don't think we
-			   ever can fall into this state, can we? */
-			ABCD_LOG_RX(OR2_ABCD_CLEAR_BACK);
-			openr2_log(r2chan, OR2_LOG_ERROR, "Wah! clear back before answering, why did this happen?.\n");
+		} else if (check_backward_disconnection(r2chan, abcd, &out_disconnect_cause, &out_r2_state)) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before accept detected!");
+			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
+			   same as Seize ACK and therefore there will be not a bit patter change in that case. 
+			   I believe the correct behavior for this case is to just proceed with disconnection without waiting 
+			   for any other MF activity, the call is going down anyway */
+			r2chan->r2_state = out_r2_state;
+			report_call_disconnection(r2chan, out_disconnect_cause);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_ANSWER_RXD_MF_PENDING:
 	case OR2_ANSWER_RXD:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_CLEAR_BACK]) {
-			ABCD_LOG_RX(OR2_ABCD_CLEAR_BACK);
+		if (abcd == R2(r2chan, CLEAR_BACK)) {
+			ABCD_LOG_RX(CLEAR_BACK);
 			r2chan->r2_state = OR2_CLEAR_BACK_RXD;
 			if (TIMER(r2chan).r2_metering_pulse) {
 				/* if the variant may have metering pulses, this clear back could be not really
@@ -944,26 +988,30 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			} else {
 				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 			}
+		} else if (abcd == R2(r2chan, FORCED_RELEASE)) {
+			ABCD_LOG_RX(FORCED_RELEASE);
+			r2chan->r2_state = OR2_FORCED_RELEASE_RXD;
+			report_call_disconnection(r2chan, OR2_CAUSE_FORCED_RELEASE);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_CLEAR_BACK_TONE_RXD:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
-			ABCD_LOG_RX(OR2_ABCD_IDLE);
-			openr2_proto_set_idle(r2chan);
+		if (abcd == R2(r2chan, IDLE)) {
+			ABCD_LOG_RX(IDLE);
+			report_call_end(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_CLEAR_FWD_TXD:
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
-			ABCD_LOG_RX(OR2_ABCD_IDLE);
+		if (abcd == R2(r2chan, IDLE)) {
+			ABCD_LOG_RX(IDLE);
 			report_call_end(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
@@ -971,29 +1019,30 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 		/* we got clear back but we have not transmitted clear fwd yet, then, the only
 		   reason for ABCD change is a possible metering pulse, if we are not detecting a metering
 		   pulse then is a protocol error */
-		if (TIMER(r2chan).r2_metering_pulse && abcd == r2chan->r2context->abcd_signals[OR2_ABCD_ANSWER]) {
+		if (TIMER(r2chan).r2_metering_pulse && abcd == R2(r2chan, ANSWER)) {
 			/* cancel the metering timer and let's pretend this never happened */
-			ABCD_LOG_RX(OR2_ABCD_ANSWER);
+			ABCD_LOG_RX(ANSWER);
 			openr2_chan_cancel_timer(r2chan);
 			r2chan->r2_state = OR2_ANSWER_RXD;
+			/* TODO: we could notify the user here with a callback, but I have not seen a use for this yet */
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Metering pulse received");
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
 	case OR2_BLOCKED:
 		/* we're blocked, unless they are setting IDLE, we don't care */
-		if (abcd == r2chan->r2context->abcd_signals[OR2_ABCD_IDLE]) {
-			ABCD_LOG_RX(OR2_ABCD_IDLE);
+		if (abcd == R2(r2chan, IDLE)) {
+			ABCD_LOG_RX(IDLE);
 			EMI(r2chan)->on_line_idle(r2chan);
 		} else {
-			ABCD_LOG_RX(OR2_ABCD_INVALID);
+			ABCD_LOG_RX(INVALID);
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Doing nothing on ABCD change, we're blocked.\n");
 		}	
 		break;
 	default:
-		ABCD_LOG_RX(OR2_ABCD_INVALID);
+		ABCD_LOG_RX(INVALID);
 		handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
 		break;
 	}
@@ -1047,6 +1096,14 @@ static int send_clear_backward(openr2_chan_t *r2chan)
 	r2chan->r2_state = OR2_CLEAR_BACK_TXD;
 	r2chan->mf_state = OR2_MF_OFF_STATE;
 	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_BACK);	
+}
+
+static int send_forced_release(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	r2chan->r2_state = OR2_FORCED_RELEASE_TXD;
+	r2chan->mf_state = OR2_MF_OFF_STATE;
+	return set_abcd_signal(r2chan, OR2_ABCD_FORCED_RELEASE);	
 }
 
 static void double_answer_handler(openr2_chan_t *r2chan, void *data)
@@ -1947,6 +2004,16 @@ static int send_clear_forward(openr2_chan_t *r2chan)
 	return set_abcd_signal(r2chan, OR2_ABCD_CLEAR_FORWARD);
 }
 
+/* BUG BUG BUG: As of now, when the call is in OR2_CALL_OFFERED state, the user has to call
+   openr2_chan_disconnect_call to reject a call with a reason, this will cause a MF tone to
+   be sent to the forward side to let them know we are rejecting the call, at that moment
+   the R2 state machine is at OR2_SEIZE_ACK_TXD, given that we did not send ANSWER signal yet,
+   the forward end then will set the signal OR2_ABCD_CLEAR_FORWARD which we will receive and
+   then call report_call_disconnection, where users are expected to call openr2_chan_disconnect_call 
+   again!. No much harm done, I think, but is odd and not consistent, we should fix it. 
+   The report_call_disconnection callback should be probably only called when the user did not requested
+   the call disconnection, if the user was the one requesting the call disconnection then just report_call_end
+   should be called. */
 int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
@@ -1965,10 +2032,20 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 			   already said they want too, then just report the call end event */
 			report_call_end(r2chan);
 		} else {
-			/* this is a normal clear backward */
-			if (send_clear_backward(r2chan)) {
-				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, cannot disconnect call nicely!, may be try again?\n");
-				return -1;
+			if (OR2_CAUSE_FORCED_RELEASE == cause) {
+				/* forced release requested */
+				if (send_forced_release(r2chan)) {
+					openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Forced Release!, " 
+							"cannot disconnect the call nicely!, may be try again?\n");
+					return -1;
+				}
+			} else {
+				/* this is a normal clear backward */
+				if (send_clear_backward(r2chan)) {
+					openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, "
+							"cannot disconnect call nicely!, may be try again?\n");
+					return -1;
+				}
 			}
 		}
 	} else {

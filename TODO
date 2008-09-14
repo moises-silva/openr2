@@ -1,6 +1,5 @@
 - add support for DNIS-1, repeat all dnis and that stuff, is it worth?
 - add nocharge=yes|no to allow users to decide whether or not calls should be charged
-- implement brazil forced release (0x0 for clear back instead of 0xC)
 - implement CAS persistence check for all signals
 - Port to Windows
 

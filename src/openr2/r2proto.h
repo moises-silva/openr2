@@ -31,7 +31,7 @@ struct openr2_context_s;
 
 /* Number of ABCD signals. ABCD signaling is
    known as line supervisory signaling  */
-#define OR2_NUM_ABCD_SIGNALS 7
+#define OR2_NUM_ABCD_SIGNALS 8
 typedef enum {
 	/* Invalid signal */
 	OR2_ABCD_INVALID = -1,
@@ -48,6 +48,12 @@ typedef enum {
 	OR2_ABCD_SEIZE_ACK,
 	/* We want to HANGUP the call */
 	OR2_ABCD_CLEAR_BACK,
+	/* Hangup immediately. I have only seen this in Brazil, where the central
+	   waits several seconds (30?) after Clear Back to release the line, with
+	   this signal no waiting will be done. When receiving this signal openr2 
+	   behaves the same as with clear back, no waiting is done with clear back
+	   anyway, should we? */
+	OR2_ABCD_FORCED_RELEASE,
 	/* They want to HANGUP the call */
 	OR2_ABCD_CLEAR_FORWARD,
 	/* We set this to let know the other end we are ANSWERing the call and the
@@ -168,6 +174,9 @@ typedef enum {
 
 /* R2 state machine */
 typedef enum {
+	/* just some invalid state */
+	OR2_INVALID_STATE = -1,
+
 	/* we are waiting to start or receive a call */
 	OR2_IDLE = 100,
 
@@ -191,6 +200,9 @@ typedef enum {
 	   block-collect-calls process and we need to resume
 	   the answer state  */
 	OR2_EXECUTING_DOUBLE_ANSWER = 204,
+
+	/* We just requested to hangup the call immediately */
+	OR2_FORCED_RELEASE_TXD = 205,
 
 	/** FORWARD STATES **/
 	OR2_SEIZE_TXD = 300,
@@ -216,6 +228,9 @@ typedef enum {
 
 	/* Asked to hangup the call */
 	OR2_CLEAR_FWD_TXD = 307,
+
+	/* callee is asking us to end the call immediately */
+	OR2_FORCED_RELEASE_RXD = 308,
 
 	/* Blocked line */
 	OR2_BLOCKED = 400
@@ -275,7 +290,8 @@ typedef enum {
 	OR2_CAUSE_UNSPECIFIED,
 	OR2_CAUSE_NO_ANSWER,
 	OR2_CAUSE_NORMAL_CLEARING,
-	OR2_CAUSE_COLLECT_CALL_REJECTED
+	OR2_CAUSE_COLLECT_CALL_REJECTED,
+	OR2_CAUSE_FORCED_RELEASE
 } openr2_call_disconnect_cause_t;
 
 /* possible causes of protocol error */

@@ -136,9 +136,10 @@ typedef struct {
 
 /* R2 protocol timers */
 typedef struct {
-	/* Max amount of time our transmitted MF signal can last */
+	/* Max amount of time our backward MF signal can last */
 	int mf_back_cycle;
-	/* Amount of time we set a MF signal ON to resume the MF cycle */
+	/* Amount of time we set a MF signal ON to resume the MF cycle 
+	   with a MF pulse */
 	int mf_back_resume_cycle;
 	/* Safety FORWARD timer */
 	int mf_fwd_safety;
