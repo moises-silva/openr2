@@ -1,7 +1,7 @@
 %define r2test %{?_with_r2test:1}%{!?_with_r2test:0}
 Name:           libopenr2
 Version:        0.1.1
-Release:        33%{?dist}
+Release:        55%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 
@@ -55,6 +55,7 @@ install -m 0644 src/openr2/r2proto.h $RPM_BUILD_ROOT/usr/include/openr2/r2proto.
 install -m 0644 src/openr2/r2utils.h $RPM_BUILD_ROOT/usr/include/openr2/r2utils.h
 install -m 0644 src/openr2/r2log.h $RPM_BUILD_ROOT/usr/include/openr2/r2log.h
 install -m 0644 src/openr2/r2engine.h $RPM_BUILD_ROOT/usr/include/openr2/r2engine.h
+install -m 0644 src/openr2/r2hwcompat.h $RPM_BUILD_ROOT/usr/include/openr2/r2hwcompat.h
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 
@@ -86,10 +87,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/openr2/r2utils.h
 %{_includedir}/openr2/r2log.h
 %{_includedir}/openr2/r2engine.h
+%{_includedir}/openr2/r2hwcompat.h
 %{_libdir}/*.so
 
 
 %changelog
+* Mon Sep 15 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to latest SVN release
+- Added r2hwcompat.h
+
 * Thu Jul 10 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update to latest SVN release
 - Removed rpath and libdir perl fix script as we don't need it
