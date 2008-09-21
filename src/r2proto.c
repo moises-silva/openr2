@@ -917,6 +917,14 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
 			mf_send_dnis(r2chan);
+		} else if (check_backward_disconnection(r2chan, abcd, &out_disconnect_cause, &out_r2_state)) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
+			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
+			   same as Seize ACK and therefore there will be not a bit patter change in that case. 
+			   I believe the correct behavior for this case is to just proceed with disconnection without waiting 
+			   for any other MF activity, the call is going down anyway */
+			r2chan->r2_state = out_r2_state;
+			report_call_disconnection(r2chan, out_disconnect_cause);
 		} else {
 			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
