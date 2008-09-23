@@ -14,7 +14,8 @@ script, r2test.conf can use zaptel tone generation instead of OpenR2 built-in sp
 
 Dependencies:
 
-zaptel - a reasonably recent version of zaptel/dahdi is enough. 
+- libc
+- Zaptel/DAHDI - OpenR2 is known to work with Zaptel 1.2, 1.4 and DAHDI
 
 Bugs and Limitations:
 
