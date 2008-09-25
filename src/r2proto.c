@@ -148,6 +148,20 @@ static void r2config_venezuela(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 }
 
+static void r2config_colombia(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+
+	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
+	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
+
+	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
+	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_6;
+}
+
 static const int standard_abcd_signals[OR2_NUM_ABCD_SIGNALS] =
 {
 	/* OR2_ABCD_IDLE */ 0x8,
@@ -204,6 +218,12 @@ static openr2_variant_entry_t r2variants[] =
 		.id = OR2_VAR_CZECH,
 		.name = "CZ",
 		.config = r2config_itu
+	},		
+	/* COLOMBIA */ 
+	{
+		.id = OR2_VAR_COLOMBIA,
+		.name = "CO",
+		.config = r2config_colombia
 	},		
 	/* ECUADOR */ 
 	{
