@@ -65,8 +65,7 @@ typedef struct {
 } openr2_mflib_interface_t;
 
 /* Event Management interface. Users should provide
-   this interface to handle library events like call starting,
-   new call, read audio etc. */
+   this interface to handle library events like call starting, new call, read audio etc. */
 typedef void (*openr2_handle_new_call_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_call_offered_func)(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
 typedef void (*openr2_handle_call_accepted_func)(struct openr2_chan_s *r2chan, openr2_call_mode_t mode);
@@ -79,6 +78,8 @@ typedef void (*openr2_handle_hardware_alarm_func)(struct openr2_chan_s *r2chan, 
 typedef void (*openr2_handle_protocol_error_func)(struct openr2_chan_s *r2chan, openr2_protocol_error_t error);
 typedef void (*openr2_handle_line_blocked_func)(struct openr2_chan_s *r2chan);
 typedef void (*openr2_handle_line_idle_func)(struct openr2_chan_s *r2chan);
+typedef void (*openr2_handle_billing_pulse_received_func)(struct openr2_chan_s *r2chan);
+typedef int (*openr2_handle_dnis_received_func)(struct openr2_chan_s *r2chan, char digit);
 typedef void (*openr2_handle_context_logging_func)(struct openr2_context_s *r2context, openr2_log_level_t level, const char *fmt, va_list ap);
 typedef struct {
 	/* A new call has just started. We will start to 
@@ -122,6 +123,14 @@ typedef struct {
 
 	/* logging handler */
 	openr2_handle_context_logging_func on_context_log;
+
+	/* New DNIS digit arrived. If the user return any non zero
+	   value OpenR2 will request more DNIS (if max DNIS still not reached),
+	   if 0 is returned no more dnis will be requested regardless of the max DNIS limit*/
+	openr2_handle_dnis_received_func on_dnis_received;
+
+	/* Billing pulse arrived */
+	openr2_handle_billing_pulse_received_func on_billing_pulse_received;
 } openr2_event_interface_t;
 
 /* Transcoding interface. Users should provide this interface

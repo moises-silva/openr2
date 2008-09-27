@@ -1296,13 +1296,19 @@ static void request_next_dnis_digit(openr2_chan_t *r2chan)
 static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
+	int rc;
 	if (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Getting DNIS digit %c\n", tone);
 		r2chan->dnis[r2chan->dnis_len++] = tone;
 		r2chan->dnis[r2chan->dnis_len] = '\0';
 		openr2_log(r2chan, OR2_LOG_DEBUG, "DNIS so far: %s, expected length: %d\n", r2chan->dnis, r2chan->r2context->max_dnis);
-		if (DNIS_COMPLETE(r2chan)) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Done getting DNIS!\n");
+		rc = EMI(r2chan)->on_dnis_received(r2chan, tone);
+		if (DNIS_COMPLETE(r2chan) || !rc) {
+			if (!rc) {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "User requested us to stop getting DNIS!\n");
+			} else {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "Done getting DNIS!\n");
+			}
 			/* if this is the first and last DNIS digit we have or
 			   we were not required to get the ANI first, request it now, 
 			   otherwise is time to go to GII signals */

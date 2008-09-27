@@ -264,20 +264,33 @@ static void on_line_idle(openr2_chan_t *r2chan)
 	openr2_chan_set_client_data(r2chan, NULL);
 }
 
+static int on_dnis_received(openr2_chan_t *r2chan, char digit)
+{
+	printf("USER: New DNIS digit '%c' received on chan %d\n", digit, openr2_chan_get_number(r2chan));
+	return 1;
+}
+
+static void on_billing_pulse_received(openr2_chan_t *r2chan)
+{
+	printf("USER: Billing Pulse Received on chan %d\n", openr2_chan_get_number(r2chan));
+}
+
 static openr2_event_interface_t g_event_iface = {
-	on_call_init,
-	on_call_offered,
-	on_call_accepted,
-	on_call_answered,
-	on_call_disconnected,
-	on_call_end,
-	on_call_read,
-	on_hardware_alarm,
-	on_os_error,
-	on_protocol_error,
-	on_line_blocked,
-	on_line_idle,
-	NULL
+	.on_call_init = on_call_init,
+	.on_call_offered = on_call_offered,
+	.on_call_accepted = on_call_accepted,
+	.on_call_answered = on_call_answered,
+	.on_call_disconnect = on_call_disconnected,
+	.on_call_end = on_call_end,
+	.on_call_read = on_call_read,
+	.on_hardware_alarm = on_hardware_alarm,
+	.on_os_error = on_os_error,
+	.on_protocol_error = on_protocol_error,
+	.on_line_blocked = on_line_blocked,
+	.on_line_idle = on_line_idle,
+	.on_context_log = NULL,
+	.on_dnis_received = on_dnis_received,
+	.on_billing_pulse_received = on_billing_pulse_received
 };
 
 static int parse_config(FILE *conf, chan_group_data_t *confdata)
