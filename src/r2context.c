@@ -108,12 +108,18 @@ static void on_line_blocked_default(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end blocked!\n");
 }
 
-static int on_dnis_received_default(openr2_chan_t *r2chan, char digit)
+static int on_dnis_digit_received_default(openr2_chan_t *r2chan, char digit)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "DNIS digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_LOG_DEBUG, "DNIS digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 	/* default behavior is to ask for as much dnis as possible */
 	return 1;
+}
+
+static void on_ani_digit_received_default(openr2_chan_t *r2chan, char digit)
+{
+	OR2_CHAN_STACK;
+	openr2_log(r2chan, OR2_LOG_DEBUG, "ANI digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 }
 
 static void on_billing_pulse_received_default(openr2_chan_t *r2chan)
@@ -203,8 +209,11 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	if (!evmanager->on_line_blocked) {
 		evmanager->on_line_blocked = on_line_blocked_default;
 	}
-	if (!evmanager->on_dnis_received) {
-		evmanager->on_dnis_received = on_dnis_received_default;
+	if (!evmanager->on_dnis_digit_received) {
+		evmanager->on_dnis_digit_received = on_dnis_digit_received_default;
+	}
+	if (!evmanager->on_ani_digit_received) {
+		evmanager->on_ani_digit_received = on_ani_digit_received_default;
 	}
 	if (!evmanager->on_billing_pulse_received) {
 		evmanager->on_billing_pulse_received = on_billing_pulse_received_default;

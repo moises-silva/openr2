@@ -26,8 +26,8 @@
 struct openr2_chan_s;
 struct openr2_context_s;
 
-#define OR2_MAX_ANI 48
-#define OR2_MAX_DNIS 48
+#define OR2_MAX_ANI 80
+#define OR2_MAX_DNIS 80
 
 /* Number of ABCD signals. ABCD signaling is
    known as line supervisory signaling  */

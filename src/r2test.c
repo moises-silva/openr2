@@ -264,10 +264,15 @@ static void on_line_idle(openr2_chan_t *r2chan)
 	openr2_chan_set_client_data(r2chan, NULL);
 }
 
-static int on_dnis_received(openr2_chan_t *r2chan, char digit)
+static int on_dnis_digit_received(openr2_chan_t *r2chan, char digit)
 {
 	printf("USER: New DNIS digit '%c' received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 	return 1;
+}
+
+static void on_ani_digit_received(openr2_chan_t *r2chan, char digit)
+{
+	printf("USER: New ANI digit '%c' received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 }
 
 static void on_billing_pulse_received(openr2_chan_t *r2chan)
@@ -289,7 +294,8 @@ static openr2_event_interface_t g_event_iface = {
 	.on_line_blocked = on_line_blocked,
 	.on_line_idle = on_line_idle,
 	.on_context_log = NULL,
-	.on_dnis_received = on_dnis_received,
+	.on_dnis_digit_received = on_dnis_digit_received,
+	.on_ani_digit_received = on_ani_digit_received,
 	.on_billing_pulse_received = on_billing_pulse_received
 };
 

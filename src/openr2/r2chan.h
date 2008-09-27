@@ -107,12 +107,12 @@ typedef struct openr2_chan_s {
 	openr2_context_t *r2context;
 
 	/* received ANI */
-	char ani[50];
+	char ani[OR2_MAX_ANI];
 	char *ani_ptr;
 	unsigned ani_len;
 
 	/* received DNIS */
-	char dnis[50];
+	char dnis[OR2_MAX_DNIS];
 	char *dnis_ptr;
 	unsigned dnis_len;
 
@@ -206,6 +206,8 @@ int openr2_chan_get_read_enabled(openr2_chan_t *r2chan);
 void openr2_chan_enable_call_files(openr2_chan_t *r2chan);
 void openr2_chan_disable_call_files(openr2_chan_t *r2chan);
 int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan);
+const char *openr2_chan_get_dnis(openr2_chan_t *r2chan);
+const char *openr2_chan_get_ani(openr2_chan_t *r2chan);
 
 /* TODO: set and cancel timer should not be called by users, move to private header */
 void openr2_chan_set_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data);

@@ -320,8 +320,8 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_answer_delay = 150;
 
 	/* Max ANI and DNIS */
-	r2context->max_dnis = max_dnis;
-	r2context->max_ani = max_ani;
+	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? OR2_MAX_DNIS - 1 : max_dnis;
+	r2context->max_ani = (max_ani >= OR2_MAX_ANI) ? OR2_MAX_ANI - 1 : max_ani;
 
 	/* the forward R2 side always send DNIS first but
 	   most variants continue by asking ANI first
@@ -1302,7 +1302,7 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 		r2chan->dnis[r2chan->dnis_len++] = tone;
 		r2chan->dnis[r2chan->dnis_len] = '\0';
 		openr2_log(r2chan, OR2_LOG_DEBUG, "DNIS so far: %s, expected length: %d\n", r2chan->dnis, r2chan->r2context->max_dnis);
-		rc = EMI(r2chan)->on_dnis_received(r2chan, tone);
+		rc = EMI(r2chan)->on_dnis_digit_received(r2chan, tone);
 		if (DNIS_COMPLETE(r2chan) || !rc) {
 			if (!rc) {
 				openr2_log(r2chan, OR2_LOG_DEBUG, "User requested us to stop getting DNIS!\n");
@@ -1379,6 +1379,7 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 			r2chan->ani[r2chan->ani_len++] = tone;
 			r2chan->ani[r2chan->ani_len] = '\0';
 			openr2_log(r2chan, OR2_LOG_DEBUG, "ANI so far: %s, expected length: %d\n", r2chan->ani, r2chan->r2context->max_ani);
+			EMI(r2chan)->on_ani_digit_received(r2chan, tone);
 		}
 		/* if we don't have a tone, or the ANI len is not enough yet, 
 		   ask for more ANI */

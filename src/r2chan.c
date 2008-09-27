@@ -574,6 +574,14 @@ int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan)
 	return r2chan->call_files;
 }
 
+const char *openr2_chan_get_dnis(openr2_chan_t *r2chan)
+{
+	return r2chan->dnis;
+}
 
+const char *openr2_chan_get_ani(openr2_chan_t *r2chan)
+{
+	return r2chan->ani;
+}
 
 
