@@ -91,6 +91,7 @@ typedef struct {
 	int callfiles;
 	int meteringpulse_timeout;
 	int collect_calls;
+	int charge_calls;
 	int double_answer;
 	int immediateaccept;
 	char dnid[OR2_MAX_DNIS];
@@ -202,14 +203,19 @@ static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *
 		openr2_chan_disconnect_call(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
 		return;
 	}
-	openr2_chan_accept_call(r2chan, OR2_CALL_WITH_CHARGE);
+	if (confdata->charge_calls) {
+		openr2_chan_accept_call(r2chan, OR2_CALL_WITH_CHARGE);
+	} else {
+		openr2_chan_accept_call(r2chan, OR2_CALL_NO_CHARGE);
+	}
 }
 
 static void on_call_accepted(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	printf("USER: call has been accepted on chan %d with type: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_call_mode_string(mode));
-	if ( openr2_chan_get_direction(r2chan) == OR2_DIR_BACKWARD )
+	if (openr2_chan_get_direction(r2chan) == OR2_DIR_BACKWARD) {
 		openr2_chan_answer_call(r2chan);
+	}	
 }
 
 static void on_call_answered(openr2_chan_t *r2chan)
@@ -319,6 +325,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int callfiles = 0;
 	int meteringpulse_timeout = -1;
 	int collect_calls = 0;
+	int charge_calls = 1;
 	int double_answer = 0;
 	int immediateaccept = 0;
 	char strvalue[512];
@@ -363,6 +370,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].collect_calls = collect_calls;
 			confdata[g].double_answer = double_answer;
 			confdata[g].immediateaccept = immediateaccept;
+			confdata[g].charge_calls = charge_calls;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			strcpy(confdata[g].r2file, r2file);
@@ -373,6 +381,15 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			}
 		} else if (1 == sscanf(line, "advancedprotocolfile=%s", r2file)) {
 			printf("found option advancedprotocolfile=%s\n", r2file);
+		} else if (1 == sscanf(line, "chargecalls=%s", strvalue)) {
+			printf("found option chargecalls=%s\n", strvalue);
+			if (!strcasecmp(strvalue, "yes")) {
+				charge_calls = 1;
+			} else if (!strcasecmp(strvalue, "no")) {
+				charge_calls = 0;
+			} else {
+				fprintf(stderr, "Invalid value '%s' for 'chargecalls' parameter.\n", strvalue);
+			}
 		} else if (1 == sscanf(line, "collectcalls=%s", strvalue)) {
 			printf("found option collectcalls=%s\n", strvalue);
 			if (!strcasecmp(strvalue, "yes")) {
