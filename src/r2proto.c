@@ -1054,6 +1054,7 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			/* TODO: we could notify the user here with a callback, but I have not seen a use for this yet */
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Metering pulse received");
+			EMI(r2chan)->on_billing_pulse_received(r2chan);
 		} else {
 			ABCD_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
