@@ -31,6 +31,12 @@ AC_ARG_WITH([r2test], [AS_HELP_STRING([--with-r2test],
 			[with_r2test=no])
 AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" != xno])
 
+AC_ARG_WITH([trace-stacks], [AS_HELP_STRING([--with-trace-stacks], 
+	                [enable r2's stacks debugging.])],
+	                [],
+			[with_tracestacks=no])
+AM_CONDITIONAL([WANT_OR2_TRACE_STACKS], [test "x$with_tracestacks" != xno])
+
 AC_PATH_PROGS(svnversioncommand,svnversion)
 
 if [test "x$svnversioncommand" = "x"]

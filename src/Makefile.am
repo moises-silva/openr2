@@ -20,6 +20,10 @@ endif
 INCLUDES = -Iopenr2
 LIBS = -lm
 
+if WANT_OR2_TRACE_STACKS
+AM_CFLAGS := -DOR2_TRACE_STACKS
+endif
+
 if HAVE_SVNVERSION
 SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
 AM_CFLAGS := -ggdb3 -O0 -Wall -Werror $(SVNDEF)

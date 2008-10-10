@@ -871,6 +871,8 @@ ac_ct_F77
 LIBTOOL
 WANT_R2TEST_TRUE
 WANT_R2TEST_FALSE
+WANT_OR2_TRACE_STACKS_TRUE
+WANT_OR2_TRACE_STACKS_FALSE
 svnversioncommand
 HAVE_SVNVERSION_TRUE
 HAVE_SVNVERSION_FALSE
@@ -1485,6 +1487,7 @@ Optional Packages:
                           both]
   --with-tags[=TAGS]      include additional configurations [automatic]
   --with-r2test           enable the r2test program.
+  --with-trace-stacks     enable r2's stacks debugging.
 
 Some influential environment variables:
   CC          C compiler command
@@ -4312,7 +4315,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4315 "configure"' > conftest.$ac_ext
+  echo '#line 4318 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7110,11 +7113,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7113: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7116: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7117: \$? = $ac_status" >&5
+   echo "$as_me:7120: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7400,11 +7403,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7403: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7406: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7407: \$? = $ac_status" >&5
+   echo "$as_me:7410: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7504,11 +7507,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7507: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7510: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7511: \$? = $ac_status" >&5
+   echo "$as_me:7514: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9866,7 +9869,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9869 "configure"
+#line 9872 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9966,7 +9969,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9969 "configure"
+#line 9972 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12386,11 +12389,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12389: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12392: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12393: \$? = $ac_status" >&5
+   echo "$as_me:12396: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12490,11 +12493,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12493: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12496: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12497: \$? = $ac_status" >&5
+   echo "$as_me:12500: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14065,11 +14068,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14068: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14071: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14072: \$? = $ac_status" >&5
+   echo "$as_me:14075: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14169,11 +14172,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14172: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14175: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14176: \$? = $ac_status" >&5
+   echo "$as_me:14179: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16369,11 +16372,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16372: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16375: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16376: \$? = $ac_status" >&5
+   echo "$as_me:16379: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16659,11 +16662,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16662: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16665: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16666: \$? = $ac_status" >&5
+   echo "$as_me:16669: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16763,11 +16766,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16766: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16769: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16770: \$? = $ac_status" >&5
+   echo "$as_me:16773: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20238,6 +20241,23 @@ else
 fi
 
 
+
+# Check whether --with-trace-stacks was given.
+if test "${with_trace_stacks+set}" = set; then
+  withval=$with_trace_stacks;
+else
+  with_tracestacks=no
+fi
+
+ if test "x$with_tracestacks" != xno; then
+  WANT_OR2_TRACE_STACKS_TRUE=
+  WANT_OR2_TRACE_STACKS_FALSE='#'
+else
+  WANT_OR2_TRACE_STACKS_TRUE='#'
+  WANT_OR2_TRACE_STACKS_FALSE=
+fi
+
+
 for ac_prog in svnversion
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -20422,6 +20442,13 @@ if test -z "${WANT_R2TEST_TRUE}" && test -z "${WANT_R2TEST_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"WANT_R2TEST\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"WANT_R2TEST\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${WANT_OR2_TRACE_STACKS_TRUE}" && test -z "${WANT_OR2_TRACE_STACKS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"WANT_OR2_TRACE_STACKS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"WANT_OR2_TRACE_STACKS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -21110,6 +21137,8 @@ ac_ct_F77!$ac_ct_F77$ac_delim
 LIBTOOL!$LIBTOOL$ac_delim
 WANT_R2TEST_TRUE!$WANT_R2TEST_TRUE$ac_delim
 WANT_R2TEST_FALSE!$WANT_R2TEST_FALSE$ac_delim
+WANT_OR2_TRACE_STACKS_TRUE!$WANT_OR2_TRACE_STACKS_TRUE$ac_delim
+WANT_OR2_TRACE_STACKS_FALSE!$WANT_OR2_TRACE_STACKS_FALSE$ac_delim
 svnversioncommand!$svnversioncommand$ac_delim
 HAVE_SVNVERSION_TRUE!$HAVE_SVNVERSION_TRUE$ac_delim
 HAVE_SVNVERSION_FALSE!$HAVE_SVNVERSION_FALSE$ac_delim
@@ -21117,7 +21146,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 12; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 14; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

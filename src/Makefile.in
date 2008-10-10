@@ -206,8 +206,9 @@ libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine
 @WANT_R2TEST_TRUE@r2test_SOURCES = r2test.c 
 @WANT_R2TEST_TRUE@r2test_LDADD = -lpthread libopenr2.la
 INCLUDES = -Iopenr2
-@HAVE_SVNVERSION_TRUE@SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
 @HAVE_SVNVERSION_TRUE@AM_CFLAGS := -ggdb3 -O0 -Wall -Werror $(SVNDEF)
+@WANT_OR2_TRACE_STACKS_TRUE@AM_CFLAGS := -DOR2_TRACE_STACKS
+@HAVE_SVNVERSION_TRUE@SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
 all: all-am
 
 .SUFFIXES:
