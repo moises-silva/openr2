@@ -1,4 +1,4 @@
 usr/include/*.h
 usr/include/openr2/*.h
 usr/lib/libopenr2.a
-usr/lib/libopenr2.so.*
+usr/lib/libopenr2.so
