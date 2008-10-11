@@ -1,0 +1,6 @@
+etc/openr2/*.conf
+usr/bin/r2test
+usr/lib/libopenr2.so.0
+usr/lib/libopenr2.so.0.0.0
+usr/share/man/man5/*.5
+usr/share/man/man8/*.8
