@@ -11,6 +11,8 @@ nobase_include_HEADERS = openr2/r2chan.h \
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
 
+AM_CFLAGS = -ggdb3 -O0 -Wall -Werror 
+
 if WANT_R2TEST
 bin_PROGRAMS = r2test
 r2test_SOURCES = r2test.c 
@@ -21,12 +23,11 @@ INCLUDES = -Iopenr2
 LIBS = -lm
 
 if WANT_OR2_TRACE_STACKS
-AM_CFLAGS := -DOR2_TRACE_STACKS
+AM_CFLAGS += -DOR2_TRACE_STACKS
 endif
 
 if HAVE_SVNVERSION
-SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
-AM_CFLAGS := -ggdb3 -O0 -Wall -Werror $(SVNDEF)
+AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
 endif
 
 

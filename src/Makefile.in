@@ -35,6 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @WANT_R2TEST_TRUE@bin_PROGRAMS = r2test$(EXEEXT)
+@WANT_OR2_TRACE_STACKS_TRUE@am__append_1 = -DOR2_TRACE_STACKS
+@HAVE_SVNVERSION_TRUE@am__append_2 = -DREVISION=\"$(shell svnversion -n .)\"
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(nobase_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -203,12 +205,10 @@ nobase_include_HEADERS = openr2/r2chan.h \
 			 openr2/r2hwcompat.h
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
+AM_CFLAGS = -ggdb3 -O0 -Wall -Werror $(am__append_1) $(am__append_2)
 @WANT_R2TEST_TRUE@r2test_SOURCES = r2test.c 
 @WANT_R2TEST_TRUE@r2test_LDADD = -lpthread libopenr2.la
 INCLUDES = -Iopenr2
-@HAVE_SVNVERSION_TRUE@AM_CFLAGS := -ggdb3 -O0 -Wall -Werror $(SVNDEF)
-@WANT_OR2_TRACE_STACKS_TRUE@AM_CFLAGS := -DOR2_TRACE_STACKS
-@HAVE_SVNVERSION_TRUE@SVNDEF := -DREVISION=\"$(shell svnversion -n .)\"
 all: all-am
 
 .SUFFIXES:
