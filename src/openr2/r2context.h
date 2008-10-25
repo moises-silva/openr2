@@ -29,6 +29,10 @@
 #include "r2proto.h"
 #include "r2log.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define OR2_MAX_LOGDIR 255
 
 /* we dont include openr2_chan_t because r2chan.h 
@@ -257,10 +261,6 @@ typedef struct openr2_context_s {
 	struct openr2_chan_s *chanlist;
 
 } openr2_context_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context);
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *callmgmt, 

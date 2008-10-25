@@ -23,6 +23,10 @@
 #ifndef _OPENR2_PROTO_H_
 #define _OPENR2_PROTO_H_
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct openr2_chan_s;
 struct openr2_context_s;
 
@@ -364,10 +368,6 @@ typedef enum {
 	OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL,
 	OR2_CALLING_PARTY_CATEGORY_UNKNOWN
 } openr2_calling_party_category_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 int openr2_proto_make_call(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
 int openr2_proto_accept_call(struct openr2_chan_s *r2chan, openr2_call_mode_t accept);

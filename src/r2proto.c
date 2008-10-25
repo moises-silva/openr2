@@ -689,7 +689,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot get time: %s\n", strerror(myerrno));
 		return;
 	}
-	if (!localtime_r(&currtime, &loctime)) {
+	if (!openr2_localtime_r(&currtime, &loctime)) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get local time\n");
 		return;
 	}
@@ -722,7 +722,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		openr2_log(r2chan, OR2_LOG_ERROR, "fopen failed: %s\n", strerror(myerrno));
 	} else {
 		currtime = time(NULL);
-		if (ctime_r(&currtime, timestr)) {
+		if (openr2_ctime_r(&currtime, timestr)) {
 			timestr[strlen(timestr)-1] = 0; /* remove end of line */
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d\n", timestr, r2chan->number);
 		} else {
@@ -2201,15 +2201,15 @@ const char *openr2_proto_get_category_string(openr2_calling_party_category_t cat
 
 openr2_calling_party_category_t openr2_proto_get_category(const char *category)
 {
-	if (!strncasecmp(category, "NATIONAL_SUBSCRIBER", sizeof("NATIONAL_SUBSCRIBER")-1)) {
+	if (!openr2_strncasecmp(category, "NATIONAL_SUBSCRIBER", sizeof("NATIONAL_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
-	} else if (!strncasecmp(category, "NATIONAL_PRIORITY_SUBSCRIBER", sizeof("NATIONAL_PRIORITY_SUBSCRIBER")-1)) {
+	} else if (!openr2_strncasecmp(category, "NATIONAL_PRIORITY_SUBSCRIBER", sizeof("NATIONAL_PRIORITY_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_PRIORITY_SUBSCRIBER;
-	} else if (!strncasecmp(category, "INTERNATIONAL_SUBSCRIBER", sizeof("INTERNATIONAL_SUBSCRIBER")-1)) {
+	} else if (!openr2_strncasecmp(category, "INTERNATIONAL_SUBSCRIBER", sizeof("INTERNATIONAL_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER;
-	} else if (!strncasecmp(category, "INTERNATIONAL_PRIORITY_SUBSCRIBER", sizeof("INTERNATIONAL_PRIORITY_SUBSCRIBER")-1)) {
+	} else if (!openr2_strncasecmp(category, "INTERNATIONAL_PRIORITY_SUBSCRIBER", sizeof("INTERNATIONAL_PRIORITY_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
-	} else if (!strncasecmp(category, "COLLECT_CALL", sizeof("COLLECT_CALL")-1)) {
+	} else if (!openr2_strncasecmp(category, "COLLECT_CALL", sizeof("COLLECT_CALL")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	}	
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
@@ -2220,7 +2220,7 @@ openr2_variant_t openr2_proto_get_variant(const char *variant_name)
 	int i;
 	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
 	for (i = 0; i < limit; i++) {
-		if (!strncasecmp(r2variants[i].name, variant_name, sizeof(r2variants[i].name)-1)) {
+		if (!openr2_strncasecmp(r2variants[i].name, variant_name, sizeof(r2variants[i].name)-1)) {
 			return r2variants[i].id;
 		}
 	}

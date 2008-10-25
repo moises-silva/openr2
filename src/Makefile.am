@@ -11,7 +11,7 @@ nobase_include_HEADERS = openr2/r2chan.h \
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
 
-AM_CFLAGS = -ggdb3 -O0 -Wall -Werror 
+AM_CFLAGS = -ggdb3 -O0 -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes 
 
 if WANT_R2TEST
 bin_PROGRAMS = r2test

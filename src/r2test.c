@@ -47,6 +47,7 @@
 		openr2_context_delete(confdata[c].context); \
 	} 
 
+#define STR_IS_EQUAL(x,y) !openr2_strncasecmp(x,#y,sizeof(#y)) 
 
 /* counter, lock and condition for listener threads 
    used to sync when outgoing threads should start */
@@ -383,45 +384,45 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			printf("found option advancedprotocolfile=%s\n", r2file);
 		} else if (1 == sscanf(line, "chargecalls=%s", strvalue)) {
 			printf("found option chargecalls=%s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				charge_calls = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				charge_calls = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'chargecalls' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "collectcalls=%s", strvalue)) {
 			printf("found option collectcalls=%s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				collect_calls = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				collect_calls = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'collectcalls' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "callfiles=%s", strvalue)) {
 			printf("found option callfiles=%s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				callfiles = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				callfiles = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'callfiles' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "doubleanswer=%s", strvalue)) {
 			printf("found option doubleanswer=%s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				double_answer = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				double_answer = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'doubleanswer' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "immediateaccept=%s", strvalue)) {
 			printf("found option immediateaccept=%s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				immediateaccept = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				immediateaccept = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'immediateaccept' parameter.\n", strvalue);
@@ -471,9 +472,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			mf_backtimeout = int_test;
 		} else if (1 == sscanf(line, "getanifirst=%s", strvalue)) {
 			printf("found option Get ANI First = %s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				getanifirst = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				getanifirst = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'getanifirst' parameter.\n", strvalue);
@@ -481,9 +482,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 		} else if (1 == sscanf(line, "usedahdimf=%s", strvalue)) {
 #ifdef HAVE_DAHDI_USER_H
 			printf("found option Use DAHDI MF = %s\n", strvalue);
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				usedahdimf = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				usedahdimf = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'usedahdimf' parameter.\n", strvalue);
@@ -513,9 +514,9 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				fprintf(stderr, "Unknown variant %s\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "caller=%s", strvalue)) {
-			if (!strcasecmp(strvalue, "yes")) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
 				caller = 1;
-			} else if (!strcasecmp(strvalue, "no")) {
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
 				caller = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'caller' parameter.\n", strvalue);
@@ -531,6 +532,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	return g;
 }
 
+void *wait_call(void *data);
 void *wait_call(void *data)
 {
 	openr2_chan_t *r2chan = data;
@@ -587,6 +589,7 @@ void *wait_call(void *data)
 	return (void *)0;
 }
 
+void *make_call(void *data);
 void *make_call(void *data)
 {
 	/* the call will be made when the other end is unblocked */

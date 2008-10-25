@@ -24,12 +24,18 @@
 #endif
 
 #include <string.h>
+#include <pthread.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "r2utils.h"
+
+static pthread_mutex_t localtime_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t ctime_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* VERSION should be always defined */
-const char *openr2_get_version()
+const char *openr2_get_version(void)
 {
 #ifdef VERSION
 	return VERSION;
@@ -70,5 +76,60 @@ int openr2_mkdir_recursive(char *dir, mode_t mode)
 		}
 	}
 	return 0;
+}
+
+/* TODO: find a better way to implement localtime_r and ctime_r when not available */
+struct tm *openr2_localtime_r(const time_t *timep, struct tm *result)
+{
+	/* we could test here for localtime_r availability */
+	struct tm *lib_tp = NULL;
+	if (!result) {
+		return NULL;
+	}
+	pthread_mutex_lock(&localtime_lock);
+	lib_tp = localtime(timep);
+	if (!lib_tp) {
+		pthread_mutex_unlock(&localtime_lock);
+		return NULL;
+	}
+	memcpy(result, lib_tp, sizeof(*result));
+	pthread_mutex_unlock(&localtime_lock);
+	return result;
+}
+
+char *openr2_ctime_r(const time_t *timep, char *buf)
+{
+	char *lib_buf = NULL;
+	size_t len;
+	if (!buf) {
+		return NULL;
+	}
+	pthread_mutex_lock(&ctime_lock);
+	lib_buf = ctime(timep);
+	if (!lib_buf) {
+		pthread_mutex_unlock(&ctime_lock);
+		return NULL;
+	}
+	len = strlen(lib_buf);
+	memcpy(buf, lib_buf, len);
+	buf[len] = 0;
+	pthread_mutex_unlock(&ctime_lock);
+	return buf;
+}
+
+int openr2_strncasecmp(const char *s1, const char *s2, size_t n)
+{
+	const unsigned char *p1 = (const unsigned char *)s1;
+	const unsigned char *p2 = (const unsigned char *)s2;
+	int result;
+	if (p1 == p2 || n == 0) {
+		return 0;
+	}
+	while ((result = tolower(*p1) - tolower(*p2++)) == 0) {
+		if (*p1++ == '\0' || --n == 0) {
+			break;
+		}
+	}
+	return result;
 }
 

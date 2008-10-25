@@ -39,11 +39,13 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level,
 	int res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		fprintf(stderr, "gettimeofday failed!\n");
+		return;
 	} 
-	if (NULL == localtime_r(&currsec, &currtime_tm)) {
-		fprintf(stderr, "localtime_r failed!\n");
+	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
+		fprintf(stderr, "openr2_localtime_r failed!\n");
+		return;
 	}
-	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
+	/* Avoid infinite recursion: Don't call openr2_chan_get_number 
 	   because that will call openr2_log */
 	printf("[%02d:%02d:%03lu][%s] Channel %d -- ", currtime_tm.tm_min, currtime_tm.tm_sec, 
 			currtime.tv_usec/1000, openr2_log_get_level_string(level), r2chan->number);
@@ -70,9 +72,11 @@ static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 	int res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		fprintf(stderr, "gettimeofday failed!\n");
+		return;
 	} 
-	if (NULL == localtime_r(&currsec, &currtime_tm)) {
-		fprintf(stderr, "localtime_r failed!\n");
+	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
+		fprintf(stderr, "openr2_localtime_r failed!\n");
+		return;
 	}
 	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
 	   because that will call openr2_log */
@@ -140,23 +144,23 @@ const char *openr2_log_get_level_string(openr2_log_level_t level)
 
 openr2_log_level_t openr2_log_get_level(const char *levelstr)
 {
-	if (!strncasecmp("ALL", levelstr, sizeof("ALL")-1)) {
+	if (!openr2_strncasecmp("ALL", levelstr, sizeof("ALL")-1)) {
 		return OR2_LOG_ALL;
-	} else if (!strncasecmp("ERROR", levelstr, sizeof("ERROR")-1)) {
+	} else if (!openr2_strncasecmp("ERROR", levelstr, sizeof("ERROR")-1)) {
 		return OR2_LOG_ERROR;	
-	} else if (!strncasecmp("WARNING", levelstr, sizeof("WARNING")-1)) {
+	} else if (!openr2_strncasecmp("WARNING", levelstr, sizeof("WARNING")-1)) {
 		return OR2_LOG_WARNING;
-	} else if (!strncasecmp("NOTICE", levelstr, sizeof("NOTICE")-1)) {
+	} else if (!openr2_strncasecmp("NOTICE", levelstr, sizeof("NOTICE")-1)) {
 		return OR2_LOG_NOTICE;
-	} else if (!strncasecmp("DEBUG", levelstr, sizeof("DEBUG")-1)) {
+	} else if (!openr2_strncasecmp("DEBUG", levelstr, sizeof("DEBUG")-1)) {
 		return OR2_LOG_DEBUG;
-	} else if (!strncasecmp("MF", levelstr, sizeof("MF")-1)) {
+	} else if (!openr2_strncasecmp("MF", levelstr, sizeof("MF")-1)) {
 		return OR2_LOG_MF_TRACE;
-	} else if (!strncasecmp("CAS", levelstr, sizeof("CAS")-1)) {
+	} else if (!openr2_strncasecmp("CAS", levelstr, sizeof("CAS")-1)) {
 		return OR2_LOG_CAS_TRACE;
-	} else if (!strncasecmp("STACK", levelstr, sizeof("STACK")-1)) {
+	} else if (!openr2_strncasecmp("STACK", levelstr, sizeof("STACK")-1)) {
 		return OR2_LOG_STACK_TRACE;
-	} else if (!strncasecmp("NOTHING", levelstr, sizeof("NOTHING")-1)){
+	} else if (!openr2_strncasecmp("NOTHING", levelstr, sizeof("NOTHING")-1)){
 		return OR2_LOG_NOTHING;
 	}
 	return (openr2_log_level_t)-1;

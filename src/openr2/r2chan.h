@@ -30,6 +30,10 @@
 #include "r2context.h"
 #include "r2log.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define OR2_CHAN_READ_SIZE 160
 
 struct openr2_chan_s;
@@ -224,10 +228,6 @@ typedef struct openr2_chan_s {
 	struct openr2_chan_s *next;
 
 } openr2_chan_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle);
 openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle);

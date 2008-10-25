@@ -23,6 +23,10 @@
 #ifndef _OPENR2_LOG_H_
 #define _OPENR2_LOG_H_
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct openr2_chan_s;
 struct openr2_context_s;
 
@@ -44,10 +48,6 @@ typedef enum {
 #else
 #define OR2_CHAN_STACK 
 #define OR2_CONTEXT_STACK 
-#endif
-
-#if defined(__cplusplus)
-extern "C" {
 #endif
 
 void openr2_log_channel_default(struct openr2_chan_s *r2chan, openr2_log_level_t level, const char *fmt, va_list ap);

@@ -290,7 +290,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		for (; t < r2chan->timers_count; t++) {
 			ms = ((r2chan->sched_timers[t].time.tv_sec - nowtv.tv_sec) * 1000) +
 			     ((r2chan->sched_timers[t].time.tv_usec - nowtv.tv_usec)/1000);
-			//if (timercmp(&r2chan->sched_timers[t].time, &nowtv, <=)) {
+			//if (openr2_timercmp(&r2chan->sched_timers[t].time, &nowtv, <=)) {
 			if (ms <= 0) {
 				memcpy(&schedtimer, &r2chan->sched_timers[t], sizeof(schedtimer));
 				openr2_chan_cancel_timer(r2chan, &schedtimer.id);
@@ -434,7 +434,7 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 	newtimer.id = ++r2chan->timer_id;
 	/* find the proper slot for the timer */
 	for (i = 0; i < r2chan->timers_count; i++) {
-		if (timercmp(&newtimer.time, &r2chan->sched_timers[i].time, <)) {
+		if (openr2_timercmp(&newtimer.time, &r2chan->sched_timers[i].time, <)) {
 			memmove(&r2chan->sched_timers[i+1], 
 				&r2chan->sched_timers[i], 
 				(r2chan->timers_count-i) * sizeof(r2chan->sched_timers[0]));

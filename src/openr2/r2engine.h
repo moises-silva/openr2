@@ -31,6 +31,10 @@
 
 #include <inttypes.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define OR2_ALAW_AMI_MASK 0x55
 
 typedef struct
@@ -113,10 +117,6 @@ typedef struct
     /*! The currently detected digit. */
     int current_digit;
 } openr2_mf_rx_state_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 openr2_mf_rx_state_t *openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd);
 int openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples);

@@ -338,7 +338,7 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 			return ms;
 		}
 		/* if the winner timer is after the current timer, then we have a new winner */
-		if (timercmp(&winner->sched_timers[0].time, &current->sched_timers[0].time, >) ) {
+		if (openr2_timercmp(&winner->sched_timers[0].time, &current->sched_timers[0].time, >) ) {
 			winner = current;
 		}
 	}
