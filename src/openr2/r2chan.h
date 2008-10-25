@@ -43,10 +43,41 @@ typedef struct {
 	struct timeval time;
 	openr2_callback_t callback;
 	void *data;
+	int id;
 } openr2_sched_timer_t;
 
 /* callback for logging channel related info */
 typedef void (*openr2_logging_func_t)(struct openr2_chan_s *r2chan, openr2_log_level_t level, const char *fmt, va_list ap);
+
+typedef struct openr2_chan_timer_ids_s {
+	/* Forward safety timer id */
+	int mf_fwd_safety;
+
+	/* Seize timer id */
+	int r2_seize;
+
+	/* Answer timer id */
+	int r2_answer;
+
+	/* metering pulse timer */
+	int r2_metering_pulse;
+
+	/* double answer timer */
+	int r2_double_answer;
+	
+	/* resume the MF dance on DNIS timeout */
+	int mf_back_resume_cycle;
+
+	/* max time the MF back compelled cycle may last */
+	int mf_back_cycle;
+
+	/* small delay before answering to give some time
+	   to the other end to detect our tone off condition */
+	int r2_answer_delay;
+
+	/* CAS persistence check */
+	int cas_persistence_check;
+} openr2_chan_timer_ids_t;
 
 /* R2 channel. Hold the states of the R2 signaling, zap device etc.
    The R2 variant will be inherited from the R2 context 
@@ -71,8 +102,22 @@ typedef struct openr2_chan_s {
 	/* forward, backward or stopped.  */
 	openr2_direction_t direction;
 
-	/* last scheduled event */
-	openr2_sched_timer_t sched_timer;
+	/* array of scheduled events in execution order */
+	#define OR2_MAX_SCHED_TIMERS 10
+	openr2_sched_timer_t sched_timers[OR2_MAX_SCHED_TIMERS];
+
+	/* timer id incremented each time a new timer is scheduled */
+	int timer_id;
+
+	/* timer count/index */
+	int timers_count;
+
+	/* programmed timer ids */
+	openr2_chan_timer_ids_t timer_ids;
+
+	/* how much time in ms CAS signals must persist before being handled, 
+	   0 means handle immediately */
+	int cas_persistence_check;
 
 	/* only one of this states is effective while in-call.
 	   We either are in a fwd state or backward state  */
@@ -93,6 +138,9 @@ typedef struct openr2_chan_s {
 
 	/* last raw R2 signal written to this channel */
 	int abcd_write;
+
+	/* signal being checked for persistence */
+	int abcd_persistence_check;
 
 	/* Meaning of last R2 signal read on this channel */
 	openr2_abcd_signal_t abcd_rx_signal;
@@ -210,8 +258,9 @@ const char *openr2_chan_get_dnis(openr2_chan_t *r2chan);
 const char *openr2_chan_get_ani(openr2_chan_t *r2chan);
 
 /* TODO: set and cancel timer should not be called by users, move to private header */
-void openr2_chan_set_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data);
-void openr2_chan_cancel_timer(openr2_chan_t *r2chan);
+int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data);
+void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id);
+void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan);
 
 
 #if defined(__cplusplus)

@@ -23,6 +23,7 @@
 #ifndef _OPENR2_CONTEXT_H_
 #define _OPENR2_CONTEXT_H_
 
+#include <pthread.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include "r2proto.h"
@@ -166,6 +167,8 @@ typedef struct {
 	int r2_double_answer;
 	/* Minimum delay time between the Accept tone signal and the R2 answer signal */
 	int r2_answer_delay;
+	/* time to wait for CAS signaling before handling the new signal */
+	int cas_persistence_check;
 } openr2_timers_t;
 
 /* Library errors */
@@ -246,6 +249,9 @@ typedef struct openr2_context_s {
 
 	/* whether or not the advanced configuration file was used */
 	int configured_from_file;
+
+	/* access token to the timers */
+	pthread_mutex_t timers_lock;
 
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;

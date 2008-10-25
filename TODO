@@ -1,9 +1,7 @@
 == This TODO list is in order of importance (what I think is more important for users to have) ==
 
-- Add nocharge=yes|no to allow users to decide whether or not calls should be charged
 - DTMF/R2
 - Add support for use 1 variant for outgoing calls and one for incoming calls
-- Implement CAS persistence check for all signals
 - Port to Windows
 - add support for DNIS-1, repeat all dnis and that stuff, is it worth?
 

@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -159,66 +160,82 @@ static openr2_transcoder_interface_t default_transcoder = {
 	.linear_to_alaw = openr2_linear_to_alaw
 };
 
+static openr2_event_interface_t default_evmanager = {
+	.on_call_init = on_call_init_default,
+	.on_call_offered = on_call_offered_default,
+	.on_call_answered = on_call_answered_default,
+	.on_call_disconnect = on_call_disconnect_default,
+	.on_call_end = on_call_end_default,
+	.on_call_read = on_call_read_default,
+	.on_hardware_alarm = on_hardware_alarm_default,
+	.on_os_error = on_os_error_default,
+	.on_protocol_error = on_protocol_error_default,
+	.on_context_log = openr2_log_context_default,
+	.on_line_idle = on_line_idle_default,
+	.on_line_blocked = on_line_idle_default,
+	.on_dnis_digit_received = on_dnis_digit_received_default,
+	.on_ani_digit_received = on_ani_digit_received_default,
+	.on_billing_pulse_received = on_billing_pulse_received_default
+};
+
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *evmanager, 
 		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis)
 {
 	/* TODO: set some error value when returning NULL */
 
-	/* event manager interface is required */
 	if (!evmanager) {
-		return NULL;
+		evmanager = &default_evmanager;
+	} else {
+		/* fix callmgmt */
+		if (!evmanager->on_call_init) {
+			evmanager->on_call_init = on_call_init_default;
+		}	
+		if (!evmanager->on_call_offered) {
+			evmanager->on_call_offered = on_call_offered_default;
+		}	
+		if (!evmanager->on_call_accepted) {
+			evmanager->on_call_accepted = on_call_accepted_default;
+		}	
+		if (!evmanager->on_call_answered) {
+			evmanager->on_call_answered = on_call_answered_default;
+		}	
+		if (!evmanager->on_call_disconnect) {
+			evmanager->on_call_disconnect = on_call_disconnect_default;
+		}	
+		if (!evmanager->on_call_end) {
+			evmanager->on_call_end = on_call_end_default;
+		}
+		if (!evmanager->on_call_read) {
+			evmanager->on_call_read = on_call_read_default;
+		}	
+		if (!evmanager->on_hardware_alarm) {
+			evmanager->on_hardware_alarm = on_hardware_alarm_default;
+		}	
+		if (!evmanager->on_os_error) {
+			evmanager->on_os_error = on_os_error_default;
+		}	
+		if (!evmanager->on_protocol_error) {
+			evmanager->on_protocol_error = on_protocol_error_default;
+		}	
+		if (!evmanager->on_context_log) {
+			evmanager->on_context_log = openr2_log_context_default;
+		}	
+		if (!evmanager->on_line_idle) {
+			evmanager->on_line_idle = on_line_idle_default;
+		}
+		if (!evmanager->on_line_blocked) {
+			evmanager->on_line_blocked = on_line_blocked_default;
+		}
+		if (!evmanager->on_dnis_digit_received) {
+			evmanager->on_dnis_digit_received = on_dnis_digit_received_default;
+		}
+		if (!evmanager->on_ani_digit_received) {
+			evmanager->on_ani_digit_received = on_ani_digit_received_default;
+		}
+		if (!evmanager->on_billing_pulse_received) {
+			evmanager->on_billing_pulse_received = on_billing_pulse_received_default;
+		}
 	}
-
-	/* fix callmgmt */
-	if (!evmanager->on_call_init) {
-		evmanager->on_call_init = on_call_init_default;
-	}	
-	if (!evmanager->on_call_offered) {
-		evmanager->on_call_offered = on_call_offered_default;
-	}	
-	if (!evmanager->on_call_accepted) {
-		evmanager->on_call_accepted = on_call_accepted_default;
-	}	
-	if (!evmanager->on_call_answered) {
-		evmanager->on_call_answered = on_call_answered_default;
-	}	
-	if (!evmanager->on_call_disconnect) {
-		evmanager->on_call_disconnect = on_call_disconnect_default;
-	}	
-	if (!evmanager->on_call_end) {
-		evmanager->on_call_end = on_call_end_default;
-	}
-	if (!evmanager->on_call_read) {
-		evmanager->on_call_read = on_call_read_default;
-	}	
-	if (!evmanager->on_hardware_alarm) {
-		evmanager->on_hardware_alarm = on_hardware_alarm_default;
-	}	
-	if (!evmanager->on_os_error) {
-		evmanager->on_os_error = on_os_error_default;
-	}	
-	if (!evmanager->on_protocol_error) {
-		evmanager->on_protocol_error = on_protocol_error_default;
-	}	
-	if (!evmanager->on_context_log) {
-		evmanager->on_context_log = openr2_log_context_default;
-	}	
-	if (!evmanager->on_line_idle) {
-		evmanager->on_line_idle = on_line_idle_default;
-	}
-	if (!evmanager->on_line_blocked) {
-		evmanager->on_line_blocked = on_line_blocked_default;
-	}
-	if (!evmanager->on_dnis_digit_received) {
-		evmanager->on_dnis_digit_received = on_dnis_digit_received_default;
-	}
-	if (!evmanager->on_ani_digit_received) {
-		evmanager->on_ani_digit_received = on_ani_digit_received_default;
-	}
-	if (!evmanager->on_billing_pulse_received) {
-		evmanager->on_billing_pulse_received = on_billing_pulse_received_default;
-	}
-
 	openr2_context_t *r2context = calloc(1, sizeof(*r2context));
 	if (!r2context) {
 		return NULL;
@@ -266,6 +283,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	r2context->transcoder = transcoder;
 	r2context->variant = variant;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
+	pthread_mutex_init(&r2context->timers_lock, NULL);
 	if (openr2_proto_configure_context(r2context, variant, max_ani, max_dnis)) {
 		free(r2context);
 		return NULL;
@@ -280,16 +298,24 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 	OR2_CONTEXT_STACK;
 	int res, ms;
 	struct timeval currtime;
-	res = gettimeofday(&currtime, NULL);
-	if (-1 == res) {
-		return -1;
-	}
-	/* iterate over all the channels to get the next event time */
+	/* iterate over all the channels to get the next event time,
+	   during this loop, timers cannot be deleted or created */
 	openr2_chan_t *current = r2context->chanlist;
 	openr2_chan_t *winner = NULL;
-	while ( current ) {
-		/* ignore any entry with no callback */
-		if ( !current->sched_timer.callback ) {
+
+	pthread_mutex_lock(&r2context->timers_lock);
+
+	res = gettimeofday(&currtime, NULL);
+	if (-1 == res) {
+		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get next context event time: %s\n", strerror(errno));
+
+		pthread_mutex_unlock(&r2context->timers_lock);
+		return -1;
+	}
+
+	while (current) {
+		/* ignore any entry with no sched timer */
+		if (current->timers_count < 1) {
 			current = current->next;
 			continue;
 		}
@@ -299,20 +325,25 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 		}
 		current = current->next;
 		/* if no more chans, return the winner */
-		if ( !current ) {
-			ms = ( ( ( winner->sched_timer.time.tv_sec - currtime.tv_sec   ) * 1000 ) + 
-			       ( ( winner->sched_timer.time.tv_usec - currtime.tv_usec ) / 1000 ) );
-			if ( ms < 0 )
+		if (!current) {
+			ms = (((winner->sched_timers[0].time.tv_sec - currtime.tv_sec) * 1000) + 
+			     ((winner->sched_timers[0].time.tv_usec - currtime.tv_usec) / 1000));
+
+			pthread_mutex_unlock(&r2context->timers_lock);
+
+			/* if the time has passed already, return 0 to attend immediately */
+			if (ms < 0) {
 				return 0;
+			}	
 			return ms;
-			
 		}
-		/* if the winner timer is after the current timer, then
-		   we have a new winner */
-		if ( timercmp(&winner->sched_timer.time, &current->sched_timer.time, >) ) {
+		/* if the winner timer is after the current timer, then we have a new winner */
+		if (timercmp(&winner->sched_timers[0].time, &current->sched_timers[0].time, >) ) {
 			winner = current;
 		}
 	}
+
+	pthread_mutex_unlock(&r2context->timers_lock);
 	return -1;
 }
 
@@ -357,6 +388,7 @@ void openr2_context_delete(openr2_context_t *r2context)
 		openr2_chan_delete(current);
 		current = next;
 	}
+	pthread_mutex_destroy(&r2context->timers_lock);
 	free(r2context);
 }
 
@@ -564,6 +596,7 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open R2 variant file '%s'\n", filename);
 		return -1;
 	}
+	openr2_log2(r2context, OR2_LOG_NOTICE, "Reading R2 definitions from protocol file '%s'\n", filename);
 	while (fgets(line, sizeof(line), variant_file))	{
 
 		if ('#' == line[0] || '\n' == line[0] || ' ' == line[0]) {
@@ -615,6 +648,7 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		LOADTIMER(timers.r2_metering_pulse)
 		LOADTIMER(timers.r2_double_answer)
 		LOADTIMER(timers.r2_answer_delay)
+		LOADTIMER(timers.cas_persistence_check)
 	}
 	r2context->configured_from_file = 1;
 	fclose(variant_file);

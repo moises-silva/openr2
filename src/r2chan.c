@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include "openr2/r2hwcompat.h"
@@ -179,6 +180,9 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	}
 #endif
 
+	/* no persistence check has been done */
+	r2chan->abcd_persistence_check = -1;
+
 	/* if we created the zap device we need to close it too */
 	r2chan->fd_created = fdcreated;
 
@@ -207,6 +211,9 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	/* set ABCD indicators to invalid */
 	r2chan->abcd_rx_signal = OR2_ABCD_INVALID;
 	r2chan->abcd_tx_signal = OR2_ABCD_INVALID;
+
+	/* start the timer id in 1 to avoid confusion when memset'ing */
+	r2chan->timer_id = 1;
 
 	/* add ourselves to the queue of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
@@ -265,24 +272,35 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 int openr2_chan_process_event(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_callback_t callback;
-	void *data;
+	openr2_sched_timer_t schedtimer;
+	int myerrno;
 	struct timeval nowtv;
 	int interesting_events, events, res, tone_result, wrote;
 	unsigned i;
+	int t = 0;
+	int ms;
 	uint8_t read_buf[OR2_CHAN_READ_SIZE];
 	int16_t tone_buf[OR2_CHAN_READ_SIZE];
 	res = gettimeofday(&nowtv, NULL);
-	if ( res == -1 ) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Yikes! gettimeofday failed!\n");
+	if (res == -1) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Yikes! gettimeofday failed, me may miss events!!\n");
 	}
 	/* handle any scheduled timer */
-	if ( res != -1 && r2chan->sched_timer.callback && timercmp(&r2chan->sched_timer.time, &nowtv, <=) ) {
-		callback = r2chan->sched_timer.callback;
-		data = r2chan->sched_timer.data;
-		openr2_chan_cancel_timer(r2chan);
-		openr2_log(r2chan, OR2_LOG_DEBUG, "calling callback on chan %d\n", r2chan->number);
-		callback(r2chan, data);
+	if (res != -1) {
+		for (; t < r2chan->timers_count; t++) {
+			ms = ((r2chan->sched_timers[t].time.tv_sec - nowtv.tv_sec) * 1000) +
+			     ((r2chan->sched_timers[t].time.tv_usec - nowtv.tv_usec)/1000);
+			//if (timercmp(&r2chan->sched_timers[t].time, &nowtv, <=)) {
+			if (ms <= 0) {
+				memcpy(&schedtimer, &r2chan->sched_timers[t], sizeof(schedtimer));
+				openr2_chan_cancel_timer(r2chan, &schedtimer.id);
+				openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer callback\n");
+				schedtimer.callback(r2chan, schedtimer.data);
+				/* at this point, r2chan->timers_count has been decremented, 
+				   we must decrement t as well */
+				t--;
+			}	
+		}
 	}
 
 	while(1) {
@@ -302,7 +320,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 
 		res = ioctl(r2chan->fd, OR2_HW_OP_IO_MUX, &interesting_events);
 		if (res) {
-			EMI(r2chan)->on_os_error(r2chan, errno);
+			myerrno = errno;
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
+			EMI(r2chan)->on_os_error(r2chan, myerrno);
 			return -1;
 		}	
 		/* if there is no interesting events, do nothing */
@@ -320,7 +340,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		if (OR2_HW_IO_MUX_READ & interesting_events) {
 			res = read(r2chan->fd, read_buf, sizeof(read_buf));
 			if (-1 == res) {
-				EMI(r2chan)->on_os_error(r2chan, errno);
+				myerrno = errno;
+				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel\n");
+				EMI(r2chan)->on_os_error(r2chan, myerrno);
 				return -1;
 			}
 			/* if the MF detector is enabled, we are supposed to detect tones */
@@ -371,33 +393,106 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 	return 0;
 }
 
-void openr2_chan_set_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data)
+int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data)
 {
 	OR2_CHAN_STACK;
+	int myerrno;
 	struct timeval tv;
+	openr2_sched_timer_t newtimer;
 	int res;
+	int i;
+
+	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+
 	res = gettimeofday(&tv, NULL);
-	if ( -1 == res ) {
-		perror("Failed to get time of day!!");
-		return;
+	if (-1 == res) {
+		myerrno = errno;
+
+		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get time of day to schedule timer!!");
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+		return -1;
 	}
-	r2chan->sched_timer.time.tv_sec = tv.tv_sec + ( ms / 1000 );
-	r2chan->sched_timer.time.tv_usec = tv.tv_usec + ( ms % 1000) * 1000;
+	if (r2chan->timers_count == OR2_MAX_SCHED_TIMERS) {
+
+		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+		openr2_log(r2chan, OR2_LOG_ERROR, "No more time slots, failed to schedule timer, this is bad!\n");
+		return -1;
+	}
+	/* build the new timer */
+	newtimer.time.tv_sec = tv.tv_sec + (ms / 1000);
+	newtimer.time.tv_usec = tv.tv_usec + (ms % 1000) * 1000;
 	/* more than 1000000 microseconds, then increment one second */
-	 if ( r2chan->sched_timer.time.tv_usec > 1000000 ) {
-		 r2chan->sched_timer.time.tv_sec += 1;
-		 r2chan->sched_timer.time.tv_usec -= 1000000;
+	 if (newtimer.time.tv_usec > 1000000) {
+		 newtimer.time.tv_sec += 1;
+		 newtimer.time.tv_usec -= 1000000;
 	}
-	r2chan->sched_timer.callback = callback;
-	r2chan->sched_timer.data = cb_data;
+	newtimer.callback = callback;
+	newtimer.data = cb_data;
+	newtimer.id = ++r2chan->timer_id;
+	/* find the proper slot for the timer */
+	for (i = 0; i < r2chan->timers_count; i++) {
+		if (timercmp(&newtimer.time, &r2chan->sched_timers[i].time, <)) {
+			memmove(&r2chan->sched_timers[i+1], 
+				&r2chan->sched_timers[i], 
+				(r2chan->timers_count-i) * sizeof(r2chan->sched_timers[0]));
+			memcpy(&r2chan->sched_timers[i], &newtimer, sizeof(newtimer));
+			break;
+		}
+	}
+	/* this means the new timer will be triggered at the end */
+	if (i == r2chan->timers_count) {
+		memcpy(&r2chan->sched_timers[i], &newtimer, sizeof(newtimer));
+	}
+	r2chan->timers_count++;
+
+	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+	return r2chan->timer_id;
 }
 
-void openr2_chan_cancel_timer(openr2_chan_t *r2chan)
+void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 {
 	OR2_CHAN_STACK;
-	r2chan->sched_timer.callback = NULL;
-	r2chan->sched_timer.data = NULL;
-	timerclear(&r2chan->sched_timer.time);
+	int i = 0;
+	//openr2_log(r2chan, OR2_LOG_ERROR, "Attempting to cancel timer timer %d\n", *timer_id);
+	if (*timer_id < 1) {
+	//	openr2_log(r2chan, OR2_LOG_ERROR, "Cannot cancel timer %d\n", *timer_id);
+		return;
+	}
+
+	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+
+	for ( ; i < r2chan->timers_count; i++) {
+		if (r2chan->sched_timers[i].id == *timer_id) {
+			/* clear the timer and move down the list */
+			memset(&r2chan->sched_timers[i], 0, sizeof(r2chan->sched_timers[0]));
+			if (i < (r2chan->timers_count - 1)) {
+				memmove(&r2chan->sched_timers[i], &r2chan->sched_timers[i+1], 
+				       (r2chan->timers_count - (i + 1))*sizeof(r2chan->sched_timers[0]));
+			}
+			r2chan->timers_count--;
+			*timer_id = 0;
+	//		openr2_log(r2chan, OR2_LOG_DEBUG, "timer id %d has been cancelled\n");
+			break;
+		}
+	}
+
+	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+}
+
+void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan)
+{
+	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+
+	r2chan->timers_count = 0;
+	r2chan->timer_id = 1;
+	memset(&r2chan->timer_ids, 0, sizeof(r2chan->timer_ids));
+	memset(r2chan->sched_timers, 0, sizeof(r2chan->sched_timers));
+
+	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
 }
 
 void openr2_chan_delete(openr2_chan_t *r2chan)
@@ -443,12 +538,15 @@ int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_ca
 int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)
 {
 	OR2_CHAN_STACK;
+	int myerrno;
 	int res = 0;
 	int wrote = 0;
 	while (wrote < buf_size) {
 		res = write(r2chan->fd, buf, buf_size);
 		if (res == -1 && errno != EAGAIN) {
-			EMI(r2chan)->on_os_error(r2chan, errno);
+			myerrno = errno;
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write to channel\n");
+			EMI(r2chan)->on_os_error(r2chan, myerrno);
 			break;
 		}
 		wrote += res;
@@ -509,18 +607,35 @@ int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 	OR2_CHAN_STACK;
 	int res, ms;
 	struct timeval currtime;
+	int myerrno;
+	
+	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+
+	/* if no timers, return 'infinite' */
+	if (!r2chan->timers_count) {
+
+		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+		return -1;
+	}
 	res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
+		myerrno = errno;
+
+		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get next event from channel. gettimeofday failed!\n");
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		return -1;
 	}
-	/* if no callback then there is no timer active */
-	if (!r2chan->sched_timer.callback) {
-		return -1;
-	}
-	ms = ( ( ( r2chan->sched_timer.time.tv_sec - currtime.tv_sec   ) * 1000 ) + 
-	       ( ( r2chan->sched_timer.time.tv_usec - currtime.tv_usec ) / 1000 ) );
-	if ( ms < 0 )
+	ms = (((r2chan->sched_timers[0].time.tv_sec - currtime.tv_sec) * 1000) + 
+	     ((r2chan->sched_timers[0].time.tv_usec - currtime.tv_usec) / 1000));
+
+	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+
+	if (ms < 0) {
 		return 0;
+	}	
 	return ms;
 }
 
