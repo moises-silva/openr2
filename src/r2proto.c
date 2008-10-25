@@ -1769,7 +1769,7 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 
                 /* first accepted */
 		previous_mf_state = r2chan->mf_state;
-		previous_call_state = r2chan->mf_state;
+		previous_call_state = r2chan->call_state;
                 r2chan->r2_state = OR2_ACCEPT_RXD;
                 EMI(r2chan)->on_call_accepted(r2chan, mode);
 
