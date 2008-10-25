@@ -1063,7 +1063,7 @@ handleabcd:
 		/* This state means we're during call setup (ANI/DNIS transmission) and the ACCEPT signal
 		   has not been received, which requires some special handling, read below for more info ... */
 		if (abcd == R2(r2chan, ANSWER)) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Answer before accept detected!");
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Answer before accept detected!\n");
 			/* sometimes, since ABCD signaling is faster than MF detectors we
 			   may receive the ANSWER signal before actually receiving the
 			   MF tone that indicates the call has been accepted (OR2_ACCEPT_RXD). We
@@ -1071,7 +1071,7 @@ handleabcd:
 			ABCD_LOG_RX(ANSWER);
 			r2chan->r2_state = OR2_ANSWER_RXD_MF_PENDING;
 		} else if (check_backward_disconnection(r2chan, abcd, &out_disconnect_cause, &out_r2_state)) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before accept detected!");
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before accept detected!\n");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
 			   same as Seize ACK and therefore there will be not a bit patter change in that case. 
 			   I believe the correct behavior for this case is to just proceed with disconnection without waiting 

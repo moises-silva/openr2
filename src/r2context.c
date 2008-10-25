@@ -453,6 +453,9 @@ openr2_log_level_t openr2_context_get_log_level(openr2_context_t *r2context)
 void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 {
 	OR2_CONTEXT_STACK;
+	if (threshold < 0) {
+		threshold = 0;
+	}
 	r2context->mf_threshold = threshold;
 }
 
@@ -582,6 +585,16 @@ int openr2_context_get_double_answer(openr2_context_t *r2context)
 		} \
 	}
 
+#define LOADSETTING(mysetting) \
+	else if (1 == sscanf(line, #mysetting "=%d", &intvalue)) { \
+		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for setting %s\n", intvalue, #mysetting); \
+		if (intvalue >= 0) { \
+			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing setting %s from %d to %d\n", \
+			#mysetting, r2context->mysetting, intvalue); \
+			r2context->mysetting = intvalue; \
+		} \
+	}
+
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
 {
 	OR2_CONTEXT_STACK;
@@ -649,6 +662,9 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		LOADTIMER(timers.r2_double_answer)
 		LOADTIMER(timers.r2_answer_delay)
 		LOADTIMER(timers.cas_persistence_check)
+
+		/* misc settings */
+		LOADSETTING(mf_threshold)
 	}
 	r2context->configured_from_file = 1;
 	fclose(variant_file);
