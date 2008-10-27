@@ -950,7 +950,6 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 			openr2_log(r2chan, OR2_LOG_DEBUG, "False positive CAS signal 0x%02X, ignoring ...\n", r2chan->abcd_persistence_check);
 			r2chan->abcd_persistence_check = -1;
 		}
-		openr2_log(r2chan, OR2_LOG_DEBUG, "No change in bits\n");
 		return 0;
 	} else {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Bits changed from 0x%02X to 0x%02X\n", r2chan->abcd_read, abcd);
