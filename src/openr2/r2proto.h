@@ -87,7 +87,9 @@ typedef enum {
 
 /* MF signals. The MF interface must understand this
    code points to match them to the proper pair of
-   frequencies */
+   frequencies. This code points were chosen to match
+   the SpanDSP Library. Usage of Zaptel MF requires to
+   match SpandSP and Zaptel identifiers */
 typedef enum {
 	OR2_MF_TONE_INVALID = 0,
 	OR2_MF_TONE_1 = '1',
