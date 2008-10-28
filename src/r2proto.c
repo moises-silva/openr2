@@ -1927,11 +1927,11 @@ static int check_threshold(openr2_chan_t *r2chan, int tone)
 		}
 		tone_threshold = timediff(&currtime, &r2chan->mf_threshold_time);
 		if (tone_threshold < r2chan->r2context->mf_threshold) {
-			if (tone) {
+			/* if (tone) {
 				openr2_log(r2chan, OR2_LOG_DEBUG, "Tone %c ignored\n", tone);
 			} else {
 				openr2_log(r2chan, OR2_LOG_DEBUG, "Tone off ignored\n");
-			}	
+			} */
 			return -1;
 		}
 	}
