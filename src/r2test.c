@@ -47,7 +47,7 @@
 		openr2_context_delete(confdata[c].context); \
 	} 
 
-#define STR_IS_EQUAL(x,y) !openr2_strncasecmp(x,#y,sizeof(#y)) 
+#define STR_IS_EQUAL(x,y) !openr2_strncasecmp(x,y,sizeof(y)) 
 
 /* counter, lock and condition for listener threads 
    used to sync when outgoing threads should start */
