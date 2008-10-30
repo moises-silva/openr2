@@ -1,7 +1,6 @@
-%define r2test %{?_with_r2test:1}%{!?_with_r2test:0}
 Name:           libopenr2
 Version:        0.1.1
-Release:        55%{?dist}
+Release:        79%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 
@@ -11,6 +10,7 @@ URL:            http://www.libopenr2.org/
 Source0:        http://www.libopenr2.org/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
+BuildRequires:	chrpath
 
 %description
 OpenR2 is a library that implements the MFC/R2 signalling over E1 lines using
@@ -37,11 +37,9 @@ developing applications that use %{name}.
 
 
 %build
-%if%{r2test}
-%configure --libdir=%{_libdir} --disable-static --disable-rpath --with-r2test
-%else
-%configure --libdir=%{_libdir} --disable-static --disable-rpath
-%endif
+%configure --libdir=%{_libdir} --sysconfdir=%{_sysconfdir}/openr2 --disable-static --disable-rpath --with-r2test
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 make %{?_smp_mflags}
 
 
@@ -56,8 +54,8 @@ install -m 0644 src/openr2/r2utils.h $RPM_BUILD_ROOT/usr/include/openr2/r2utils.
 install -m 0644 src/openr2/r2log.h $RPM_BUILD_ROOT/usr/include/openr2/r2log.h
 install -m 0644 src/openr2/r2engine.h $RPM_BUILD_ROOT/usr/include/openr2/r2engine.h
 install -m 0644 src/openr2/r2hwcompat.h $RPM_BUILD_ROOT/usr/include/openr2/r2hwcompat.h
+chrpath --delete $RPM_BUILD_ROOT%{_bindir}/r2test
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -71,11 +69,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
-%if%{r2test}
-%doc r2test.conf
 %{_bindir}/r2test
-%endif
 %{_libdir}/*.so.*
+%{_mandir}/man5/r2test.conf.5.gz
+%{_mandir}/man8/r2test.8.gz
+%config(noreplace) %{_sysconfdir}/openr2/r2test.conf
+%config(noreplace) %{_sysconfdir}/openr2/r2proto.conf
+
 
 %files devel
 %defattr(-,root,root,-)
@@ -92,6 +92,15 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Oct 30 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to latest SVN release
+
+* Thu Oct 09 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to latest SVN release
+- Added r2test and r2test.conf man pages
+- Build r2test by default
+- Add r2test.conf and r2proto.conf files
+
 * Mon Sep 15 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update to latest SVN release
 - Added r2hwcompat.h
