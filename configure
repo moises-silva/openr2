@@ -19745,6 +19745,8 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
+CFLAGS='-ggdb3 -O0'
+CXXFLAGS='-ggdb3 -O0'
 
 ac_config_files="$ac_config_files Makefile src/Makefile"
 
