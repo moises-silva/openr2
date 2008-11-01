@@ -1,4 +1,5 @@
 OpenR2 - MFC/R2 call setup library
+http://www.libopenr2.org/
 
 OpenR2 is a library that implements the MFC/R2 signalling over E1 lines using
 the Zapata Telephony interface (or DAHDI). The MF R2 tones required for the signaling are
@@ -24,5 +25,5 @@ Bugs and Limitations:
 
 - Send any bugs or suggestions to my e-mail.
 
-Moises Silva <moises.silva@gmail.com>
+Moises Silva <moy@sangoma.com>
 

@@ -2,7 +2,7 @@
  * OpenR2 
  * MFC/R2 call setup library
  *
- * Moises Silva <moises.silva@gmail.com>
+ * Moises Silva <moy@sangoma.com>
  * Copyright (C) Moises Silva
  *
  * This program is free software: you can redistribute it and/or modify

@@ -1,4 +1,20 @@
-Moises Silva <moises.silva@gmail.com>
+Moises Silva 
+<moy@sangoma.com>
+http://www.moythreads.com/
+- Author and primary developer
 
-r2engine.c and r2engine.h is basically
-code written by Steve Underwood for the SpanDSP LGPL library
+Alexandre Cavalcante Alencar
+<alexandre.alencar@gmail.com>
+- Debian build, documentation, r2test enhancements and testing in Brazil.
+
+Cleiber Marques da Silva
+<cleibermarques@hotmail.com>
+- Implementation of collect calls, release forced and other work for the Brazilian variant.
+
+Humberto Figuera
+- Venezuela variant and immediate accept for the backward side.
+
+Steve Underwood 
+<steveu@coppice.org>
+- I Borrowed code from his SpanDSP LGPL library for the MF Detector and generator (basically r2engine.c and r2engine.h)
+

@@ -2,7 +2,7 @@
  * R2Test
  * MFC/R2 call setup program
  *
- * Moises Silva <moises.silva@gmail.com>
+ * Moises Silva <moy@sangoma.com>
  * Copyright (C) Moises Silva
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contributors:
+ *
+ * Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
  *
  */
 #ifdef HAVE_CONFIG_H
