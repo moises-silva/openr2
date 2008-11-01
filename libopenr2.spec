@@ -1,6 +1,6 @@
 Name:           libopenr2
 Version:        0.1.1
-Release:        79%{?dist}
+Release:        82%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 

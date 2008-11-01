@@ -24,6 +24,7 @@
 #endif
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -44,7 +45,7 @@
 
 #define CLEAN_CONF \
 	for (c = 0; c < numgroups; c++) { \
-		openr2_context_delete(confdata[c].context); \
+		openr2_context_delete(g_confdata[c].context); \
 	} 
 
 #define STR_IS_EQUAL(x,y) !openr2_strncasecmp(x,y,sizeof(y)) 
@@ -65,16 +66,21 @@ typedef struct {
 	int generate;
 } dahdi_mf_tx_state_t;
 #endif
-
+struct chan_group_data_s;
 typedef struct {
 #ifdef HAVE_DAHDI_USER_H
 	dahdi_mf_tx_state_t dahdi_tx_state;
 #endif
 	pthread_t thread_id;
 	openr2_chan_t *chan;
+	FILE *audiofp;
+	int audio_stop;
+	int frame_counter;
+	int called;
+	struct chan_group_data_s *conf;
 } r2chan_data_t;
 
-typedef struct {
+typedef struct chan_group_data_s {
 	openr2_calling_party_category_t category;
 	openr2_context_t *context;
 	openr2_variant_t variant;
@@ -95,12 +101,14 @@ typedef struct {
 	int charge_calls;
 	int double_answer;
 	int immediateaccept;
+	int playaudio;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 	char r2file[512];
+	char audiofile[512];
 } chan_group_data_t;
 
-static chan_group_data_t confdata[MAX_GROUPS];
+static chan_group_data_t g_confdata[MAX_GROUPS];
 
 #ifdef HAVE_DAHDI_USER_H
 static void *dahdi_mf_tx_init(dahdi_mf_tx_state_t *handle, int forward_signals)
@@ -172,6 +180,52 @@ static openr2_mflib_interface_t g_mf_dahdi_iface = {
 };
 #endif /* HAVE_DAHDI_USER_H */
 
+/* Deal with audio playback feature */
+int get_buf_length(const unsigned char *buf);
+int get_buf_length(const unsigned char *buf)
+{
+	int n;
+	
+	for(n=0; *buf != '\0'; buf++ )
+		n++;
+
+	return(n);
+}
+
+static void close_audiofp(openr2_chan_t *r2chan)
+{
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+
+	if(chandata->audiofp != NULL) {
+		fclose(chandata->audiofp);
+		chandata->audiofp = NULL;
+		chandata->audio_stop = 1;
+	}
+}
+
+static int get_audio(openr2_chan_t *r2chan, unsigned char *buf, int length)
+{
+	int ret;
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+	if (chandata->audiofp == NULL) {
+		printf("USER: no file opened yet, let's open it...\n");
+		if (!(chandata->audiofp = fopen(chandata->conf->audiofile, "rb"))) {
+			fprintf(stderr, "USER: Cannot open the '%s' audio file.\n", chandata->conf->audiofile);
+			chandata->audio_stop = 1;
+			return(-1);
+		}	
+	}	
+	ret = fread(buf, 1, length, chandata->audiofp);
+	if (ferror(chandata->audiofp)) {
+		fprintf(stderr, "USER: Error reading file audio: %s\n", strerror(errno));
+	} else if (feof(chandata->audiofp)) {
+		printf("USER: end of file\n");
+		close_audiofp(r2chan);
+		return 0;
+	} 
+	return(ret);
+}
+
 static void on_call_init(openr2_chan_t *r2chan)
 {
 	printf("USER: new call detected on chan %d\n", openr2_chan_get_number(r2chan));
@@ -185,18 +239,21 @@ static void on_hardware_alarm(openr2_chan_t *r2chan, int alarm)
 static void on_os_error(openr2_chan_t *r2chan, int errorcode)
 {
 	printf("USER: OS error on chan %d, quitting ...\n", openr2_chan_get_number(r2chan));
+	close_audiofp(r2chan);
 	pthread_exit((void *)1);
 }
 
 static void on_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t reason)
 {
+	close_audiofp(r2chan);
 	printf("USER: protocol error on chan %d, quitting ...\n", openr2_chan_get_number(r2chan));
 	pthread_exit((void *)1);
 }
 
 static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
-	chan_group_data_t *confdata = openr2_chan_get_client_data(r2chan);
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+	chan_group_data_t *confdata = chandata->conf;
 	printf("USER: call ready on chan %d. DNIS = %s, ANI = %s, Category = %d\n", 
 			openr2_chan_get_number(r2chan), dnis, ani ? ani : "(restricted)", category);
 	/* if collect calls are not allowed and this is a collect call, reject it */
@@ -226,13 +283,35 @@ static void on_call_answered(openr2_chan_t *r2chan)
 
 static void on_call_read(openr2_chan_t *r2chan, const unsigned char *buf, int buflen)
 {
-	static int count = 0;
-	count++;
-	if ( count == 40000 )
-		count = 0;
-	if ( count > 400 && 0 == ( count % 400 ) )
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+	unsigned char write_buf[OR2_CHAN_READ_SIZE];
+	int write_buflen;
+	chandata->frame_counter++;
+
+	if (chandata->frame_counter == 50) {
 		printf("USER: call read data of length %d on chan %d\n", buflen, openr2_chan_get_number(r2chan));
-	openr2_chan_write(r2chan, buf, buflen);
+	}
+
+	if (chandata->conf->playaudio == 0) {
+		openr2_chan_write(r2chan, buf, buflen);
+	} else if (!chandata->audio_stop) {
+		if (chandata->frame_counter == 50) {
+			printf("USER: playing an audio stream.\n");
+		}	
+		write_buflen = get_audio(r2chan, write_buf, sizeof(write_buf));
+		if (-1 == write_buflen){
+			fprintf(stderr, "USER: Failed to get audio\n");
+			goto done;
+		}
+		if (0 == write_buflen) {
+			goto done;
+		}
+		openr2_chan_write(r2chan, write_buf, write_buflen);
+	}
+done:
+	if (chandata->frame_counter == 400) {
+		chandata->frame_counter = 0;
+	}
 }
 
 static void on_call_disconnected(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
@@ -243,7 +322,9 @@ static void on_call_disconnected(openr2_chan_t *r2chan, openr2_call_disconnect_c
 
 static void on_call_end(openr2_chan_t *r2chan)
 {
+	close_audiofp(r2chan);
 	printf("USER: call ended at chan %d\n", openr2_chan_get_number(r2chan));
+	
 }
 
 static void on_line_blocked(openr2_chan_t *r2chan)
@@ -254,9 +335,10 @@ static void on_line_blocked(openr2_chan_t *r2chan)
 static void on_line_idle(openr2_chan_t *r2chan)
 {
 	int res;
-	chan_group_data_t *confdata = openr2_chan_get_client_data(r2chan);
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+	chan_group_data_t *confdata = chandata->conf;
 	printf("USER: far end unblocked on chan %d\n", openr2_chan_get_number(r2chan));
-	if (!confdata || !confdata->caller) {
+	if (chandata->called || !confdata->caller) {
 		return;
 	}
 	printf("USER: making call on chan %d. DNID = %s, CID = %s, CPC = %s\n", 
@@ -267,8 +349,8 @@ static void on_line_idle(openr2_chan_t *r2chan)
 		fprintf(stderr, "Error making call on chan %d\n", openr2_chan_get_number(r2chan));
 		return;
 	}
-	/* let's clear the client data to not make more calls */
-	openr2_chan_set_client_data(r2chan, NULL);
+	/* set the fal to not make more calls when getting back to IDLE */
+	chandata->called = 1;
 }
 
 static int on_dnis_digit_received(openr2_chan_t *r2chan, char digit)
@@ -331,10 +413,12 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int immediateaccept = 0;
 	char strvalue[512];
 	char r2file[512];
+	char audiofile[512];
 	char *toklevel;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
 	int caller = 0;
+	int playaudio = 0;
 	dnid[0] = 0;
 	cid[0] = 0;
 	strvalue[0] = 0;
@@ -372,9 +456,11 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].double_answer = double_answer;
 			confdata[g].immediateaccept = immediateaccept;
 			confdata[g].charge_calls = charge_calls;
+			confdata[g].playaudio = playaudio;
 			strcpy(confdata[g].dnid, dnid);
 			strcpy(confdata[g].cid, cid);
 			strcpy(confdata[g].r2file, r2file);
+			strcpy(confdata[g].audiofile, audiofile);
 			g++;
 			if (g == (MAX_GROUPS - 1)) {
 				printf("MAX_GROUPS reached, quitting loop ...\n");
@@ -521,6 +607,20 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'caller' parameter.\n", strvalue);
 			}
+		} else if (1 == sscanf(line, "playaudio=%s", strvalue)) {
+			if (STR_IS_EQUAL(strvalue,"yes")) {
+				playaudio = 1;
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
+				playaudio = 0;
+			} else {
+				fprintf(stderr, "Invalid value '%s' for 'playaudio' parameter.\n", strvalue);
+			}
+		} else if (1 == sscanf(line, "audiofile=%s", audiofile)) {
+			if (playaudio) {
+				printf("found option 'audiofile=%s'\n", audiofile);
+			} else {
+				printf("found option 'audiofile=%s' but 'playaudio' not set, not using it.\n", audiofile);
+			}		
 		} else {
 			fprintf(stderr, "ERROR in config file: cannot parse line: '%s'\n", line);
 			return -1;
@@ -536,7 +636,8 @@ void *wait_call(void *data);
 void *wait_call(void *data)
 {
 	openr2_chan_t *r2chan = data;
-	chan_group_data_t *confdata = openr2_chan_get_client_data(r2chan);
+	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+	chan_group_data_t *confdata = chandata->conf;
 	struct timeval timeout, *timeout_ptr;
 	int ms, chanfd, res, channo;
 	unsigned loopcount = 0;
@@ -605,7 +706,7 @@ void *make_call(void *data)
 		FD_ZERO(&chanread);
 		FD_ZERO(&chanexcept);
 		FD_SET(chanfd, &chanread);
-		FD_SET(chanfd, &chanexcept);
+			FD_SET(chanfd, &chanexcept);
 		ms = openr2_chan_get_time_to_next_event(r2chan);
 		if (ms < 0) { 
 			timeout_ptr = NULL;
@@ -649,8 +750,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	memset(confdata, 0, sizeof(confdata));
-	if ((numgroups = parse_config(config, confdata)) < 1) {
+	memset(g_confdata, 0, sizeof(g_confdata));
+	if ((numgroups = parse_config(config, g_confdata)) < 1) {
 		fclose(config);
 		return -1;
 	}
@@ -659,26 +760,26 @@ int main(int argc, char *argv[])
 	/* we have a bunch of channels, let's create contexts for each group of them */
 	for (c = 0; c < numgroups; c++) {
 #ifdef HAVE_DAHDI_USER_H
-		if (confdata[c].usedahdimf) {
+		if (g_confdata[c].usedahdimf) {
 			mf_iface = &g_mf_dahdi_iface;
 		}
 #endif
-		confdata[c].context = openr2_context_new(mf_iface, &g_event_iface, 
-				NULL, confdata[c].variant, confdata[c].max_ani, confdata[c].max_dnis);
-		if (!confdata[c].context) {
+		g_confdata[c].context = openr2_context_new(mf_iface, &g_event_iface, 
+				NULL, g_confdata[c].variant, g_confdata[c].max_ani, g_confdata[c].max_dnis);
+		if (!g_confdata[c].context) {
 			fprintf(stderr, "failed to create R2 context when c = %d\n", c);
 			break;
 		}
-		openr2_context_set_log_level(confdata[c].context, confdata[c].loglevel);
-		openr2_context_set_ani_first(confdata[c].context, confdata[c].getanifirst);
-		openr2_context_set_mf_threshold(confdata[c].context, confdata[c].mf_threshold);
-		openr2_context_set_mf_back_timeout(confdata[c].context, confdata[c].mf_backtimeout);
-		openr2_context_set_metering_pulse_timeout(confdata[c].context, confdata[c].meteringpulse_timeout);
-		openr2_context_set_double_answer(confdata[c].context, confdata[c].double_answer);
-		openr2_context_set_immediate_accept(confdata[c].context, confdata[c].immediateaccept);
-		if (confdata[c].r2file[0] != 0) {
-			if (openr2_context_configure_from_advanced_file(confdata[c].context, confdata[c].r2file)) {
-				fprintf(stderr, "failed to configure R2 context with file %s\n", confdata[c].r2file);
+		openr2_context_set_log_level(g_confdata[c].context, g_confdata[c].loglevel);
+		openr2_context_set_ani_first(g_confdata[c].context, g_confdata[c].getanifirst);
+		openr2_context_set_mf_threshold(g_confdata[c].context, g_confdata[c].mf_threshold);
+		openr2_context_set_mf_back_timeout(g_confdata[c].context, g_confdata[c].mf_backtimeout);
+		openr2_context_set_metering_pulse_timeout(g_confdata[c].context, g_confdata[c].meteringpulse_timeout);
+		openr2_context_set_double_answer(g_confdata[c].context, g_confdata[c].double_answer);
+		openr2_context_set_immediate_accept(g_confdata[c].context, g_confdata[c].immediateaccept);
+		if (g_confdata[c].r2file[0] != 0) {
+			if (openr2_context_configure_from_advanced_file(g_confdata[c].context, g_confdata[c].r2file)) {
+				fprintf(stderr, "failed to configure R2 context with file %s\n", g_confdata[c].r2file);
 			}
 		}	
 	}
@@ -686,7 +787,7 @@ int main(int argc, char *argv[])
 	if (c != numgroups) {
 		/* let's free what we allocated so far and bail out */
 		for (--c; c >= 0; c--) {
-			openr2_context_delete(confdata[c].context);
+			openr2_context_delete(g_confdata[c].context);
 		}
 		fprintf(stderr, "Aborting test.\n");
 		return -1;
@@ -694,28 +795,29 @@ int main(int argc, char *argv[])
 
 	/* now create channels for each context */
 	for (c = 0; c < numgroups; c++) {
-		for (i = confdata[c].lowchan, cnt = 0; i <= confdata[c].highchan; i++, cnt++) {
+		for (i = g_confdata[c].lowchan, cnt = 0; i <= g_confdata[c].highchan; i++, cnt++) {
 #ifdef HAVE_DAHDI_USER_H
-			if (confdata[c].usedahdimf) {
-				tx_mf_state = &confdata[c].channels[cnt].dahdi_tx_state;
+			if (g_confdata[c].usedahdimf) {
+				tx_mf_state = &g_confdata[c].channels[cnt].dahdi_tx_state;
 			}
 #endif
-			confdata[c].channels[cnt].chan = openr2_chan_new(confdata[c].context, i, tx_mf_state, NULL);
-			if (!confdata[c].channels[cnt].chan) {
+			g_confdata[c].channels[cnt].chan = openr2_chan_new(g_confdata[c].context, i, tx_mf_state, NULL);
+			if (!g_confdata[c].channels[cnt].chan) {
 				fprintf(stderr, "failed to create R2 channel %d: %s\n", i,
-						openr2_context_error_string(openr2_context_get_last_error(confdata[c].context)));
+						openr2_context_error_string(openr2_context_get_last_error(g_confdata[c].context)));
 				break;
 			}
-			openr2_chan_set_client_data(confdata[c].channels[cnt].chan, &confdata[c]);
-			if (confdata[c].callfiles) {
-				openr2_chan_enable_call_files(confdata[c].channels[cnt].chan);
+			g_confdata[c].channels[cnt].conf = &g_confdata[c];
+			openr2_chan_set_client_data(g_confdata[c].channels[cnt].chan, &g_confdata[c].channels[cnt]);
+			if (g_confdata[c].callfiles) {
+				openr2_chan_enable_call_files(g_confdata[c].channels[cnt].chan);
 			}
 #ifdef HAVE_DAHDI_USER_H
-			confdata[c].channels[cnt].dahdi_tx_state.r2chan = confdata[c].channels[cnt].chan;
+			g_confdata[c].channels[cnt].dahdi_tx_state.r2chan = g_confdata[c].channels[cnt].chan;
 #endif
 		}
 		/* something failed, thus, at least 1 channel could not be created */
-		if (cnt != ((confdata[c].highchan - confdata[c].lowchan)+1)) {
+		if (cnt != ((g_confdata[c].highchan - g_confdata[c].lowchan)+1)) {
 			CLEAN_CONF;
 			fprintf(stderr, "Aborting test.\n");
 			return -1;
@@ -731,14 +833,14 @@ int main(int argc, char *argv[])
 	   the far end is unblocked before making the call */
 	listener_count = 0;
 	for (c = 0; c < numgroups; c++) {
-		if (confdata[c].caller) {
+		if (g_confdata[c].caller) {
 			continue;
 		}
-		for (i = confdata[c].lowchan, cnt = 0; i<= confdata[c].highchan; i++, cnt++) {
-			res = pthread_create(&confdata[c].channels[cnt].thread_id, NULL, wait_call, confdata[c].channels[cnt].chan);
+		for (i = g_confdata[c].lowchan, cnt = 0; i<= g_confdata[c].highchan; i++, cnt++) {
+			res = pthread_create(&g_confdata[c].channels[cnt].thread_id, NULL, wait_call, g_confdata[c].channels[cnt].chan);
 			if (res) {
 				fprintf(stderr, "Failed to create listener thread for channel %d, continuing anyway ...\n", 
-						openr2_chan_get_number(confdata[c].channels[cnt].chan));
+						openr2_chan_get_number(g_confdata[c].channels[cnt].chan));
 				continue;
 			}
 			listener_count++;
@@ -756,15 +858,15 @@ int main(int argc, char *argv[])
 	/* time to spawn a thread for each channel that requested to start a call */
 	int caller_threads = 0;
 	for (c = 0; c < numgroups; c++) {
-		if (!confdata[c].caller) {
+		if (!g_confdata[c].caller) {
 			continue;
 		}
-		for (i = confdata[c].lowchan, cnt = 0; i <= confdata[c].highchan; i++, cnt++) {
-			res = pthread_create(&confdata[c].channels[cnt].thread_id, NULL, 
-					make_call, confdata[c].channels[cnt].chan);
+		for (i = g_confdata[c].lowchan, cnt = 0; i <= g_confdata[c].highchan; i++, cnt++) {
+			res = pthread_create(&g_confdata[c].channels[cnt].thread_id, NULL, 
+					make_call, g_confdata[c].channels[cnt].chan);
 			if (res) {
 				fprintf(stderr, "Failed to create calling thread for channel %d, continuing anyway ...\n", 
-						openr2_chan_get_number(confdata[c].channels[cnt].chan));
+						openr2_chan_get_number(g_confdata[c].channels[cnt].chan));
 				continue;
 			}
 			caller_threads++;
@@ -774,8 +876,8 @@ int main(int argc, char *argv[])
 
 	/* wait for all the threads to be done */
 	for (c = 0; c < numgroups; c++) {
-		for (i = confdata[c].lowchan, cnt = 0; i <= confdata[c].highchan; i++, cnt++) {
-			pthread_join(confdata[c].channels[cnt].thread_id, NULL);
+		for (i = g_confdata[c].lowchan, cnt = 0; i <= g_confdata[c].highchan; i++, cnt++) {
+			pthread_join(g_confdata[c].channels[cnt].thread_id, NULL);
 		}
 	}
 

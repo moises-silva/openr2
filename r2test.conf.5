@@ -98,6 +98,14 @@ Whether to skip Group B/II signals and go directly to the accepted state for an 
 .B advancedprotocolfile
 This option is for advanced users only! Define a file that contains hacks to R2 protocol. This allow advanced users to fine tune the library or make test with specific scenarios to inclide in the library in the future.
 
+.TP
+\fBplayaudio\fR=\fI<yes|no>\fR
+This feature allows you to play an alaw audio file for inconming/outgoing calls. Defaults to \fIno\fR
+
+.TP
+.B audiofile
+If you set \fBplayaudio\fR=\fIyes\fR you should provide the path to the audio file
+
 .TP 
 .B channel
 Define range of channels to configure using previous options. The channel range must be specified, unless you will use only one channel. If this option is specified after \fBdnid\fR, \fBcid\fR and \fBcaller\fR that options will be used. Defaults to
