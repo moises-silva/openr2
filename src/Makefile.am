@@ -1,3 +1,12 @@
+AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes 
+if WANT_OR2_TRACE_STACKS
+AM_CFLAGS += -DOR2_TRACE_STACKS
+endif
+
+if HAVE_SVNVERSION
+AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
+endif
+
 lib_LTLIBRARIES = libopenr2.la
 
 include_HEADERS = openr2/openr2.h 
@@ -10,24 +19,15 @@ nobase_include_HEADERS = openr2/r2chan.h \
 			 openr2/r2hwcompat.h
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
-
-AM_CFLAGS = -ggdb3 -O0 -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes 
+libopenr2_la_CFLAGS = $(AM_CFLAGS)
+libopenr2_la_LDFLAGS = -lm -lpthread -version-info $(OPENR2_LT_CURRENT):@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
 
 if WANT_R2TEST
 bin_PROGRAMS = r2test
 r2test_SOURCES = r2test.c 
 r2test_LDADD = -lpthread libopenr2.la
+r2test_CFLAGS = $(AM_CFLAGS)
 endif
 
 INCLUDES = -Iopenr2
-LIBS = -lm
-
-if WANT_OR2_TRACE_STACKS
-AM_CFLAGS += -DOR2_TRACE_STACKS
-endif
-
-if HAVE_SVNVERSION
-AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
-endif
-
 

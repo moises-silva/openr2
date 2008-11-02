@@ -3,7 +3,7 @@
  * MFC/R2 call setup library
  *
  * Moises Silva <moy@sangoma.com>
- * Copyright (C) Moises Silva
+ * Copyright (C) 2008 Moises Silva
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
