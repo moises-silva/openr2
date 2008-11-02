@@ -290,7 +290,6 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		for (; t < r2chan->timers_count; t++) {
 			ms = ((r2chan->sched_timers[t].time.tv_sec - nowtv.tv_sec) * 1000) +
 			     ((r2chan->sched_timers[t].time.tv_usec - nowtv.tv_usec)/1000);
-			//if (openr2_timercmp(&r2chan->sched_timers[t].time, &nowtv, <=)) {
 			if (ms <= 0) {
 				memcpy(&schedtimer, &r2chan->sched_timers[t], sizeof(schedtimer));
 				openr2_chan_cancel_timer(r2chan, &schedtimer.id);
@@ -457,9 +456,9 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 {
 	OR2_CHAN_STACK;
 	int i = 0;
-	//openr2_log(r2chan, OR2_LOG_ERROR, "Attempting to cancel timer timer %d\n", *timer_id);
+	openr2_log(r2chan, OR2_LOG_EX_DEBUG, "Attempting to cancel timer timer %d\n", *timer_id);
 	if (*timer_id < 1) {
-	//	openr2_log(r2chan, OR2_LOG_ERROR, "Cannot cancel timer %d\n", *timer_id);
+		openr2_log(r2chan, OR2_LOG_EX_DEBUG, "Cannot cancel timer %d\n", *timer_id);
 		return;
 	}
 
@@ -475,7 +474,7 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 			}
 			r2chan->timers_count--;
 			*timer_id = 0;
-	//		openr2_log(r2chan, OR2_LOG_DEBUG, "timer id %d has been cancelled\n");
+			openr2_log(r2chan, OR2_LOG_EX_DEBUG, "timer id %d has been cancelled\n");
 			break;
 		}
 	}

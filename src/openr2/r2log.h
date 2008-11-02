@@ -39,7 +39,8 @@ typedef enum {
 	OR2_LOG_MF_TRACE    = ( 1 << 4 ),
 	OR2_LOG_CAS_TRACE   = ( 1 << 5 ),
 	OR2_LOG_STACK_TRACE = ( 1 << 6 ),
-	OR2_LOG_ALL         = 0xFF
+	OR2_LOG_ALL         = ( 0xFFF ),
+	OR2_LOG_EX_DEBUG    = ( OR2_LOG_ALL + 1 )
 } openr2_log_level_t;	
 
 #ifdef OR2_TRACE_STACKS

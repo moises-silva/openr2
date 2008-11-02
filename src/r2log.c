@@ -120,7 +120,7 @@ void openr2_log2(openr2_context_t *r2context, openr2_log_level_t level, const ch
 
 const char *openr2_log_get_level_string(openr2_log_level_t level)
 {
-	switch ( level ) {
+	switch (level) {
 	case OR2_LOG_ERROR:
 		return "ERROR";
 	case OR2_LOG_WARNING:
@@ -137,6 +137,8 @@ const char *openr2_log_get_level_string(openr2_log_level_t level)
 		return "STACK TRACE";
 	case OR2_LOG_NOTHING:
 		return "NOTHING";
+	case OR2_LOG_EX_DEBUG:
+		return "EXDEBUG";
 	default:
 		return "*UNKNOWN*";
 	};
@@ -154,6 +156,8 @@ openr2_log_level_t openr2_log_get_level(const char *levelstr)
 		return OR2_LOG_NOTICE;
 	} else if (!openr2_strncasecmp("DEBUG", levelstr, sizeof("DEBUG")-1)) {
 		return OR2_LOG_DEBUG;
+	} else if (!openr2_strncasecmp("EXDEBUG", levelstr, sizeof("EXDEBUG")-1)) {
+		return OR2_LOG_EX_DEBUG;
 	} else if (!openr2_strncasecmp("MF", levelstr, sizeof("MF")-1)) {
 		return OR2_LOG_MF_TRACE;
 	} else if (!openr2_strncasecmp("CAS", levelstr, sizeof("CAS")-1)) {
