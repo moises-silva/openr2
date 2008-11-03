@@ -257,6 +257,14 @@ typedef enum {
 	OR2_VAR_UNKNOWN = 999
 } openr2_variant_t;
 
+typedef void (*openr2_variant_config_func)(struct openr2_context_s *);
+typedef struct {
+	openr2_variant_t id;
+	const char *name;
+	const char *country;
+	openr2_variant_config_func config;
+} openr2_variant_entry_t;
+
 /* at any given time we either are stopped (idle or blocked), forward or backward */
 typedef enum {
 	OR2_DIR_STOPPED,
@@ -399,6 +407,7 @@ const char *openr2_proto_get_mf_state_string(struct openr2_chan_s *r2chan);
 const char *openr2_proto_get_mf_group_string(struct openr2_chan_s *r2chan);
 int openr2_proto_get_mf_tx(struct openr2_chan_s *r2chan);
 int openr2_proto_get_mf_rx(struct openr2_chan_s *r2chan);
+const openr2_variant_entry_t *openr2_proto_get_variant_list(int *numvariants);
 
 
 #if defined(__cplusplus)

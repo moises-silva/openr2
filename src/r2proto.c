@@ -191,14 +191,6 @@ static const char *abcd_names[OR2_NUM_ABCD_SIGNALS] =
 	/* OR2_ABCD_ANSWER */ "ANSWER" 
 };
 
-typedef void (*openr2_variant_config_func)(openr2_context_t *);
-typedef struct {
-	openr2_variant_t id;
-	const char *name;
-	const char *country;
-	openr2_variant_config_func config;
-} openr2_variant_entry_t;
-
 static openr2_variant_entry_t r2variants[] =
 {
 	/* ARGENTINA */ 
@@ -247,7 +239,7 @@ static openr2_variant_entry_t r2variants[] =
 	{
 		.id = OR2_VAR_ITU,
 		.name = "ITU",
-		.country = "Neutral",
+		.country = "International Telecommunication Union",
 		.config = r2config_itu
 	},
 	/* MEXICO */ 
@@ -2310,5 +2302,14 @@ int openr2_proto_get_mf_rx(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->mf_read_tone;
+}
+
+const openr2_variant_entry_t *openr2_proto_get_variant_list(int *numvariants)
+{
+	if (!numvariants) {
+		return NULL;
+	}
+	*numvariants = sizeof(r2variants)/sizeof(r2variants[0]);
+	return r2variants;
 }
 
