@@ -18,6 +18,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Contributors:
+ *
+ * Cleiber Marques da Silva <cleibermarques@hotmail.com>
+ * Humberto Figuera <hfiguera@gmail.com>
+ *
  */
 
 #ifdef HAVE_CONFIG_H
