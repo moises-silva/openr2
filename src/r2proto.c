@@ -195,6 +195,7 @@ typedef void (*openr2_variant_config_func)(openr2_context_t *);
 typedef struct {
 	openr2_variant_t id;
 	const char *name;
+	const char *country;
 	openr2_variant_config_func config;
 } openr2_variant_entry_t;
 
@@ -204,60 +205,70 @@ static openr2_variant_entry_t r2variants[] =
 	{
 		.id = OR2_VAR_ARGENTINA,
 		.name = "AR",
+		.country = "Argentina",
 		.config = r2config_argentina,
 	},	
 	/* BRAZIL */ 
 	{
 		.id = OR2_VAR_BRAZIL,
 		.name = "BR",
+		.country = "Brazil",
 		.config = r2config_brazil
 	},
 	/* CHINA */ 
 	{
 		.id = OR2_VAR_CHINA,
 		.name = "CN",
+		.country = "China",
 		.config = r2config_china
 	},	
 	/* CZECH */ 
 	{
 		.id = OR2_VAR_CZECH,
 		.name = "CZ",
+		.country = "Czech Republic",
 		.config = r2config_itu
 	},		
 	/* COLOMBIA */ 
 	{
 		.id = OR2_VAR_COLOMBIA,
 		.name = "CO",
+		.country = "Colombia",
 		.config = r2config_colombia
 	},		
 	/* ECUADOR */ 
 	{
 		.id = OR2_VAR_ECUADOR,
 		.name = "EC",
+		.country = "Ecuador",
 		.config = r2config_itu,
 	},	
 	/* ITU */
 	{
 		.id = OR2_VAR_ITU,
 		.name = "ITU",
+		.country = "Neutral",
 		.config = r2config_itu
 	},
 	/* MEXICO */ 
 	{
 		.id = OR2_VAR_MEXICO,
 		.name = "MX",
+		.country = "Mexico",
 		.config = r2config_mexico
 	},
 	/* PHILIPPINES */ 
 	{
 		.id = OR2_VAR_PHILIPPINES,
 		.name = "PH",
+		.country = "Philippines",
 		.config = r2config_itu
 	},
 	/* VENEZUELA */ 
 	{
 		.id = OR2_VAR_VENEZUELA,
 		.name = "VE",
+		.country = "Venezuela",
 		.config = r2config_venezuela
 	}
 };
