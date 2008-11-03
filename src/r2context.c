@@ -417,6 +417,9 @@ openr2_variant_t openr2_context_get_variant(openr2_context_t *r2context)
 void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 {
 	OR2_CONTEXT_STACK;
+	if (ani_first < 0) {
+		return;
+	}
 	r2context->get_ani_first = ani_first ? 1 : 0;
 }
 
@@ -429,6 +432,9 @@ int openr2_context_get_ani_first(openr2_context_t *r2context)
 void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
 {
 	OR2_CONTEXT_STACK;
+	if (immediate_accept < 0) {
+		return;
+	}
 	r2context->immediate_accept = immediate_accept ? 1 : 0;
 }
 
