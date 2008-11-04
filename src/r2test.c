@@ -185,19 +185,6 @@ static openr2_mflib_interface_t g_mf_dahdi_iface = {
 };
 #endif /* HAVE_DAHDI_USER_H */
 
-/* Deal with audio playback feature */
-int get_buf_length(const unsigned char *buf);
-int get_buf_length(const unsigned char *buf)
-{
-	int n;
-	
-	for(n=0; *buf != '\0'; buf++ )
-		n++;
-
-	return(n);
-}
-
-static void show_variant_list(void);
 static void show_variant_list(void)
 {
 	const openr2_variant_entry_t *variants;
@@ -205,12 +192,13 @@ static void show_variant_list(void)
 	int j = 0;
 	
 	if(!(variants = openr2_proto_get_variant_list(&j))) {
-		fprintf(stderr, "USER: failed to get variants list.\n");
+		fprintf(stderr, "Failed to get variants list.\n");
+		return;
 	}
 
-	printf("Variant\tContry\n");
+	printf("%4s %40s\n", "Variant Code", "Country");
 	for (i = 0; i < j; i++) {
-		printf("%7s\t%s\n", variants[i].name, variants[i].country);
+		printf("%4s %40s\n", variants[i].name, variants[i].country);
 	}
 }
 
@@ -773,7 +761,7 @@ int main(int argc, char *argv[])
 			show_variant_list();
 			exit(0);
 		case 'v':
-			printf("OpenR2 version: %s, release: %s\n", openr2_get_version(), openr2_get_revision());
+			printf("OpenR2 version: %s, revision: %s\n", openr2_get_version(), openr2_get_revision());
 			exit(0);
 		case '?':
 			break;
