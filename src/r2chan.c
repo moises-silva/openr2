@@ -260,7 +260,8 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 	case OR2_HW_EVENT_ALARM:
 	case OR2_HW_EVENT_NO_ALARM:
 		openr2_log(r2chan, OR2_LOG_DEBUG, (event == OR2_HW_EVENT_ALARM) ? "Alarm Raised\n" : "Alarm Cleared\n");
-		EMI(r2chan)->on_hardware_alarm(r2chan, ((event == OR2_HW_EVENT_ALARM) ? 1 : 0));
+		r2chan->inalarm = (event == OR2_HW_EVENT_ALARM) ? 1 : 0;
+		EMI(r2chan)->on_hardware_alarm(r2chan, r2chan->inalarm);
 		break;
 	default:
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Unhandled hardware event %d\n", event);

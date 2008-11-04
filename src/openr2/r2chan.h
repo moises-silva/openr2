@@ -152,6 +152,9 @@ typedef struct openr2_chan_s {
 	/* Meaning of last R2 signal written to this channel */
 	openr2_abcd_signal_t abcd_tx_signal;
 
+	/* Whether or not this channel is in alarm */
+	int inalarm;
+
 	/* Private buffer to store the string ABCD representation */
 	char abcd_buff[10];
 

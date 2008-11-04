@@ -974,6 +974,13 @@ int openr2_proto_handle_abcd_change(openr2_chan_t *r2chan)
 handleabcd:
 
 	r2chan->abcd_read = abcd;
+	/* if were in alarm, just save the read bits and set the 
+	   ABCD signal to invalid, since the bits cannot mean anything
+	   when in alarm */
+	if (r2chan->inalarm) {
+		r2chan->abcd_rx_signal = OR2_ABCD_INVALID;
+		return 0;
+	}
 	/* ok, bits have changed, we need to know in which 
 	   ABCD state we are to know what to do */
 	switch (r2chan->r2_state) {
@@ -2249,7 +2256,7 @@ const char *openr2_proto_get_variant_string(openr2_variant_t variant)
 const char *openr2_proto_get_rx_state_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	if (r2chan->abcd_rx_signal != OR2_ABCD_INVALID) {
+	if (r2chan->abcd_rx_signal != OR2_ABCD_INVALID && !r2chan->inalarm) {
 		return abcd_names[r2chan->abcd_rx_signal];
 	}
 	/* this is obviously not thread-safe, oh well ... */
