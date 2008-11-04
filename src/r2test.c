@@ -28,6 +28,7 @@
 #endif
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
@@ -194,6 +195,23 @@ int get_buf_length(const unsigned char *buf)
 		n++;
 
 	return(n);
+}
+
+static void show_variant_list(void);
+static void show_variant_list(void)
+{
+	const openr2_variant_entry_t *variants;
+	int i = 0;
+	int j = 0;
+	
+	if(!(variants = openr2_proto_get_variant_list(&j))) {
+		fprintf(stderr, "USER: failed to get variants list.\n");
+	}
+
+	printf("Variant\tContry\n");
+	for (i = 0; i < j; i++) {
+		printf("%7s\t%s\n", variants[i].name, variants[i].country);
+	}
 }
 
 static void close_audiofp(openr2_chan_t *r2chan)
@@ -733,14 +751,33 @@ void *make_call(void *data)
 
 int main(int argc, char *argv[])
 {
-	int res, c, i, numgroups, cnt;
+	int res, c, i, numgroups, cnt, o;
 	FILE *config;
 	struct stat confstat;
 	void *tx_mf_state = NULL;
 	openr2_mflib_interface_t *mf_iface = NULL;
+
+	extern char *optarg;
+	extern int optind, optopt;
+
 	if (argc < 2) {
-		fprintf(stderr, "You need to specify a configuration file\n");
+		fprintf(stderr, "Usage:\n\t%s <file>\tConfiguration file\n", argv[0]);
+		fprintf(stderr, "\t%s -l\tShow variants list\n", argv[0]);
+		fprintf(stderr, "\t%s -v\tShow version info\n", argv[0]);
 		return -1;
+	}
+	
+	while ((o = getopt(argc, argv, ":lv")) != -1) {
+		switch(o) {
+		case 'l':
+			show_variant_list();
+			exit(0);
+		case 'v':
+			printf("OpenR2 version: %s, release: %s\n", openr2_get_version(), openr2_get_revision());
+			exit(0);
+		case '?':
+			break;
+		}
 	}
 
 	if (stat(argv[1], &confstat)) {
