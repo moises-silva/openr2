@@ -264,8 +264,8 @@ static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *
 {
 	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
 	chan_group_data_t *confdata = chandata->conf;
-	printf("USER: call ready on chan %d. DNIS = %s, ANI = %s, Category = %d\n", 
-			openr2_chan_get_number(r2chan), dnis, ani ? ani : "(restricted)", category);
+	printf("USER: call ready on chan %d. ANI = %s, DNIS = %s, Category = %d\n", 
+			openr2_chan_get_number(r2chan), ani ? ani : "(restricted)", dnis, category);
 	/* if collect calls are not allowed and this is a collect call, reject it */
 	if (!confdata->collect_calls && category == OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL) {
 		openr2_chan_disconnect_call(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
