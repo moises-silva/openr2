@@ -6,13 +6,14 @@ r2test.conf \- OpenR2 r2test program configuration file
 .SH "DESCRIPTION"
 This file defines the behavior of the \fBr2test\fP program
 .PP 
-This file works pretty much like Asterisk zapata.conf file, the \fBchannel\fR parameter
-will create a R2 context with the specified range of channels and will take all the
-preceding parameters as configuration.
+This file works pretty much like Asterisk zapata.conf file, the \fBchannel\fR
+parameter will create a R2 context with the specified range of channels and
+will take all the preceding parameters as configuration.
 .PP 
 
 .SH "SYNTAX"
-No spaces are allowed in parameter definition, lines starting with \fB#\fR or spaces will be ignored
+No spaces are allowed in parameter definition, lines starting with \fB#\fR
+or spaces will be ignored
 .BR 
 .PP 
 This definition will not be read properly
@@ -26,7 +27,8 @@ This definition will be read fine
 .PP 
 .SH "OPTIONS"
 .TP 
-\fBcategory\fR=\fI<NATIONAL_SUBSCRIBER,NATIONAL_PRIORITY_SUBSCRIBER,INTERNATIONAL_SUBSCRIBER,INTERNATIONAL_PRIORITY_SUBSCRIBER>\fR
+\fBcategory\fR=\fI<NATIONAL_SUBSCRIBER,NATIONAL_PRIORITY_SUBSCRIBER,
+INTERNATIONAL_SUBSCRIBER,INTERNATIONAL_PRIORITY_SUBSCRIBER>\fR
 Defines the call category of subscriber. Defaults to \fINATIONAL_SUBSCRIBER\fR
 .TP 
 \fBloglevel\fR=\fI<all,error,warning,debug,notice,cas,mf,stack,nothing>\fR
@@ -38,17 +40,23 @@ Defines the log level for debugging purpouses. Defaults to \fIall\fR
 
 \fBmf\fR is for logging of the Multi Frequency tones
 
-\fBstack\fR is for very verbose output of the channel and context call stack, only useful if you are debugging a crash or want to learn how the library works. The stack logging will be only enabled if the openr2 library was compiled with \-DOR2_TRACE_STACKS
+\fBstack\fR is for very verbose output of the channel and context call stack,
+only useful if you are debugging a crash or want to learn how the library works.
+The stack logging will be only enabled if the openr2 library was compiled with
+\-DOR2_TRACE_STACKS
 
 \fBall\fR is a special value to log all the activity
 
-\fBnothing\fR is a clean\-up value, in case you want to not log any activity for a channel or group of channels
+\fBnothing\fR is a clean\-up value, in case you want to not log any activity
+for a channel or group of channels
 
-You can mix up values, like: \fBloglevel\fR=\fIerror,debug,mf\fR to log just \fBerror\fR, \fBdebug\fR and multi frequency messages
+You can mix up values, like: \fBloglevel\fR=\fIerror,debug,mf\fR to log just
+\fBerror\fR, \fBdebug\fR and multi frequency messages
 
 .TP 
 \fBcallfile\fR=\fI<yes|no>\fR
-Call files useful to debug signaling isssues are dumped in the current directory if this parameter is enabled. Defaults to \fIno\fR
+Call files useful to debug signaling isssues are dumped in the current directory
+if this parameter is enabled. Defaults to \fIno\fR
 
 .TP 
 \fBvariant\fR=\fI<br,mx,ar,itu>\fR
@@ -68,19 +76,28 @@ Wheter or not we want to request ANI first. Defaults to \fIno\fR
 
 .TP 
 \fBusedahdimf\fR=\fI<yes|no>\fR
-Whether to use the built\-in openr2 MF tone generation or DAHDI MF tone generation. DAHDI is faster since it does not require to copy user space buffers to the kernel, however this option will only be available when the configure script detects DAHDI support for MF R2 tone generation. Defaults to \fIno\fR
+Whether to use the built\-in openr2 MF tone generation or DAHDI MF tone
+generation. DAHDI is faster since it does not require to copy user space
+buffers to the kernel, however this option will only be available when the
+configure script detects DAHDI support for MF R2 tone generation.
+Defaults to \fIno\fR
 
 .TP 
 \fBmfthreshold\fR
-MF threshold in milliseconds. This is the amount of time a R2 MF signal is required to be ON or OFF after has been detected to be handled. 0 means as soon as we detect a signal we handle it. This aids when a buggy generator or detector causes small false positives. Defaults to \fI0\fR
+MF threshold in milliseconds. This is the amount of time a R2 MF signal is
+required to be ON or OFF after has been detected to be handled. 0 means as soon
+as we detect a signal we handle it. This aids when a buggy generator or
+detector causes small false positives. Defaults to \fI0\fR
 
 .TP 
 \fBmfbacktimeout\fR
-MF backward timeout in milliseconds to use openr2 default just specify any negative number or comment this line. Defaults to \fI\-1\fR
+MF backward timeout in milliseconds to use openr2 default just specify any
+negative number or comment this line. Defaults to \fI\-1\fR
 
 .TP 
 \fBmeteringpulsetimeout\fR
-Value in milliseconds for the metering pulse timeout, any negative value means \fIdefault\fR. Defaults to \fI\-1\fR
+Value in milliseconds for the metering pulse timeout, any negative value means
+\fIdefault\fR. Defaults to \fI\-1\fR
 
 .TP 
 \fBcollectcalls\fR=\fI<yes|no>\fR
@@ -88,19 +105,25 @@ Whether to accept collect calls (se also \fBdoubleanswer\fR). Defaults to \fIno\
 
 .TP 
 \fBdoubleanswer\fR=\fI<yes|no>\fR
-This option are related but independent of \fBcollectcalls\fR. If you have problems to block collect calls using Group B signals (\fBcollectcalls\fR), enable this option. Defaults to \fIno\fR
+This option are related but independent of \fBcollectcalls\fR. If you have problems
+to block collect calls using Group B signals (\fBcollectcalls\fR), enable this
+option. Defaults to \fIno\fR
 
 .TP 
 \fBimmediateaccept\fR=\fI<yes|no>\fR
-Whether to skip Group B/II signals and go directly to the accepted state for an incoming call. Defaults to \fIno\fR
+Whether to skip Group B/II signals and go directly to the accepted state for an
+incoming call. Defaults to \fIno\fR
 
 .TP 
 .B advancedprotocolfile
-This option is for advanced users only! Define a file that contains hacks to R2 protocol. This allow advanced users to fine tune the library or make test with specific scenarios to inclide in the library in the future.
+This option is for advanced users only! Define a file that contains hacks to
+R2 protocol. This allow advanced users to fine tune the library or make test
+with specific scenarios to inclide in the library in the future.
 
 .TP
 \fBplayaudio\fR=\fI<yes|no>\fR
-This feature allows you to play an alaw audio file for inconming/outgoing calls. Defaults to \fIno\fR
+This feature allows you to play an alaw audio file for inconming/outgoing calls.
+Defaults to \fIno\fR
 
 .TP
 .B audiofile
@@ -108,7 +131,10 @@ If you set \fBplayaudio\fR=\fIyes\fR you should provide the path to the audio fi
 
 .TP 
 .B channel
-Define range of channels to configure using previous options. The channel range must be specified, unless you will use only one channel. If this option is specified after \fBdnid\fR, \fBcid\fR and \fBcaller\fR that options will be used. Defaults to
+Define range of channels to configure using previous options. The channel range
+must be specified, unless you will use only one channel. If this option is
+specified after \fBdnid\fR, \fBcid\fR and \fBcaller\fR that options will be
+used. Defaults to
 
 .br 
 .br 
@@ -127,7 +153,8 @@ Defines the caller id number. Only used if .B caller = yes
 
 .TP 
 \fBcaller\fR=\fI<yes|no>\fR
-Whether or not the group of channels will start a call to the specified dnid. Defaults to \fIyes\fR
+Whether or not the group of channels will start a call to the specified dnid.
+Defaults to \fIyes\fR
 
 
 .SH "FILES"

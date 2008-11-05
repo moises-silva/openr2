@@ -196,9 +196,9 @@ static void show_variant_list(void)
 		return;
 	}
 
-	printf("%4s %40s\n", "Variant Code", "Country");
+	printf("%12s        %-40s\n", "Variant Code", "Country");
 	for (i = 0; i < j; i++) {
-		printf("%4s %40s\n", variants[i].name, variants[i].country);
+		printf("%-12s        %-40s\n", variants[i].name, variants[i].country);
 	}
 }
 
@@ -737,6 +737,14 @@ void *make_call(void *data)
 	return (void *)0;
 }
 
+void show_usage_help(char *name);
+void show_usage_help(char *name)
+{
+	fprintf(stderr, "Usage:\n\t%s -c <file>\tConfiguration file\n", name);
+	fprintf(stderr, "\t%s -l\t\tShow variants list\n", name);
+	fprintf(stderr, "\t%s -v\t\tShow version info\n", name);
+}
+
 int main(int argc, char *argv[])
 {
 	int res, c, i, numgroups, cnt, o;
@@ -745,35 +753,44 @@ int main(int argc, char *argv[])
 	void *tx_mf_state = NULL;
 	openr2_mflib_interface_t *mf_iface = NULL;
 
+	char *cfgfile = NULL;
 	extern char *optarg;
-	extern int optind, optopt;
+	extern int optind, opterr, optopt;
 
-	if (argc < 2) {
-		fprintf(stderr, "Usage:\n\t%s <file>\tConfiguration file\n", argv[0]);
-		fprintf(stderr, "\t%s -l\tShow variants list\n", argv[0]);
-		fprintf(stderr, "\t%s -v\tShow version info\n", argv[0]);
-		return -1;
-	}
-	
-	while ((o = getopt(argc, argv, ":lv")) != -1) {
+	while ((o = getopt(argc, argv, ":c:lv")) != -1) {
 		switch(o) {
+		case 'c':
+			cfgfile = optarg;
+			if (stat(cfgfile, &confstat)) {
+				perror("failed to stat() configuration file");
+				return -1;
+			}
+			break;
 		case 'l':
 			show_variant_list();
-			exit(0);
+			return 0;
 		case 'v':
 			printf("OpenR2 version: %s, revision: %s\n", openr2_get_version(), openr2_get_revision());
-			exit(0);
+			return 0;
 		case '?':
-			break;
+			show_usage_help(argv[0]);
+			return -1;
+		case ':':
+			show_usage_help(argv[0]);
+			return -1;
+		default:
+			show_usage_help(argv[0]);
+			return -1;
+			
 		}
 	}
 
-	if (stat(argv[1], &confstat)) {
-		perror("failed to stat() configuration file");
+	if ((cfgfile==NULL)) {
+		show_usage_help(argv[0]);
 		return -1;
 	}
 
-	config = fopen(argv[1], "r");
+	config = fopen(cfgfile, "r");
 	if (!config) {
 		perror("unable to open configuration file");
 		return -1;
