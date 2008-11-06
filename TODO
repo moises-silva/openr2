@@ -1,5 +1,6 @@
 == This TODO list is in order of importance (what I think is more important for users to have) ==
 
+- Send logs to syslog
 - DTMF/R2
 - Add support for use 1 variant for outgoing calls and one for incoming calls
 - Port to Windows
