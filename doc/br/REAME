@@ -1,0 +1,82 @@
+Sample Configurations for Brazil
+================================
+
+Here we provide sample working configurations for named Brazilian telco companies.
+If you get you installation working with another telco not in this list or with
+different params, please send me you config for alexandre.alencar@gmail.com.
+
+All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
+you need to choose only one sample.
+
+Sample Configuration for Embratel
+=================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=embratel
+mfcr2_logging=all
+
+Sample Configuration for Oi
+===========================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_get_ani_first=yes
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=oi
+mfcr2_logging=all
+
+; Sample 2
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=oi
+mfcr2_logging=all
+
+; Sample 3
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_metering_pulse_timeout=500
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=oi
+mfcr2_logging=all
+
+
+Sample Configuration for Brasil Telecom
+=======================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_mfback_timeout=4000
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=brt
+mfcr2_logging=all
+
