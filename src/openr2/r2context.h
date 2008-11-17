@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#define OR2_MAX_LOGDIR 255
+#define OR2_MAX_PATH 255
 
 /* we dont include openr2_chan_t because r2chan.h 
    already include us */
@@ -249,7 +249,7 @@ typedef struct openr2_context_s {
 	openr2_log_level_t loglevel;
 
 	/* R2 logging directory */
-	char logdir[OR2_MAX_LOGDIR];
+	char logdir[OR2_MAX_PATH];
 
 	/* whether or not the advanced configuration file was used */
 	int configured_from_file;
