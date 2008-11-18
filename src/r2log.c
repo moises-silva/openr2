@@ -26,10 +26,10 @@
 #include <sys/time.h>
 #include <time.h>
 #include <pthread.h>
-#include "openr2/r2log.h"
-#include "openr2/r2chan.h"
-#include "openr2/r2context.h"
-#include "openr2/r2utils.h"
+#include "openr2/r2log-pvt.h"
+#include "openr2/r2utils-pvt.h"
+#include "openr2/r2chan-pvt.h"
+#include "openr2/r2context-pvt.h"
 
 void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt, va_list ap)
 {
@@ -118,6 +118,7 @@ void openr2_log2(openr2_context_t *r2context, openr2_log_level_t level, const ch
 	}	
 }
 
+OR2_EXPORT_SYMBOL
 const char *openr2_log_get_level_string(openr2_log_level_t level)
 {
 	switch (level) {
@@ -144,6 +145,7 @@ const char *openr2_log_get_level_string(openr2_log_level_t level)
 	};
 }
 
+OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_log_get_level(const char *levelstr)
 {
 	if (!openr2_strncasecmp("ALL", levelstr, sizeof("ALL")-1)) {

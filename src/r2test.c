@@ -657,8 +657,8 @@ void *wait_call(void *data)
 	chanfd = openr2_chan_get_fd(r2chan);
 	variant = openr2_context_get_variant(confdata->context);
 	printf("channel %d, variant = %s\n", channo, openr2_proto_get_variant_string(variant));
-	openr2_proto_set_idle(r2chan);
-	openr2_proto_handle_abcd_change(r2chan);
+	openr2_chan_set_idle(r2chan);
+	openr2_chan_handle_cas(r2chan);
 	while (1) {
 		FD_ZERO(&chanread);
 		FD_ZERO(&chanexcept);
@@ -710,8 +710,8 @@ void *make_call(void *data)
 	struct timeval timeout, *timeout_ptr;
 	chanfd = openr2_chan_get_fd(r2chan);
 	/* handle current state of ABCD bits, either blocked or idle */
-	openr2_proto_set_idle(r2chan);
-	openr2_proto_handle_abcd_change(r2chan);
+	openr2_chan_set_idle(r2chan);
+	openr2_chan_handle_cas(r2chan);
 	while (1) {
 		FD_ZERO(&chanread);
 		FD_ZERO(&chanexcept);

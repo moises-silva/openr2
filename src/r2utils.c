@@ -29,12 +29,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "r2utils.h"
+#include "r2utils-pvt.h"
 
 static pthread_mutex_t localtime_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ctime_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* VERSION should be always defined */
+OR2_EXPORT_SYMBOL
 const char *openr2_get_version(void)
 {
 #ifdef VERSION
@@ -45,6 +46,7 @@ const char *openr2_get_version(void)
 }
 
 /* REVISION will be only defined if built via SVN */
+OR2_EXPORT_SYMBOL
 const char *openr2_get_revision()
 {
 #ifdef REVISION
@@ -117,6 +119,7 @@ char *openr2_ctime_r(const time_t *timep, char *buf)
 	return buf;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_strncasecmp(const char *s1, const char *s2, size_t n)
 {
 	const unsigned char *p1 = (const unsigned char *)s1;

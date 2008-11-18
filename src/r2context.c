@@ -29,12 +29,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "openr2/r2chan.h"
-#include "openr2/r2log.h"
-#include "openr2/r2proto.h"
-#include "openr2/r2context.h"
 #include "openr2/r2engine.h"
-#include "openr2/r2utils.h"
+#include "openr2/r2log-pvt.h"
+#include "openr2/r2proto-pvt.h"
+#include "openr2/r2utils-pvt.h"
+#include "openr2/r2chan-pvt.h"
+#include "openr2/r2context-pvt.h"
 
 static void on_call_init_default(openr2_chan_t *r2chan)
 {
@@ -178,6 +178,7 @@ static openr2_event_interface_t default_evmanager = {
 	.on_billing_pulse_received = on_billing_pulse_received_default
 };
 
+OR2_EXPORT_SYMBOL
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *evmanager, 
 		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis)
 {
@@ -293,6 +294,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 
 /* Is this really needed? in anycase, read events from hardware are likely to wake us up
    so probably we could trust on that instead of having the user to call this function? */
+OR2_EXPORT_SYMBOL
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -378,6 +380,7 @@ void openr2_context_remove_channel(openr2_context_t *r2context, openr2_chan_t *r
 	}
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_delete(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -392,12 +395,14 @@ void openr2_context_delete(openr2_context_t *r2context)
 	free(r2context);
 }
 
+OR2_EXPORT_SYMBOL
 openr2_liberr_t openr2_context_get_last_error(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->last_error;
 }
 
+OR2_EXPORT_SYMBOL
 const char *openr2_context_error_string(openr2_liberr_t error)
 {
 	switch ( error ) {
@@ -408,12 +413,14 @@ const char *openr2_context_error_string(openr2_liberr_t error)
 	}
 }
 
+OR2_EXPORT_SYMBOL
 openr2_variant_t openr2_context_get_variant(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->variant;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 {
 	OR2_CONTEXT_STACK;
@@ -423,12 +430,14 @@ void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 	r2context->get_ani_first = ani_first ? 1 : 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_ani_first(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->get_ani_first;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
 {
 	OR2_CONTEXT_STACK;
@@ -438,24 +447,28 @@ void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immedi
 	r2context->immediate_accept = immediate_accept ? 1 : 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_immediate_accept(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->immediate_accept;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_t level)
 {
 	OR2_CONTEXT_STACK;
 	r2context->loglevel = level;
 }
 
+OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_context_get_log_level(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->loglevel;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 {
 	OR2_CONTEXT_STACK;
@@ -465,12 +478,14 @@ void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 	r2context->mf_threshold = threshold;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_mf_threshold(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->mf_threshold;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_set_log_directory(openr2_context_t *r2context, char *directory)
 {
 	OR2_CONTEXT_STACK;
@@ -500,6 +515,7 @@ int openr2_context_set_log_directory(openr2_context_t *r2context, char *director
 	return 0;
 }
 
+OR2_EXPORT_SYMBOL
 char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len)
 {
 	OR2_CONTEXT_STACK;
@@ -511,18 +527,21 @@ char *openr2_context_get_log_directory(openr2_context_t *r2context, char *direct
 	return directory;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_max_ani(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->max_ani;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_max_dnis(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->max_dnis;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
 {
 	OR2_CONTEXT_STACK;
@@ -533,12 +552,14 @@ void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
 	r2context->timers.mf_back_cycle = ms;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->timers.mf_back_cycle;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms)
 {
 	OR2_CONTEXT_STACK;
@@ -549,18 +570,21 @@ void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int 
 	r2context->timers.r2_metering_pulse = ms;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->timers.r2_metering_pulse;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
 {
 	OR2_CONTEXT_STACK;
 	r2context->timers.r2_double_answer = enable ? 400 : 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_context_get_double_answer(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -601,6 +625,7 @@ int openr2_context_get_double_answer(openr2_context_t *r2context)
 		} \
 	}
 
+OR2_EXPORT_SYMBOL
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
 {
 	OR2_CONTEXT_STACK;

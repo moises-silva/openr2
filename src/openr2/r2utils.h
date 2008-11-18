@@ -33,30 +33,8 @@
 extern "C" {
 #endif
 
-#define openr2_timercmp(a, b, CMP)                                           \
- (((a)->tv_sec == (b)->tv_sec) ?                                             \
-  ((a)->tv_usec CMP (b)->tv_usec) :                                          \
-  ((a)->tv_sec CMP (b)->tv_sec))
-
-#define openr2_timerclear(tvp) ((tvp)->tv_sec = (tvp)->tv_usec = 0)
-
-/* quick access to context Multi Frequency Interface */
-#define MFI(r2chan) (r2chan)->r2context->mflib
-
-/* quick access to context Event Management Interface */
-#define EMI(r2chan) (r2chan)->r2context->evmanager
-
-/* quick access to the Transcoding Interface */
-#define TI(r2c) (r2chan)->r2context->transcoder
-
 const char *openr2_get_version(void);
 const char *openr2_get_revision(void);
-int openr2_mkdir_recursive(char *dir, mode_t mode);
-
-/* I added this ones because -std=c99 -pedantic causes
-   localtime_r, ctime_r and strncasecmp to not be defined */
-struct tm *openr2_localtime_r(const time_t *timep, struct tm *result);
-char *openr2_ctime_r(const time_t *timep, char *buf);
 int openr2_strncasecmp(const char *s1, const char *s2, size_t n);
 
 #if defined(__cplusplus)

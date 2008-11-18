@@ -33,12 +33,20 @@
 extern "C" {
 #endif
 
-#define OR2_MAX_PATH 255
-
-/* we dont include openr2_chan_t because r2chan.h 
-   already include us */
+#ifdef __OR2_COMPILING_LIBRARY__
 struct openr2_chan_s;
+#define openr2_chan_t struct openr2_chan_s
 struct openr2_context_s;
+#define openr2_context_t struct openr2_context_s
+#else
+#ifndef OR2_CHAN_AND_CONTEXT_DEFINED
+#define OR2_CHAN_AND_CONTEXT_DEFINED
+typedef void* openr2_chan_t;
+typedef void* openr2_context_t;
+#endif
+#endif
+
+#define OR2_MAX_PATH 255
 
 /* MF interface */
 typedef void *(*openr2_mf_read_init_func)(void *read_handle, int forward_signals);
@@ -71,22 +79,22 @@ typedef struct {
 
 /* Event Management interface. Users should provide
    this interface to handle library events like call starting, new call, read audio etc. */
-typedef void (*openr2_handle_new_call_func)(struct openr2_chan_s *r2chan);
-typedef void (*openr2_handle_call_offered_func)(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
-typedef void (*openr2_handle_call_accepted_func)(struct openr2_chan_s *r2chan, openr2_call_mode_t mode);
-typedef void (*openr2_handle_call_answered_func)(struct openr2_chan_s *r2chan);
-typedef void (*openr2_handle_call_disconnect_func)(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
-typedef void (*openr2_handle_call_end_func)(struct openr2_chan_s *r2chan);
-typedef void (*openr2_handle_call_read_func)(struct openr2_chan_s *r2chan, const unsigned char *buf, int buflen);
-typedef void (*openr2_handle_os_error_func)(struct openr2_chan_s *r2chan, int oserrorcode);
-typedef void (*openr2_handle_hardware_alarm_func)(struct openr2_chan_s *r2chan, int alarm);
-typedef void (*openr2_handle_protocol_error_func)(struct openr2_chan_s *r2chan, openr2_protocol_error_t error);
-typedef void (*openr2_handle_line_blocked_func)(struct openr2_chan_s *r2chan);
-typedef void (*openr2_handle_line_idle_func)(struct openr2_chan_s *r2chan);
-typedef void (*openr2_handle_billing_pulse_received_func)(struct openr2_chan_s *r2chan);
-typedef int (*openr2_handle_dnis_digit_received_func)(struct openr2_chan_s *r2chan, char digit);
-typedef void (*openr2_handle_ani_digit_received_func)(struct openr2_chan_s *r2chan, char digit);
-typedef void (*openr2_handle_context_logging_func)(struct openr2_context_s *r2context, openr2_log_level_t level, const char *fmt, va_list ap);
+typedef void (*openr2_handle_new_call_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_call_offered_func)(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
+typedef void (*openr2_handle_call_accepted_func)(openr2_chan_t *r2chan, openr2_call_mode_t mode);
+typedef void (*openr2_handle_call_answered_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_call_disconnect_func)(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
+typedef void (*openr2_handle_call_end_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_call_read_func)(openr2_chan_t *r2chan, const unsigned char *buf, int buflen);
+typedef void (*openr2_handle_os_error_func)(openr2_chan_t *r2chan, int oserrorcode);
+typedef void (*openr2_handle_hardware_alarm_func)(openr2_chan_t *r2chan, int alarm);
+typedef void (*openr2_handle_protocol_error_func)(openr2_chan_t *r2chan, openr2_protocol_error_t error);
+typedef void (*openr2_handle_line_blocked_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_line_idle_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_billing_pulse_received_func)(openr2_chan_t *r2chan);
+typedef int (*openr2_handle_dnis_digit_received_func)(openr2_chan_t *r2chan, char digit);
+typedef void (*openr2_handle_ani_digit_received_func)(openr2_chan_t *r2chan, char digit);
+typedef void (*openr2_handle_context_logging_func)(openr2_context_t *r2context, openr2_log_level_t level, const char *fmt, va_list ap);
 typedef struct {
 	/* A new call has just started. We will start to 
 	   receive the ANI and DNIS */
@@ -152,29 +160,6 @@ typedef struct {
 	openr2_linear_to_alaw_func linear_to_alaw;
 } openr2_transcoder_interface_t;
 
-/* R2 protocol timers */
-typedef struct {
-	/* Max amount of time our backward MF signal can last */
-	int mf_back_cycle;
-	/* Amount of time we set a MF signal ON to resume the MF cycle 
-	   with a MF pulse */
-	int mf_back_resume_cycle;
-	/* Safety FORWARD timer */
-	int mf_fwd_safety;
-	/* How much time do we wait for a response to our seize signal */
-	int r2_seize;
-	/* How much to wait for an answer once the call has been accepted */
-	int r2_answer;
-	/* How much to wait for metering pulse detection */
-	int r2_metering_pulse;
-	/* Interval between ANSWER - CLEAR BACK - ANSWER when double answer is in effect */
-	int r2_double_answer;
-	/* Minimum delay time between the Accept tone signal and the R2 answer signal */
-	int r2_answer_delay;
-	/* time to wait for CAS signaling before handling the new signal */
-	int cas_persistence_check;
-} openr2_timers_t;
-
 /* Library errors */
 typedef enum {
 	/* Failed system call */
@@ -185,89 +170,10 @@ typedef enum {
 	OR2_LIBERR_CANNOT_SET_IDLE
 } openr2_liberr_t;
 
-/* R2 library context. Holds the R2 channel list,
-   protocol variant, client interfaces etc */
-typedef struct openr2_context_s {
-
-	/* last library error occurred on the context */
-	openr2_liberr_t last_error;
-
-	/* this interface provide MF functions 
-	   to the R2 channels */
-	openr2_mflib_interface_t *mflib;
-
-	/* this interface provides event management 
-	   functions */
-	openr2_event_interface_t *evmanager;
-
-	/* this interface provide transcoding 
-	   functions to the R2 channels */
-	openr2_transcoder_interface_t *transcoder;
-
-	/* R2 variant to use in this context channels */
-	openr2_variant_t variant;
-
-	/* ABCD signals configured for the variant in use */
-	openr2_abcd_signal_t abcd_signals[OR2_NUM_ABCD_SIGNALS];
-
-	/* C and D bit are not required for R2 and set to 01, 
-	   thus, not used for the R2 signaling */
-	openr2_abcd_signal_t abcd_nonr2_bits;
-
-	/* Mask to easily get the AB bits which are used for 
-	   R2 signaling */
-	openr2_abcd_signal_t abcd_r2_bits;
-
-	/* Backward MF tones */
-	openr2_mf_ga_tones_t mf_ga_tones;
-	openr2_mf_gb_tones_t mf_gb_tones;
-	openr2_mf_gc_tones_t mf_gc_tones;
-
-	/* Forward MF tones */
-	openr2_mf_g1_tones_t mf_g1_tones;
-	openr2_mf_g2_tones_t mf_g2_tones;
-
-	/* R2 timers */
-	openr2_timers_t timers;
-
-	/* Max amount of DNIS digits that a channel on this context expect */
-	int max_dnis;
-
-	/* Max amount of ANI digits that a channel on this context expect */
-	int max_ani;
-
-	/* whether or not to get the ANI before getting DNIS */
-	int get_ani_first;
-
-	/* whether or not accept the call bypassing the use of group B and II tones */
-	int immediate_accept;
-
-	/* MF threshold time in ms */
-	int mf_threshold;
-
-	/* R2 logging mask */
-	openr2_log_level_t loglevel;
-
-	/* R2 logging directory */
-	char logdir[OR2_MAX_PATH];
-
-	/* whether or not the advanced configuration file was used */
-	int configured_from_file;
-
-	/* access token to the timers */
-	pthread_mutex_t timers_lock;
-
-	/* list of channels that belong to this context */
-	struct openr2_chan_s *chanlist;
-
-} openr2_context_t;
-
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context);
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *callmgmt, 
 		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis);
 void openr2_context_delete(openr2_context_t *r2context);
-void openr2_context_add_channel(openr2_context_t *r2context, struct openr2_chan_s *r2chan);
-void openr2_context_remove_channel(openr2_context_t *r2context, struct openr2_chan_s *r2chan);
 openr2_liberr_t openr2_context_get_last_error(openr2_context_t *r2context);
 const char *openr2_context_error_string(openr2_liberr_t error);
 openr2_variant_t openr2_context_get_variant(openr2_context_t *r2context);
@@ -290,6 +196,11 @@ int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
 int openr2_context_get_double_answer(openr2_context_t *r2context);
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
+
+#ifdef __OR2_COMPILING_LIBRARY__
+#undef openr2_chan_t 
+#undef openr2_context_t
+#endif
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

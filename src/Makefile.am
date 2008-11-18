@@ -14,12 +14,10 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2context.h \
 		         openr2/r2proto.h \
 		         openr2/r2utils.h \
-		         openr2/r2log.h \
-			 openr2/r2engine.h \
-			 openr2/r2hwcompat.h
+		         openr2/r2log.h 
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c
-libopenr2_la_CFLAGS = $(AM_CFLAGS)
+libopenr2_la_CFLAGS = $(AM_CFLAGS) -fvisibility=hidden -D__OR2_COMPILING_LIBRARY__
 libopenr2_la_LDFLAGS = -lm -lpthread -version-info $(OPENR2_LT_CURRENT):@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
 
 if WANT_R2TEST

@@ -23,8 +23,6 @@
 #ifndef _OPENR2_H_
 #define _OPENR2_H_
 
-/* include the R2 context and channel APIs */
-/* TODO: strip out private stuff */
 #include <openr2/r2context.h>
 #include <openr2/r2chan.h>
 #include <openr2/r2proto.h>

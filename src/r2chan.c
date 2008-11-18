@@ -33,11 +33,11 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include "openr2/r2hwcompat.h"
-#include "openr2/r2context.h"
-#include "openr2/r2log.h"
-#include "openr2/r2proto.h"
-#include "openr2/r2utils.h"
-#include "openr2/r2chan.h"
+#include "openr2/r2log-pvt.h"
+#include "openr2/r2utils-pvt.h"
+#include "openr2/r2proto-pvt.h"
+#include "openr2/r2chan-pvt.h"
+#include "openr2/r2context-pvt.h"
 
 static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle, int fdcreated)
 {
@@ -181,7 +181,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 #endif
 
 	/* no persistence check has been done */
-	r2chan->abcd_persistence_check = -1;
+	r2chan->cas_persistence_check_signal = -1;
 
 	/* if we created the zap device we need to close it too */
 	r2chan->fd_created = fdcreated;
@@ -208,9 +208,9 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	/* set default logger and default logging level */
 	r2chan->on_channel_log = openr2_log_channel_default;
 
-	/* set ABCD indicators to invalid */
-	r2chan->abcd_rx_signal = OR2_ABCD_INVALID;
-	r2chan->abcd_tx_signal = OR2_ABCD_INVALID;
+	/* set CAS indicators to invalid */
+	r2chan->cas_rx_signal = OR2_CAS_INVALID;
+	r2chan->cas_tx_signal = OR2_CAS_INVALID;
 
 	/* start the timer id in 1 to avoid confusion when memset'ing */
 	r2chan->timer_id = 1;
@@ -222,6 +222,7 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	return r2chan;
 }
 
+OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
 {
 	int chanfd, res;
@@ -245,6 +246,7 @@ openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf
 	return __openr2_chan_new_from_fd(r2context, chanfd, mf_write_handle, mf_read_handle, 1);
 }
 
+OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle)
 {
 	return __openr2_chan_new_from_fd(r2context, chanfd, mf_write_handle, mf_read_handle, 0);
@@ -255,7 +257,7 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 	OR2_CHAN_STACK;
 	switch (event) {
 	case OR2_HW_EVENT_BITS_CHANGED:
-		openr2_proto_handle_abcd_change(r2chan);
+		openr2_proto_handle_cas(r2chan);
 		break;
 	case OR2_HW_EVENT_ALARM:
 	case OR2_HW_EVENT_NO_ALARM:
@@ -270,6 +272,7 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 	return 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_process_event(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -305,7 +308,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 
 	while(1) {
 
-		/* we're always interested in ABCD bit events and we don't want not block */
+		/* we're always interested in CAS bit events and we don't want not block */
 		interesting_events = OR2_HW_IO_MUX_SIG_EVENT | OR2_HW_IO_MUX_NO_WAIT;
 
 		/* we also want to be notified about read-ready if we have read enabled */
@@ -329,7 +332,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		if (!interesting_events) {
 			return -1;
 		}
-		/* if there is a signaling eventset, probably ABCD bits just changed */
+		/* if there is a signaling eventset, probably CAS bits just changed */
 		if (OR2_HW_IO_MUX_SIG_EVENT & interesting_events) {
 			res = ioctl(r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
 			if ( !res && events ) {
@@ -495,6 +498,7 @@ void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan)
 	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_delete(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -517,24 +521,105 @@ void openr2_chan_delete(openr2_chan_t *r2chan)
 	free(r2chan);
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
 	return openr2_proto_accept_call(r2chan, mode);
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_answer_call(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return openr2_proto_answer_call(r2chan);
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
 	return openr2_proto_disconnect_call(r2chan, cause);
 }
 
+OR2_EXPORT_SYMBOL
+int openr2_chan_set_idle(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_set_idle(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_set_blocked(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_set_blocked(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_handle_cas(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_handle_cas(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_rx_cas_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_tx_cas_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_call_state_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_call_state_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_r2_state_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_r2_state_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_mf_state_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_mf_state_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+const char *openr2_chan_get_mf_group_string(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_mf_group_string(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_tx_mf_signal(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_get_rx_mf_signal(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
 int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)
 {
 	OR2_CHAN_STACK;
@@ -554,54 +639,63 @@ int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_s
 	return wrote;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
 	return openr2_proto_make_call(r2chan, ani, dnid, category);
 }
 
+OR2_EXPORT_SYMBOL
 openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->direction;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback)
 {
 	OR2_CHAN_STACK;
 	r2chan->on_channel_log = logcallback;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_get_fd(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->fd;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_get_number(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->number;
 }
 
+OR2_EXPORT_SYMBOL
 openr2_context_t *openr2_chan_get_context(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->r2context;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_STACK;
 	r2chan->client_data = data;
 }
 
+OR2_EXPORT_SYMBOL
 void *openr2_chan_get_client_data(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->client_data;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -639,6 +733,7 @@ int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 	return ms;
 }
 
+OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level)
 {
 	OR2_CHAN_STACK;
@@ -647,56 +742,64 @@ openr2_log_level_t openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_l
 	return retlevel;
 }
 
+OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_chan_get_log_level(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->loglevel;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_enable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->read_enabled = 1;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_disable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->read_enabled = 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_get_read_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->read_enabled;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_enable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->call_files = 1;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_chan_disable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->call_files = 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->call_files;
 }
 
+OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_dnis(openr2_chan_t *r2chan)
 {
 	return r2chan->dnis;
 }
 
+OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_ani(openr2_chan_t *r2chan)
 {
 	return r2chan->ani;
 }
-
 
