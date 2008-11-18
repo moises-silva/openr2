@@ -3,10 +3,10 @@ Sample Configurations for Brazil
 
 Here we provide sample working configurations for named Brazilian telco companies.
 If you get you installation working with another telco not in this list or with
-different params, please send me you config for alexandre.alencar@gmail.com.
+different params, please send me your config to alexandre.alencar@gmail.com.
 
 All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
-you need to choose only one sample.
+you need to choose only one sample per link.
 
 Sample Configuration for Embratel
 =================================

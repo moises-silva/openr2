@@ -1,0 +1,29 @@
+;;;;;; Configuration for  Telmex or Axtel ;;;;;;;;;;
+; zapata.conf or chan_dahdi.conf in /etc/asterisk
+signalling=mfcr2
+mfcr2_variant=mx
+mfcr2_get_ani_first=no
+mfcr2_max_ani=10
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=-1
+mfcr2_metering_pulse_timeout=-1
+; this is for debugging purposes
+mfcr2_logdir=log
+mfcr2_logging=all
+; end debugging configuration
+channel => 1-15
+channel => 17-31
+
+; /etc/dahdi/system.conf or /etc/zaptel.conf
+span=1,1,0,cas,hdb3
+cas=1-15:1101
+cas=17-31:1101
+loadzone=us
+defaultzone=us
+
+span=2,1,0,cas,hdb3
+cas=32-46:1101
+cas=48-62:1101
+loadzone=us
+defaultzone=us

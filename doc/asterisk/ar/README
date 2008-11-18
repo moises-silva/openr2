@@ -1,0 +1,25 @@
+Sample Configurations for Argentina
+================================
+
+Here we provide sample working configurations for named Argentina telco companies.
+If you get you installation working with another telco not in this list or with
+different params, please send me your config to moy@sangoma.com
+
+All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
+you need to choose only one sample per link.
+
+Sample Configuration for TASA (Telefonica de Argentina) (contributed by Fernando Villares <fernando@intelix.com.ar>)
+=================================
+
+; Sample 1
+signalling = mfcr2
+mfcr2_variant = ar
+mfcr2_max_ani = 20
+mfcr2_max_dnis = 4 
+mfcr2_category = national_subscriber
+mfcr2_get_ani_first = no
+; The next three params are for debuging, you can disable when in production
+mfcr2_call_files=yes
+mfcr2_logdir=embratel
+mfcr2_logging=all
+

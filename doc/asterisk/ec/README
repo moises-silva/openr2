@@ -1,0 +1,23 @@
+; PACIFITEL
+[channels]
+signalling=mfcr2
+mfcr2_variant=itu
+mfcr2_get_ani_first=no
+mfcr2_max_ani=8
+mfcr2_max_dnis=7
+mfcr2_category=national_subscriber
+mfcr2_logdir=span1
+mfcr2_logging=all
+context=incoming
+channel => 1-15
+channel => 17-31
+
+; This is /etc/dahdi/system.conf or /etc/zaptel.conf
+span=1,1,0,cas,hdb3
+cas=1-15:1101
+cas=17-31:1101
+dchan=16
+loadzone        = us
+defaultzone     = us
+
+; this guy had success in Ecuador: http://lists.digium.com/pipermail/asterisk-r2/2008-November/000156.html

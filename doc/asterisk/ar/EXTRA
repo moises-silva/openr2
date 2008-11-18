@@ -1,0 +1,126 @@
+; ##############################################################################
+; #                                                                            #
+; #             CONFIGURACION ARBA 0800 / PBX / Deleg. La Plata                #
+; #                                                                            #
+; ##############################################################################
+
+; Referencias:
+
+; Bocas 1/2: A Meridian (usa r2pr_pbx.conf como variante)
+; Bocas 3/4: A Telefonica (usa r2pr_telco.conf como variante)
+
+; Grupo 1: Llamada a telefonos operadores 0800 ARBA (internos)
+; Grupo 2: Llamada a telefonos Delegacion La Plata (numeracion publica)
+; Grupo 3: Llamadas a tramas ARBA
+; Grupo 4: Llamadas a trama Delegacion La Plata
+
+; Parametros Globales (MFC/R2)
+
+[channels]
+language=es
+signalling = mfcr2
+mfcr2_variant = ar
+mfcr2_max_ani = 16
+mfcr2_category = national_subscriber
+mfcr2_call_files = yes
+mfcr2_mfback_timeout = 5000
+mfcr2_metering_pulse_timeout = 200
+rxwink = 300 
+callwaiting = yes
+usecallerid = yes
+hidecallerid = no
+callwaitingcallerid = yes
+threewaycalling = yes
+transfer = yes
+cancallforward = yes
+callreturn = yes
+echocancel = yes
+echocancelwhenbridged = no
+rxgain = 0.0
+txgain = 0.0
+callgroup = 1
+pickupgroup = 1
+immediate = no
+callprogress = yes
+
+; Placa 1
+
+; Boca 1: DTI 4 Meridian (internos operadores 0800 ARBA)
+mfcr2_max_dnis = 16
+mfcr2_logdir = span1
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_pbx.conf
+group = 1
+context = arba0800
+channel => 1-15
+channel => 17-31
+
+; Boca 2: DTI 5 Meridian (internos operadores 0800 ARBA)
+mfcr2_max_dnis = 16
+mfcr2_logdir = span2
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_pbx.conf
+group = 1
+context = arba0800
+channel => 32-46
+channel => 48-62
+
+; Boca 3: 429-6400 Telefonica (entrante/saliente PBX ARBA)
+mfcr2_max_dnis = 4
+mfcr2_logdir = span3
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_telco.conf
+group = 3
+context = telco429prod
+channel => 63-77
+channel => 79-93
+
+; Boca 4: 412-0400 Telefonica (entrante 0800 ARBA)
+mfcr2_max_dnis = 4
+mfcr2_logdir = span4
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_telco.conf
+group = 3
+context = telco412prod
+channel => 94-108
+channel => 110-124
+
+; Placa 2
+
+; Boca 1: DTI 1 Meridian (Delegacion La Plata)
+mfcr2_max_dnis = 16
+mfcr2_logdir = span5
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_pbx.conf
+group = 2
+context = pbx4291350
+channel => 125-139
+channel => 141-149
+context = pbx4290400
+channel => 150-155
+
+; Boca 2: DTI 6 Meridian (internos operadores 0800 ARBA)
+mfcr2_max_dnis = 16
+mfcr2_logdir = span6
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_pbx.conf
+group = 1
+context = arba0800ddn
+channel => 156-170
+channel => 172-186
+
+; Boca 3: 429-1350/0400 Telefonica (entrante 0800 ARBA/entrante-saliente Del.La Plata)
+mfcr2_max_dnis = 4
+mfcr2_logdir = span7
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_telco.conf
+group = 3
+context = telco429prod
+channel => 187-201
+channel => 203-211
+group = 4
+context = telco4290400
+channel => 212-217
+
+; Boca 4: 412-0500 Telefonica (entrante 0800 ARBA)
+mfcr2_max_dnis = 4
+mfcr2_logdir = span8
+mfcr2_advanced_protocol_file = /etc/asterisk/r2pr_telco.conf
+group = 3
+context = telco412prod
+channel => 218-232
+channel => 234-248
+
