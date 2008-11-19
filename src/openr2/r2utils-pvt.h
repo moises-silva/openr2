@@ -33,11 +33,7 @@
 extern "C" {
 #endif
 
-#if __GNUC__ >= 4
 #define OR2_EXPORT_SYMBOL __attribute__((visibility("default")))
-#else
-#define OR2_EXPORT_SYMBOL 
-#endif
 
 #define openr2_timercmp(a, b, CMP)                                           \
  (((a)->tv_sec == (b)->tv_sec) ?                                             \
