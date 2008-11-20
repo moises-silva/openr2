@@ -579,6 +579,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 static void openr2_proto_init(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
+	int rc = 0;
+	int myerrno = 0;
 	/* cancel any event we could be waiting for */
 	openr2_chan_cancel_all_timers(r2chan);
 
@@ -601,10 +603,13 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
 	if (r2chan->logfile) {
-		if (fclose(r2chan->logfile)) {
-			openr2_log(r2chan, OR2_LOG_WARNING, "Failed to close log file, leaking fds!.\n");
-		}
+		rc = fclose(r2chan->logfile);
 		r2chan->logfile = NULL;
+		if (rc) {
+			myerrno = errno;
+			EMI(r2chan)->on_os_error(r2chan, myerrno);
+			openr2_log(r2chan, OR2_LOG_ERROR, "Closing log file failed: %s\n", strerror(myerrno));
+		}
 	}
 }
 
@@ -719,12 +724,12 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 	if (r2chan->logfile) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Yay, still have a log file, closing ...\n");
 		res = fclose(r2chan->logfile);
+		r2chan->logfile = NULL;
 		if (res) {
 			myerrno = errno;
 			EMI(r2chan)->on_os_error(r2chan, myerrno);
-			openr2_log(r2chan, OR2_LOG_ERROR, "fclose failed: %s\n", strerror(myerrno));
+			openr2_log(r2chan, OR2_LOG_ERROR, "Closing log file failed: %s\n", strerror(myerrno));
 		}
-		r2chan->logfile = NULL;
 	}
 	r2chan->logfile = fopen(stringbuf, "w");
 	if (!r2chan->logfile) {
