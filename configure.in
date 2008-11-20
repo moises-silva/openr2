@@ -88,10 +88,10 @@ then
 	AC_MSG_FAILURE([Zaptel or DAHDI headers are required but not present])
 fi
 
-AC_ARG_WITH([r2test], [AS_HELP_STRING([--with-r2test], 
-	                [enable the r2test program.])],
+AC_ARG_WITH([r2test], [AS_HELP_STRING([--without-r2test], 
+	                [disable the r2test program.])],
 	                [],
-			[with_r2test=no])
+			[with_r2test=yes])
 AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" != xno])
 
 AC_ARG_WITH([trace-stacks], [AS_HELP_STRING([--with-trace-stacks], 
