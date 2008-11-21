@@ -20266,26 +20266,13 @@ EOF
 
             { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-
-
-
-if test 1; then
-  HAVE_ATTR_VISIBILITY_HIDDEN_TRUE=
-  HAVE_ATTR_VISIBILITY_HIDDEN_FALSE='#'
-else
-  HAVE_ATTR_VISIBILITY_HIDDEN_TRUE='#'
-  HAVE_ATTR_VISIBILITY_HIDDEN_FALSE=
-fi
-
+        have_visibility=yes
 
 else
 
             { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-
-    { echo "$as_me:$LINENO: result: your GCC does not support -fvisibility=hidden." >&5
-echo "${ECHO_T}your GCC does not support -fvisibility=hidden." >&6; }
-
+        have_visibility=no
 
 fi
 
@@ -20298,6 +20285,24 @@ echo "${ECHO_T}no gcc available" >&6; }
 fi
 
 
+
+
+if test "x$have_visibility" = xyes; then
+  HAVE_ATTR_VISIBILITY_HIDDEN_TRUE=
+  HAVE_ATTR_VISIBILITY_HIDDEN_FALSE='#'
+else
+  HAVE_ATTR_VISIBILITY_HIDDEN_TRUE='#'
+  HAVE_ATTR_VISIBILITY_HIDDEN_FALSE=
+fi
+
+if test "x$have_visibility" = xyes
+then
+	{ echo "$as_me:$LINENO: result: GCC supports -fvisibility and will be used to compile the library" >&5
+echo "${ECHO_T}GCC supports -fvisibility and will be used to compile the library" >&6; }
+else
+	{ echo "$as_me:$LINENO: result: GCC does NOT support -fvisibility and will not used to compile the library" >&5
+echo "${ECHO_T}GCC does NOT support -fvisibility and will not used to compile the library" >&6; }
+fi
 
 nozaptel=no
 nozaptelzaptel=no
@@ -20813,14 +20818,14 @@ fi
 
 # Check whether --with-r2test was given.
 if test "${with_r2test+set}" = set; then
-  withval=$with_r2test;
+  withval=$with_r2test; with_r2test=no
 else
   with_r2test=yes
 fi
 
 
 
-if test "x$with_r2test" != xno; then
+if test "x$with_r2test" = xyes; then
   WANT_R2TEST_TRUE=
   WANT_R2TEST_FALSE='#'
 else
@@ -20828,6 +20833,14 @@ else
   WANT_R2TEST_FALSE=
 fi
 
+if test "x$with_r2test" = xyes
+then
+	{ echo "$as_me:$LINENO: result: r2test program will be compiled" >&5
+echo "${ECHO_T}r2test program will be compiled" >&6; }
+else
+	{ echo "$as_me:$LINENO: result: r2test program will NOT be compiled" >&5
+echo "${ECHO_T}r2test program will NOT be compiled" >&6; }
+fi
 
 
 # Check whether --with-trace-stacks was given.

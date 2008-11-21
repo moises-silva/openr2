@@ -71,10 +71,14 @@ EOF
   ])
 ])
 
-AX_GCC_OPTION([-fvisibility=hidden],[],[],[
-    AM_CONDITIONAL([HAVE_ATTR_VISIBILITY_HIDDEN], [test 1])],[
-    AC_MSG_RESULT([your GCC does not support -fvisibility=hidden.])
-    ])
+AX_GCC_OPTION([-fvisibility=hidden],[],[],[have_visibility=yes],[have_visibility=no])
+AM_CONDITIONAL([HAVE_ATTR_VISIBILITY_HIDDEN], [test "x$have_visibility" = xyes])
+if [test "x$have_visibility" = xyes]
+then
+	AC_MSG_RESULT([GCC supports -fvisibility and will be used to compile the library])
+else
+	AC_MSG_RESULT([GCC does NOT support -fvisibility and will not used to compile the library])
+fi
 
 nozaptel=no
 nozaptelzaptel=no
@@ -90,9 +94,15 @@ fi
 
 AC_ARG_WITH([r2test], [AS_HELP_STRING([--without-r2test], 
 	                [disable the r2test program.])],
-	                [],
+	                [with_r2test=no],
 			[with_r2test=yes])
-AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" != xno])
+AM_CONDITIONAL([WANT_R2TEST], [test "x$with_r2test" = xyes])
+if [test "x$with_r2test" = xyes]
+then
+	AC_MSG_RESULT([r2test program will be compiled])
+else
+	AC_MSG_RESULT([r2test program will NOT be compiled])
+fi
 
 AC_ARG_WITH([trace-stacks], [AS_HELP_STRING([--with-trace-stacks], 
 	                [enable r2's stacks debugging.])],
