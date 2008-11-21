@@ -1142,6 +1142,8 @@ handlecas:
 		if (cas == R2(r2chan, IDLE)) {
 			CAS_LOG_RX(IDLE);
 			report_call_end(r2chan);
+		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
+			report_call_end(r2chan);
 		} else {
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
