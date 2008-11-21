@@ -151,6 +151,7 @@ static void r2config_venezuela(openr2_context_t *r2context)
 
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_9;
 
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 }
 
