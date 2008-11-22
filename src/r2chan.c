@@ -470,6 +470,7 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 
 	for ( ; i < r2chan->timers_count; i++) {
 		if (r2chan->sched_timers[i].id == *timer_id) {
+			openr2_log(r2chan, OR2_LOG_EX_DEBUG, "timer id %d found, cancelling it now\n", *timer_id);
 			/* clear the timer and move down the list */
 			memset(&r2chan->sched_timers[i], 0, sizeof(r2chan->sched_timers[0]));
 			if (i < (r2chan->timers_count - 1)) {
@@ -478,7 +479,6 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 			}
 			r2chan->timers_count--;
 			*timer_id = 0;
-			openr2_log(r2chan, OR2_LOG_EX_DEBUG, "timer id %d has been cancelled\n");
 			break;
 		}
 	}
