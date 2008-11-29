@@ -1,4 +1,4 @@
-In the doc/asterisk/ directory you will find sample configurations for different countries.
+In the asterisk/ directory you will find sample configurations for different countries.
 The samples that you can find there have minimal documentation for each parameter, in order
 to get an idea of what each parameter does, you can refer to configs/chan_dahdi.conf.sample
 or configs/chan_zap.conf.sample in the Asterisk distribution and search for mfcr2_xxx parameters.

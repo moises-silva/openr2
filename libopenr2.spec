@@ -65,6 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
+%doc doc/README.asterisk
 %doc %dir doc/asterisk
 %{_datadir}/%{name}/*.alaw
 %{_bindir}/r2test
