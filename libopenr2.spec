@@ -1,6 +1,6 @@
 Name:           libopenr2
-Version:        0.1.1
-Release:        82%{?dist}
+Version:        1.0.0
+Release:        84%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 
@@ -69,6 +69,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
+%doc %dir doc/asterisk/ar/README
+%doc %dir doc/asterisk/ar/EXTRA
+%doc %dir doc/asterisk/br/README
+%doc %dir doc/asterisk/ec/README
+%doc %dir doc/asterisk/mx/README
+%doc doc/REAME
+%{_datadir}/%{name}/*.alaw
 %{_bindir}/r2test
 %{_libdir}/*.so.*
 %{_mandir}/man5/r2test.conf.5.gz
@@ -92,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Nov 29 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update to latest SVN release
+- Changed version number
+- Added sample docs
+
 * Thu Oct 30 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update to latest SVN release
 
