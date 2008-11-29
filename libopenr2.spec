@@ -1,6 +1,6 @@
 Name:           libopenr2
 Version:        1.0.0
-Release:        84%{?dist}
+Release:        1%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 
@@ -37,7 +37,7 @@ developing applications that use %{name}.
 
 
 %build
-%configure --libdir=%{_libdir} --sysconfdir=%{_sysconfdir}/openr2 --disable-static --disable-rpath --with-r2test
+%configure --libdir=%{_libdir} --sysconfdir=%{_sysconfdir}/openr2 --disable-static --disable-rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 make %{?_smp_mflags}
@@ -46,14 +46,10 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-install -m 0755 -d $RPM_BUILD_ROOT/usr/include/openr2
-install -m 0644 src/openr2/r2chan.h $RPM_BUILD_ROOT/usr/include/openr2/r2chan.h
-install -m 0644 src/openr2/r2context.h $RPM_BUILD_ROOT/usr/include/openr2/r2context.h
-install -m 0644 src/openr2/r2proto.h $RPM_BUILD_ROOT/usr/include/openr2/r2proto.h
-install -m 0644 src/openr2/r2utils.h $RPM_BUILD_ROOT/usr/include/openr2/r2utils.h
-install -m 0644 src/openr2/r2log.h $RPM_BUILD_ROOT/usr/include/openr2/r2log.h
-install -m 0644 src/openr2/r2engine.h $RPM_BUILD_ROOT/usr/include/openr2/r2engine.h
-install -m 0644 src/openr2/r2hwcompat.h $RPM_BUILD_ROOT/usr/include/openr2/r2hwcompat.h
+install -m 0755 -d $RPM_BUILD_ROOT/%{_includedir}/openr2
+install -m 0644 src/openr2/*.h $RPM_BUILD_ROOT/%{_includedir}/openr2
+install -m 0755 -d $RPM_BUILD_ROOT/%{_datadir}/%{name}
+install -m 0644 doc/*.alaw $RPM_BUILD_ROOT/%{_datadir}/%{name}
 chrpath --delete $RPM_BUILD_ROOT%{_bindir}/r2test
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
@@ -69,12 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
-%doc %dir doc/asterisk/ar/README
-%doc %dir doc/asterisk/ar/EXTRA
-%doc %dir doc/asterisk/br/README
-%doc %dir doc/asterisk/ec/README
-%doc %dir doc/asterisk/mx/README
-%doc doc/REAME
+%doc %dir doc/asterisk
 %{_datadir}/%{name}/*.alaw
 %{_bindir}/r2test
 %{_libdir}/*.so.*
@@ -88,17 +79,16 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
 %{_includedir}/openr2.h
-%{_includedir}/openr2/r2chan.h
-%{_includedir}/openr2/r2context.h
-%{_includedir}/openr2/r2proto.h
-%{_includedir}/openr2/r2utils.h
-%{_includedir}/openr2/r2log.h
-%{_includedir}/openr2/r2engine.h
-%{_includedir}/openr2/r2hwcompat.h
+%{_includedir}/openr2/*.h
 %{_libdir}/*.so
 
 
 %changelog
+* Sat Nov 29 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update package revision number
+- Add missing files
+- Small fixes on spec file
+
 * Sat Nov 29 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update to latest SVN release
 - Changed version number
