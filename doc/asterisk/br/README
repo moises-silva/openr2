@@ -8,6 +8,13 @@ different params, please send me your config to alexandre.alencar@gmail.com.
 All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
 you need to choose only one sample per link.
 
+Credits
+=======
+
+Many thanks to Evandro Arruda from ezVoice Telecom for it's contribution with
+old PABX and telco samples. You can contact him at ecarruda@gmail.com or
+evandro@ezvoice.com.br
+
 Sample Configuration for Embratel
 =================================
 
@@ -22,6 +29,22 @@ mfcr2_category=national_subscriber
 mfcr2_call_files=yes
 mfcr2_logdir=embratel
 mfcr2_logging=all
+
+; Sample 2
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no   
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=1500
+mfcr2_metering_pulse_timeout=-1
+; choose only yes or no
+mfcr2_allow_collect_calls=(no/yes)
+mfcr2_double_answer=no
+mfcr2_charge_calls=yes
+mfcr2_forced_release=yes
 
 Sample Configuration for Oi
 ===========================
@@ -79,4 +102,135 @@ mfcr2_category=national_subscriber
 mfcr2_call_files=yes
 mfcr2_logdir=brt
 mfcr2_logging=all
+
+Sample Configuration for CTBC
+=============================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+; To fix issues with delay on international calls on this telco
+mfcr2_mfback_timeout=3000
+mfcr2_metering_pulse_timeout=-1
+; choose only yes or no
+mfcr2_allow_collect_calls=(no/yes)
+mfcr2_double_answer=no
+mfcr2_charge_calls=yes
+mfcr2_forced_release=yes
+
+Sample Configuration for Telefonica
+===================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=20
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=3000
+mfcr2_metering_pulse_timeout=-1
+; choose only yes or no
+mfcr2_allow_collect_calls=(no/yes)
+mfcr2_double_answer=no
+mfcr2_charge_calls=yes
+
+Sample Configuration for Tadiran (PABX)
+=======================================
+
+; Sample 1
+
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no   
+mfcr2_max_ani=10
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=6000
+mfcr2_charge_calls=yes
+
+Sample Configuration for Digistar (PABX)
+========================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+; This PABX expect ANI first
+mfcr2_get_ani_first=yes
+mfcr2_max_ani=4
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=6000
+mfcr2_charge_calls=yes
+
+Sample Configuration for Ericsson (PABX)
+========================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br  
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=8
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=3000
+mfcr2_charge_calls=yes
+; This PABX tends to bug without this
+mfcr2_forced_release=yes
+
+Sample Configuration for Avaya (PABX)
+=====================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=4
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=1000
+; To avoid call being dropped after 500ms
+mfcr2_metering_pulse_timeout=2000
+mfcr2_charge_calls=yes
+
+Sample Configuration for Siemens HighPath (PABX)
+================================================
+
+; Sample 1
+signalling=mfcr2
+mfcr2_variant=br  
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=8
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+; Needed because this PABX delay digits forward
+mfcr2_mfback_timeout=5000
+mfcr2_charge_calls=yes
+; This PABX tends to bug without this
+mfcr2_forced_release=yes
+
+Sample Configuration for Leucotron (PABX)
+=========================================
+
+; Sample 1
+signalling=mfcr2   
+mfcr2_variant=br
+mfcr2_immediate_accept=no
+mfcr2_get_ani_first=no
+mfcr2_max_ani=8
+mfcr2_max_dnis=20
+mfcr2_category=national_subscriber
+mfcr2_mfback_timeout=3000
+mfcr2_charge_calls=yes
 
