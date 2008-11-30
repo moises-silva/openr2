@@ -46,10 +46,6 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-install -m 0755 -d $RPM_BUILD_ROOT/%{_includedir}/openr2
-install -m 0644 src/openr2/*.h $RPM_BUILD_ROOT/%{_includedir}/openr2
-install -m 0755 -d $RPM_BUILD_ROOT/%{_datadir}/%{name}
-install -m 0644 doc/*.alaw $RPM_BUILD_ROOT/%{_datadir}/%{name}
 chrpath --delete $RPM_BUILD_ROOT%{_bindir}/r2test
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
@@ -65,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING COPYING.LESSER NEWS README TODO
+%doc doc/*.alaw
 %doc doc/README.asterisk
 %doc %dir doc/asterisk
 %{_datadir}/%{name}/*.alaw
