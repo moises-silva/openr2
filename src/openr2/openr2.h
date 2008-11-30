@@ -26,6 +26,7 @@
 #include <openr2/r2context.h>
 #include <openr2/r2chan.h>
 #include <openr2/r2proto.h>
+#include <openr2/r2log.h>
 #include <openr2/r2utils.h>
 
 #endif /* endif defined _OPENR2_H_ */
