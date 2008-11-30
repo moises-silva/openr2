@@ -1,1 +1,1 @@
-shlibs:Depends=libc6 (>= 2.7-1), libopenr2-0-dev
+shlibs:Depends=libc6 (>= 2.7-1)
