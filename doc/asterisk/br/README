@@ -203,7 +203,7 @@ mfcr2_mfback_timeout=1000
 mfcr2_metering_pulse_timeout=2000
 mfcr2_charge_calls=yes
 
-Sample Configuration for Siemens HighPath (PABX)
+Sample Configuration for Siemens HiPath (PABX)
 ================================================
 
 ; Sample 1
