@@ -136,6 +136,10 @@ typedef struct openr2_context_s {
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;
 
+	/* this interface provide transcoding 
+	   functions to the R2 channels */
+	openr2_io_interface_t *io;
+
 } openr2_context_t;
 
 

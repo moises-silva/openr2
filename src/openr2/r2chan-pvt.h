@@ -79,7 +79,7 @@ typedef struct openr2_chan_timer_ids_s {
 	int cas_persistence_check;
 } openr2_chan_timer_ids_t;
 
-/* R2 channel. Hold the states of the R2 signaling, zap device etc.
+/* R2 channel. Hold the states of the R2 signaling, I/O device etc.
    The R2 variant will be inherited from the R2 context 
    this channel belongs to */
 typedef struct openr2_chan_s {
@@ -87,13 +87,13 @@ typedef struct openr2_chan_s {
 	/* whether or not we created the FD */
 	int fd_created;
 
-	/* zap device fd */
-	int fd;
+	/* I/O device fd */
+	openr2_io_fd_t fd;
 
-	/* zap buffer size */
-	int zap_buf_size;
+	/* I/O buffer size */
+	int io_buf_size;
 
-	/* zap device number */
+	/* I/O device number */
 	int number;
 
 	/* to read or not to read, that is the question */

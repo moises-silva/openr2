@@ -27,18 +27,7 @@
 extern "C" {
 #endif
 
-#ifdef __OR2_COMPILING_LIBRARY__
-struct openr2_chan_s;
-#define openr2_chan_t struct openr2_chan_s
-struct openr2_context_s;
-#define openr2_context_t struct openr2_context_s
-#else
-#ifndef OR2_CHAN_AND_CONTEXT_DEFINED
-#define OR2_CHAN_AND_CONTEXT_DEFINED
-typedef void* openr2_chan_t;
-typedef void* openr2_context_t;
-#endif
-#endif
+#include "r2exports.h"
 
 #define OR2_MAX_ANI 80
 #define OR2_MAX_DNIS 80

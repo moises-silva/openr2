@@ -33,18 +33,7 @@
 extern "C" {
 #endif
 
-#ifdef __OR2_COMPILING_LIBRARY__
-struct openr2_chan_s;
-#define openr2_chan_t struct openr2_chan_s
-struct openr2_context_s;
-#define openr2_context_t struct openr2_context_s
-#else
-#ifndef OR2_CHAN_AND_CONTEXT_DEFINED
-#define OR2_CHAN_AND_CONTEXT_DEFINED
-typedef void* openr2_chan_t;
-typedef void* openr2_context_t;
-#endif
-#endif
+#include "r2exports.h"
 
 #define OR2_MAX_PATH 255
 
@@ -150,6 +139,23 @@ typedef struct {
 	openr2_handle_billing_pulse_received_func on_billing_pulse_received;
 } openr2_event_interface_t;
 
+typedef openr2_io_fd_t (*openr2_io_open_func)(openr2_context_t* r2context);
+typedef int (*openr2_io_close_func)(openr2_chan_t *r2chan);
+typedef int (*openr2_io_set_cas_func)(openr2_chan_t *r2chan, int cas);
+typedef int (*openr2_io_get_cas_func)(openr2_chan_t *r2chan, int *cas);
+typedef int (*openr2_io_flush_write_buffers_func)(openr2_chan_t *r2chan);
+typedef int (*openr2_io_write_func)(openr2_chan_t *r2chan, const void *buf, int size);
+typedef int (*openr2_io_read_func)(openr2_chan_t *r2chan, const void *buf, int size);
+typedef struct {
+	openr2_io_open_func open;
+	openr2_io_close_func close;
+	openr2_io_set_cas_func set_cas;
+	openr2_io_get_cas_func get_cas;
+	openr2_io_flush_write_buffers_func flush_write_buffers;
+	openr2_io_write_func write;
+	openr2_io_read_func read;
+} openr2_io_interface_t;
+
 /* Transcoding interface. Users should provide this interface
    to provide transcoding services from linear to alaw and 
    viceversa */
@@ -167,7 +173,9 @@ typedef enum {
 	/* Invalid channel signaling when creating it */
 	OR2_LIBERR_INVALID_CHAN_SIGNALING,
 	/* cannot set to IDLE the channel when creating it */
-	OR2_LIBERR_CANNOT_SET_IDLE
+	OR2_LIBERR_CANNOT_SET_IDLE,
+	/* No I/O interface is available */
+	OR2_LIBERR_NO_IO_IFACE_AVAILABLE
 } openr2_liberr_t;
 
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context);

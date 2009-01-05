@@ -32,125 +32,26 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
-#include "openr2/r2hwcompat.h"
 #include "openr2/r2log-pvt.h"
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2proto-pvt.h"
 #include "openr2/r2chan-pvt.h"
 #include "openr2/r2context-pvt.h"
+#include "openr2/r2ioabs.h"
+#include "openr2/r2hwcompat.h"
 
-static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle, int fdcreated)
+static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
 {
-	int res, zapval, channo;
-	unsigned i;
 	openr2_chan_t *r2chan = NULL;
-	OR2_HW_GAINS chan_gains;
-	OR2_HW_BUFFER_INFO chan_buffers;
-	OR2_HW_PARAMS chan_params;
 #ifdef OR2_MF_DEBUG
 	char logfile[1024];
 #endif
-	res = ioctl(chanfd, OR2_HW_OP_CHANNO, &channo);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get channel number from descriptor %d (%s)\n", chanfd, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}
-		return NULL;
-	}
-	/* let's check the signaling */
-	res = ioctl(chanfd, OR2_HW_OP_GET_PARAMS, &chan_params);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get signaling information for channel %d (%s)\n", channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}	
-		return NULL;
-	}
-	if (OR2_HW_SIG_CAS != chan_params.sigtype) {
-		r2context->last_error = OR2_LIBERR_INVALID_CHAN_SIGNALING;
-		openr2_log2(r2context, OR2_LOG_ERROR, "chan %d does not has CAS signaling\n", channo);
-		if (fdcreated) {
-			close(chanfd);
-		}
-		return NULL;
-	}
-
-	/* setup buffers and gains  */
-	res = ioctl(chanfd, OR2_HW_OP_GET_BUFINFO, &chan_buffers);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to retrieve buffer information for chan %d (%s)\n", 
-			    channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}	
-		return NULL;
-	}
-	chan_buffers.txbufpolicy = OR2_HW_POLICY_IMMEDIATE;
-	chan_buffers.rxbufpolicy = OR2_HW_POLICY_IMMEDIATE;
-	chan_buffers.numbufs = 4;
-	chan_buffers.bufsize = OR2_CHAN_READ_SIZE;
-	res = ioctl(chanfd, OR2_HW_OP_SET_BUFINFO, &chan_buffers);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set buffer information for chan %d (%s)\n", channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}	
-		return NULL;
-	}
-
-	chan_gains.chan = 0;
-	for (i = 0; i < 256; i++) {
-		chan_gains.rxgain[i] = chan_gains.txgain[i] = i;
-	}
-
-	res = ioctl(chanfd, OR2_HW_OP_SET_GAINS, &chan_gains);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set gains on channel %d (%s)\n", channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}
-		return NULL;
-	}
-
-	zapval = OR2_HW_LAW_ALAW;
-	res = ioctl(chanfd, OR2_HW_OP_SET_LAW, &zapval);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set ALAW codec on channel %d (%s)\n", channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}	
-		return NULL;
-	}
-
-	zapval = 0;
-	res = ioctl(chanfd, OR2_HW_OP_SET_ECHO_CANCEL, &zapval);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to put echo-cancel off on channel %d (%s)\n", channo, strerror(errno));
-		if (fdcreated) {
-			close(chanfd);
-		}	
-		return NULL;
-	}
-
-	/* zap channel setup has succeeded, now allocate the R2 channel*/
 	r2chan = calloc(1, sizeof(*r2chan));
 	if (!r2chan) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to allocate memory for r2chan %d\n", channo);
-		if (fdcreated) {
-			close(chanfd);
-		}	
 		return NULL;
 	}
-
 #ifdef OR2_MF_DEBUG
 	/* open the channel log */
 	snprintf(logfile, sizeof(logfile)-1, "openr2-chan-%d-tx.raw", channo);
@@ -159,9 +60,6 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	if (-1 == r2chan->mf_read_fd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open MF-tx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
-		if (fdcreated) {
-			close(chanfd);
-		}	
 		free(r2chan);
 		return NULL;
 	}
@@ -171,9 +69,6 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	if (-1 == r2chan->mf_read_fd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
 		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open MF-rx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
-		if (fdcreated) {
-			close(chanfd);
-		}	
 		close(r2chan->mf_write_fd);
 		free(r2chan);
 		return NULL;
@@ -182,18 +77,6 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 
 	/* no persistence check has been done */
 	r2chan->cas_persistence_check_signal = -1;
-
-	/* if we created the zap device we need to close it too */
-	r2chan->fd_created = fdcreated;
-
-	/* channel number ( zap device number ) */	
-	r2chan->number = channo;
-
-	/* channel fd */
-	r2chan->fd = chanfd;
-
-	/* zap buffer size to write data */
-	r2chan->zap_buf_size = chan_buffers.bufsize;
 
 	/* start with read enabled */
 	r2chan->read_enabled = 1;
@@ -215,7 +98,22 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 	/* start the timer id in 1 to avoid confusion when memset'ing */
 	r2chan->timer_id = 1;
 
-	/* add ourselves to the queue of channels in the context */
+	/* prepare the I/O for R2 signaling if needed */
+	if (channo) {
+		/* channel fd */
+		r2chan->fd = openr2_io_open(r2context, channo);
+		if (!r2chan->fd) {
+			openr2_chan_delete(r2chan);
+			return NULL;
+		}
+		if (openr2_io_setup(r2chan)) {
+			openr2_chan_delete(r2chan);
+			return NULL;
+		}
+		r2chan->fd_created = 1;
+	}	
+
+	/* add ourselves to the list of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
 
 	OR2_CHAN_STACK;
@@ -225,31 +123,23 @@ static openr2_chan_t *__openr2_chan_new_from_fd(openr2_context_t *r2context, int
 OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
 {
-	int chanfd, res;
-
-	/* open the zap generic channel interface */
-	chanfd = open(OR2_HW_CHANNEL_FILE_NAME, O_RDWR | O_NONBLOCK);
-	if (-1 == chanfd) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open zap control device (%s)\n", strerror(errno));
+	if (channo <=0 ) {
 		return NULL;
 	}
-
-	/* choose the requested channel */
-	res = ioctl(chanfd, OR2_HW_OP_SPECIFY, &channo);
-	if (res) {
-		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to choose channel %d (%s)\n", channo, strerror(errno));
-		close(chanfd);
-		return NULL;
-	}
-	return __openr2_chan_new_from_fd(r2context, chanfd, mf_write_handle, mf_read_handle, 1);
+	return __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle);
 }
 
 OR2_EXPORT_SYMBOL
-openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle)
+openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo, void *mf_write_handle, void *mf_read_handle)
 {
-	return __openr2_chan_new_from_fd(r2context, chanfd, mf_write_handle, mf_read_handle, 0);
+	openr2_chan_t *r2chan = __openr2_chan_new(r2context, 0, mf_write_handle, mf_read_handle);
+	if (!r2chan) {
+		return NULL;
+	}
+	r2chan->fd = chanfd;
+	r2chan->fd_created = 0;
+	r2chan->number = channo;
+	return r2chan;
 }
 
 static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
@@ -321,7 +211,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			interesting_events |= OR2_HW_IO_MUX_WRITE;
 		}
 
-		res = ioctl(r2chan->fd, OR2_HW_OP_IO_MUX, &interesting_events);
+		res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_IO_MUX, &interesting_events);
 		if (res) {
 			myerrno = errno;
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
@@ -334,18 +224,15 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		/* if there is a signaling eventset, probably CAS bits just changed */
 		if (OR2_HW_IO_MUX_SIG_EVENT & interesting_events) {
-			res = ioctl(r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
+			res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
 			if ( !res && events ) {
 				openr2_chan_handle_zap_event(r2chan, events);
 			}
 			continue;
 		}
 		if (OR2_HW_IO_MUX_READ & interesting_events) {
-			res = read(r2chan->fd, read_buf, sizeof(read_buf));
+			res = openr2_io_read(r2chan->fd, read_buf, sizeof(read_buf));
 			if (-1 == res) {
-				myerrno = errno;
-				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel\n");
-				EMI(r2chan)->on_os_error(r2chan, myerrno);
 				return -1;
 			}
 			/* if the MF detector is enabled, we are supposed to detect tones */
@@ -369,7 +256,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
 		if (OR2_HW_IO_MUX_WRITE & interesting_events) {
-			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->zap_buf_size);
+			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
 			/* if there are no samples to convert and write then continue,
 			   the generate routine already took care of it */
 			if (!res) {
@@ -386,7 +273,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			for (i = 0; i < res; i++) {
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
-			wrote = write(r2chan->fd, read_buf, res);
+			wrote = openr2_io_write(r2chan, read_buf, res);
 			if (wrote != res) {
 				EMI(r2chan)->on_os_error(r2chan, errno);
 			}
@@ -509,7 +396,7 @@ void openr2_chan_delete(openr2_chan_t *r2chan)
 		MFI(r2chan)->mf_write_dispose(r2chan->mf_write_handle);
 	}	
 	if (r2chan->fd_created) {
-		close(r2chan->fd);
+		openr2_io_close(r2chan);
 	}	
 	if (r2chan->logfile) {
 		fclose(r2chan->logfile);
@@ -627,7 +514,7 @@ int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_s
 	int res = 0;
 	int wrote = 0;
 	while (wrote < buf_size) {
-		res = write(r2chan->fd, buf, buf_size);
+		res = openr2_io_write(r2chan, buf, buf_size);
 		if (res == -1 && errno != EAGAIN) {
 			myerrno = errno;
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write to channel\n");
@@ -661,7 +548,7 @@ void openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t l
 }
 
 OR2_EXPORT_SYMBOL
-int openr2_chan_get_fd(openr2_chan_t *r2chan)
+openr2_io_fd_t openr2_chan_get_fd(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return r2chan->fd;

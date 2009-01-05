@@ -124,7 +124,7 @@ static void *dahdi_mf_tx_init(dahdi_mf_tx_state_t *handle, int forward_signals)
 	int res;
 	/* choose either forward or backward signals */
 	strcpy(dahdi_operation.dialstr, forward_signals ? "O" : "R");
-	res = ioctl(openr2_chan_get_fd(handle->r2chan), DAHDI_DIAL, &dahdi_operation);
+	res = ioctl((int)(long)openr2_chan_get_fd(handle->r2chan), DAHDI_DIAL, &dahdi_operation);
 	if (-1 == res) {
 		perror("init failed");
 		return NULL;
@@ -156,7 +156,7 @@ static int dahdi_mf_tx_put(dahdi_mf_tx_state_t *handle, char signal)
 static int dahdi_mf_tx(dahdi_mf_tx_state_t *handle, int16_t buffer[], int samples)
 {
 	int res;
-	res = ioctl(openr2_chan_get_fd(handle->r2chan), DAHDI_SENDTONE, &handle->signal);
+	res = ioctl((int)(long)openr2_chan_get_fd(handle->r2chan), DAHDI_SENDTONE, &handle->signal);
 	if (-1 == res) {
 		perror("failed to set signal\n");
 		return -1;
@@ -654,7 +654,7 @@ void *wait_call(void *data)
 	fd_set chanread, chanexcept;
 	openr2_variant_t variant;
 	channo = openr2_chan_get_number(r2chan);
-	chanfd = openr2_chan_get_fd(r2chan);
+	chanfd = (int)(long)openr2_chan_get_fd(r2chan);
 	variant = openr2_context_get_variant(confdata->context);
 	printf("channel %d, variant = %s\n", channo, openr2_proto_get_variant_string(variant));
 	openr2_chan_set_idle(r2chan);
@@ -708,7 +708,7 @@ void *make_call(void *data)
 	fd_set chanread, chanexcept;
 	openr2_chan_t *r2chan = data;
 	struct timeval timeout, *timeout_ptr;
-	chanfd = openr2_chan_get_fd(r2chan);
+	chanfd = (int)(long)openr2_chan_get_fd(r2chan);
 	/* handle current state of ABCD bits, either blocked or idle */
 	openr2_chan_set_idle(r2chan);
 	openr2_chan_handle_cas(r2chan);

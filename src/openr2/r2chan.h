@@ -33,25 +33,15 @@
 extern "C" {
 #endif
 
-#ifdef __OR2_COMPILING_LIBRARY__
-struct openr2_chan_s;
-#define openr2_chan_t struct openr2_chan_s
-struct openr2_context_s;
-#define openr2_context_t struct openr2_context_s
-#else
-#ifndef OR2_CHAN_AND_CONTEXT_DEFINED
-#define OR2_CHAN_AND_CONTEXT_DEFINED
-typedef void* openr2_chan_t;
-typedef void* openr2_context_t;
-#endif
-#endif
+#include "r2exports.h"
 
 #define OR2_CHAN_READ_SIZE 160
+
 /* callback for logging channel related info */
 typedef void (*openr2_logging_func_t)(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt, va_list ap);
 
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle);
-openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, int chanfd, void *mf_write_handle, void *mf_read_handle);
+openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo, void *mf_write_handle, void *mf_read_handle);
 void openr2_chan_delete(openr2_chan_t *r2chan);
 int openr2_chan_process_event(openr2_chan_t *r2chan);
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t accept);
@@ -61,7 +51,7 @@ int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dn
 openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan);
 int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int len);
 void openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback);
-int openr2_chan_get_fd(openr2_chan_t *r2chan);
+openr2_io_fd_t openr2_chan_get_fd(openr2_chan_t *r2chan);
 int openr2_chan_get_number(openr2_chan_t *r2chan);
 openr2_context_t *openr2_chan_get_context(openr2_chan_t *r2chan);
 void openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data);
