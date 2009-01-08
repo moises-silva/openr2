@@ -23,3 +23,18 @@ mfcr2_call_files=yes
 mfcr2_logdir=embratel
 mfcr2_logging=all
 
+
+Sample Configuration Telecom Argentina (contributed by Marcelo Bonin <chelobon@gmail.com>)
+[channels]
+language=es
+signalling = mfcr2
+mfcr2_variant = ar
+mfcr2_max_ani = 10
+mfcr2_max_dnis = 4
+mfcr2_category = national_subscriber
+mfcr2_call_files = yes
+mfcr2_mfback_timeout = 5000
+mfcr2_metering_pulse_timeout = 200
+mfcr2_logdir = telecom
+mfcr2_logging=all
+
