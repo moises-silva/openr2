@@ -373,7 +373,9 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	/* Group I tones. Attend requests of Group A  */
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_15;
 	r2context->mf_g1_tones.no_more_ani_available = OR2_MF_TONE_15;
-	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_INVALID;
+	/* even though ITU does not define this signal, many countries do
+	   and it does not hurt to add it anyway */
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
 	/* Group II tones. */
 	r2context->mf_g2_tones.national_subscriber = OR2_MF_TONE_1;
