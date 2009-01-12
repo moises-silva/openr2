@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jan 12 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Update package version
+
 * Sat Nov 29 2008 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update package revision number
 - Add missing files

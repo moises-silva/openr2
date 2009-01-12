@@ -1,15 +1,15 @@
-Source: libopenr2-0
+Source: libopenr2
 Priority: extra
 Maintainer: Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev, zaptel-source
+Build-Depends: debhelper (>= 7), autotools-dev, zaptel-source | dahdi-linux
 Standards-Version: 3.8.0
 Section: libs
 Homepage: http://www.libopenr2.org
 
-Package: libopenr2-0-dev
+Package: libopenr2-dev
 Section: libdevel
 Architecture: any
-Depends: libopenr2-0 (= ${binary:Version}), ${shlibs:Depends}
+Depends: libopenr2-1 (= ${binary:Version}), ${shlibs:Depends}
 Description: MFC/R2 call setup library - Development
  OpenR2 is a library that implements the MFC/R2 signalling over E1 lines using
  the Zapata Telephony interface. The MF R2 tones required for the signaling are
@@ -21,7 +21,7 @@ Description: MFC/R2 call setup library - Development
  general media transmission though)
  This package contains libraries and header files for developing applications.
 
-Package: libopenr2-0
+Package: libopenr2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
