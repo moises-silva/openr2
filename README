@@ -1,5 +1,6 @@
 OpenR2 - MFC/R2 call setup library
 http://www.libopenr2.org/
+http://code.google.com/p/openr2/
 
 OpenR2 is a library that implements the MFC/R2 signalling over E1 lines using
 the Zapata Telephony interface (or DAHDI). The MF R2 tones required for the signaling are
@@ -18,12 +19,15 @@ Dependencies:
 - libc
 - Zaptel/DAHDI - OpenR2 is known to work with Zaptel 1.2, 1.4 and DAHDI
 
-Bugs and Limitations:
+Support, bugs and limitations:
 
 - This is a not thread-safe library by design, application code is responsible for locking 
   r2chan and r2context structures if they really want thread-safe access.
 
-- Send any bugs or suggestions to my e-mail.
+- If you have a question that is related to the usage of openr2 in Asterisk, send an e-mail to
+  the asterisk-r2 mailing list:  http://lists.digium.com/pipermail/asterisk-r2/
+
+- Any other bugs, questions or suggestions may be sent to my e-mail. 
 
 Moises Silva <moy@sangoma.com>
 
