@@ -1350,6 +1350,14 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 	if (OR2_MF_TONE_INVALID == GI_TONE(r2chan).no_more_dnis_available
 	     && r2chan->mf_group == OR2_MF_GA
 	     && r2chan->mf_state == OR2_MF_DNIS_RQ_TXD) {
+		
+		force compilation error here
+		how dow we know that the other end is in tone off condition?,
+		we dont know that, we could have timeout even before they put off their tone
+		if they never detect our tone
+
+
+
 		openr2_log(r2chan, OR2_LOG_DEBUG, "MF cycle timed out, no more DNIS\n");
 		/* the other end has run out of DNIS digits and were in a R2 variant that
 		   does not support 'No More DNIS available' signal (ain't that silly?), and
