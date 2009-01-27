@@ -29,6 +29,7 @@
 #include "config.h"
 #endif
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -827,8 +828,13 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
 	OR2_CHAN_STACK;
-	int diff = (r2chan->dnis_ptr - r2chan->dnis);
-	if (offset > diff) {
+	int diff =  0;
+	if (offset < 0 ) {
+		diff = (r2chan->dnis_ptr - r2chan->dnis);
+	} else if (offset > 0) {
+		diff = (r2chan->dnis + r2chan->dnis_len) - r2chan->dnis_ptr;
+	}
+	if (abs(offset) > diff) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Adjusting DNIS offset since its bigger than expected (offset = %d, diff = %d)!\n", offset, diff);
 		offset = diff;
 	}
