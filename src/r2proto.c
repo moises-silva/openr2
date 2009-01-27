@@ -350,6 +350,10 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 
 	/* Group A tones. Requests of ANI, DNIS and Calling Party Category */
 	r2context->mf_ga_tones.request_next_dnis_digit = OR2_MF_TONE_1;
+	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_2;
+	r2context->mf_ga_tones.request_dnis_minus_2 = OR2_MF_TONE_7;
+	r2context->mf_ga_tones.request_dnis_minus_3 = OR2_MF_TONE_8;
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_INVALID;
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_5;
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_5;
 	r2context->mf_ga_tones.request_category_and_change_to_gc = OR2_MF_TONE_INVALID;
@@ -820,18 +824,26 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 	}	
 }
 
-static void mf_send_dnis(openr2_chan_t *r2chan)
+static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
-	/* TODO: Handle sending of previous DNIS digits */
 	OR2_CHAN_STACK;
+	int diff = (r2chan->dnis_ptr - r2chan->dnis);
+	if (offset > diff) {
+		openr2_log(r2chan, OR2_LOG_WARNING, "Adjusting DNIS offset since its bigger than expected (offset = %d, diff = %d)!\n", offset, diff);
+		offset = diff;
+	}
+	r2chan->dnis_ptr += offset;
 	/* if there are still some DNIS to send out */
-	if ( *r2chan->dnis_ptr ) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending DNIS digit %c\n", *r2chan->dnis_ptr);
+	if (*r2chan->dnis_ptr) {
+		if (offset > 0) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Sending Next DNIS digit %c\n", *r2chan->dnis_ptr);
+		} else {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Sending N - %d DNIS digit %c\n", (offset * -1), *r2chan->dnis_ptr);
+		}
 		r2chan->mf_state = OR2_MF_DNIS_TXD;
 		prepare_mf_tone(r2chan, *r2chan->dnis_ptr);
-		r2chan->dnis_ptr++;
 	/* if no more DNIS, and there is a signal for it, use it */
-	} else if ( GI_TONE(r2chan).no_more_dnis_available ) {
+	} else if (GI_TONE(r2chan).no_more_dnis_available) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
 		r2chan->mf_state = OR2_MF_DNIS_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).no_more_dnis_available);
@@ -1041,7 +1053,7 @@ handlecas:
 			r2chan->mf_group = OR2_MF_GI;
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
-			mf_send_dnis(r2chan);
+			mf_send_dnis(r2chan, 1);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
@@ -1825,14 +1837,39 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
         }
 }
 
+static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
+{
+	OR2_CHAN_STACK;
+	int diff;
+	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
+		mf_send_dnis(r2chan, 1);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_1) {
+		mf_send_dnis(r2chan, -1);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_2) {
+		mf_send_dnis(r2chan, -2);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_3){
+		mf_send_dnis(r2chan, -3);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_all_dnis_again) {
+		diff = r2chan->dnis_ptr - r2chan->dnis;
+		diff = diff ? (diff * -1) : 0;
+		mf_send_dnis(r2chan, diff);
+		return 1;
+	}
+	return 0;
+}
+
 static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
 	openr2_mf_tone_t request_category_tone = GA_TONE(r2chan).request_category ?
 						 GA_TONE(r2chan).request_category :
 						 GA_TONE(r2chan).request_category_and_change_to_gc;
-	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
-		mf_send_dnis(r2chan);
+	if (handle_dnis_request(r2chan, tone)) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Group A DNIS request handled\n");
 	} else if (r2chan->category_sent && (tone == GA_TONE(r2chan).request_next_ani_digit)) {
 		mf_send_ani(r2chan);
 	} else if (tone == request_category_tone) {
@@ -1865,7 +1902,7 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 		mf_send_category(r2chan);
 	} else if (tone == GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga) {
 		r2chan->mf_group = OR2_MF_GI;
-		mf_send_dnis(r2chan);
+		mf_send_dnis(r2chan, 1);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}

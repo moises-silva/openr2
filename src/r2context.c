@@ -649,7 +649,10 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 
 		/* Group A tones */
 		LOADTONE(mf_ga_tones.request_next_dnis_digit)
-		LOADTONE(mf_ga_tones.request_next_ani_digit)
+		LOADTONE(mf_ga_tones.request_dnis_minus_1)
+		LOADTONE(mf_ga_tones.request_dnis_minus_2)
+		LOADTONE(mf_ga_tones.request_dnis_minus_3)
+		LOADTONE(mf_ga_tones.request_all_dnis_again)
 		LOADTONE(mf_ga_tones.request_category)
 		LOADTONE(mf_ga_tones.request_category_and_change_to_gc)
 		LOADTONE(mf_ga_tones.request_change_to_g2)
