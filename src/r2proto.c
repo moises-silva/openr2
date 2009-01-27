@@ -598,7 +598,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->ani_ptr = NULL;
 	r2chan->dnis[0] = '\0';
 	r2chan->dnis_len = 0;
-	r2chan->dnis_ptr = NULL;
+	r2chan->dnis_index = 0;
 	r2chan->caller_ani_is_restricted = 0;
 	r2chan->caller_category = OR2_MF_TONE_INVALID;
 	r2chan->r2_state = OR2_IDLE;
@@ -828,26 +828,31 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
 	OR2_CHAN_STACK;
-	int diff =  0;
-	if (offset < 0 ) {
-		diff = (r2chan->dnis_ptr - r2chan->dnis);
-	} else if (offset > 0) {
-		diff = (r2chan->dnis + r2chan->dnis_len) - (r2chan->dnis_ptr+1);
+	switch (offset) {
+	case -1:
+		r2chan->dnis_index = r2chan->dnis_index >= 1 ? (r2chan->dnis_index - 1) : 0;
+		break;
+	case -2:
+		r2chan->dnis_index = r2chan->dnis_index >= 2 ? (r2chan->dnis_index - 2) : 0;
+		break;
+	case -3:
+		r2chan->dnis_index = r2chan->dnis_index >= 3 ? (r2chan->dnis_index - 3) : 0;
+		break;
+	case 0:
+		break;
+	case 1:
+		r2chan->dnis_index++;
+		break;
+	default:
+		openr2_log(r2chan, OR2_LOG_ERROR, "BUG: invalid DNIS offset\n");
+		handle_protocol_error(r2chan, OR2_LIBRARY_BUG);
+		break;
 	}
-	if (abs(offset) > diff) {
-		openr2_log(r2chan, OR2_LOG_WARNING, "Adjusting DNIS offset since its bigger than expected (offset = %d, diff = %d)!\n", offset, diff);
-		offset = diff;
-	}
-	r2chan->dnis_ptr += offset;
 	/* if there are still some DNIS to send out */
-	if (*r2chan->dnis_ptr) {
-		if (offset > 0) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Sending Next DNIS digit %c\n", *r2chan->dnis_ptr);
-		} else {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Sending N - %d DNIS digit %c\n", (offset * -1), *r2chan->dnis_ptr);
-		}
+	if (r2chan->dnis[r2chan->dnis_index]) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending DNIS digit %c\n", r2chan->dnis[r2chan->dnis_index]);
 		r2chan->mf_state = OR2_MF_DNIS_TXD;
-		prepare_mf_tone(r2chan, *r2chan->dnis_ptr);
+		prepare_mf_tone(r2chan, r2chan->dnis[r2chan->dnis_index]);
 	/* if no more DNIS, and there is a signal for it, use it */
 	} else if (GI_TONE(r2chan).no_more_dnis_available) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
@@ -1860,9 +1865,8 @@ static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
 		mf_send_dnis(r2chan, -3);
 		return 1;
 	} else if (tone == GA_TONE(r2chan).request_all_dnis_again) {
-		diff = r2chan->dnis_ptr - r2chan->dnis;
-		diff = diff ? (diff * -1) : 0;
-		mf_send_dnis(r2chan, diff);
+		diff = r2chan->dnis_index = 0;
+		mf_send_dnis(r2chan, 0);
 		return 1;
 	}
 	return 0;
@@ -2152,7 +2156,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	} else {
 		r2chan->dnis[0] = '\0';
 	}	
-	r2chan->dnis_ptr = r2chan->dnis;
+	r2chan->dnis_index = 0;
 	/* cannot wait forever for seize ack, put a timer */
 	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, NULL);
 	return 0;

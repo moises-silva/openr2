@@ -159,7 +159,7 @@ typedef struct openr2_chan_s {
 
 	/* received DNIS */
 	char dnis[OR2_MAX_DNIS];
-	char *dnis_ptr;
+	int dnis_index;
 	unsigned dnis_len;
 
 	/* 1 when the caller ANI is restricted */
