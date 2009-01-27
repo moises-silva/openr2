@@ -832,7 +832,7 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 	if (offset < 0 ) {
 		diff = (r2chan->dnis_ptr - r2chan->dnis);
 	} else if (offset > 0) {
-		diff = (r2chan->dnis + r2chan->dnis_len) - r2chan->dnis_ptr;
+		diff = (r2chan->dnis + r2chan->dnis_len) - (r2chan->dnis_ptr+1);
 	}
 	if (abs(offset) > diff) {
 		openr2_log(r2chan, OR2_LOG_WARNING, "Adjusting DNIS offset since its bigger than expected (offset = %d, diff = %d)!\n", offset, diff);
