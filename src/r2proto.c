@@ -1059,7 +1059,7 @@ handlecas:
 			r2chan->mf_group = OR2_MF_GI;
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
-			mf_send_dnis(r2chan, 1);
+			mf_send_dnis(r2chan, 0);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
