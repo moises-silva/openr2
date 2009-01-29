@@ -239,6 +239,7 @@ typedef struct {
 	openr2_mf_tone_t line_out_of_order;
 	openr2_mf_tone_t special_info_tone;
 	openr2_mf_tone_t reject_collect_call;
+	openr2_mf_tone_t number_changed;
 } openr2_mf_gb_tones_t;
 
 /* names for the GC MF tones */

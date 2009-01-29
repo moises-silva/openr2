@@ -668,6 +668,7 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		LOADTONE(mf_gb_tones.line_out_of_order)
 		LOADTONE(mf_gb_tones.special_info_tone)
 		LOADTONE(mf_gb_tones.reject_collect_call)
+		LOADTONE(mf_gb_tones.number_changed)
 
 		/* Group C tones */
 		LOADTONE(mf_gc_tones.request_next_ani_digit)

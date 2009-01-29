@@ -80,11 +80,12 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
-	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6; /* holding? */
 	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_7;
+	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_3;
 	/* use out of order for unallocated, I could not find a special
 	   tone for unallocated number on the Brazil spec */
-	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_8;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7; /* was 8, but TONE_7 for unallocated in Brazil according to Marcia from ANATEL */
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -373,6 +374,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_INVALID;
+	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_INVALID;
 
 	/* Group C tones. Similar to Group A but for Mexico */
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
@@ -1932,7 +1934,8 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).network_congestion) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
-	} else if (tone == GB_TONE(r2chan).unallocated_number) {
+	} else if (tone == GB_TONE(r2chan).unallocated_number ||
+		   tone == GB_TONE(r2chan).number_changed) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
