@@ -570,6 +570,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "Network Congestion";
 	case OR2_CAUSE_UNALLOCATED_NUMBER:
 		return "Unallocated Number";
+	case OR2_CAUSE_NUMBER_CHANGED:
+		return "Number Changed";
 	case OR2_CAUSE_OUT_OF_ORDER:
 		return "Line Out Of Order";
 	case OR2_CAUSE_UNSPECIFIED:
@@ -1934,10 +1936,12 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).network_congestion) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
-	} else if (tone == GB_TONE(r2chan).unallocated_number ||
-		   tone == GB_TONE(r2chan).number_changed) {
+	} else if (tone == GB_TONE(r2chan).unallocated_number) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
+	} else if (tone == GB_TONE(r2chan).number_changed) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_NUMBER_CHANGED);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
@@ -2184,6 +2188,9 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 		break;
 	case OR2_CAUSE_UNALLOCATED_NUMBER:
 		tone = GB_TONE(r2chan).unallocated_number;
+		break;
+	case OR2_CAUSE_NUMBER_CHANGED:
+		tone = GB_TONE(r2chan).number_changed ? GB_TONE(r2chan).number_changed : GB_TONE(r2chan).unallocated_number;
 		break;
 	case OR2_CAUSE_OUT_OF_ORDER:
 		tone = GB_TONE(r2chan).line_out_of_order;
