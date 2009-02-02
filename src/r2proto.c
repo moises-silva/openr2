@@ -29,6 +29,7 @@
 #include "config.h"
 #endif
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -73,15 +74,17 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_g2_tones.collect_call = OR2_MF_TONE_8;
 
 	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
+	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_9;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
-	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6;
+	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6; /* holding? */
 	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_7;
+	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_3;
 	/* use out of order for unallocated, I could not find a special
 	   tone for unallocated number on the Brazil spec */
-	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_8;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7; /* was 8, but TONE_7 for unallocated in Brazil according to Marcia from ANATEL */
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -347,6 +350,10 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 
 	/* Group A tones. Requests of ANI, DNIS and Calling Party Category */
 	r2context->mf_ga_tones.request_next_dnis_digit = OR2_MF_TONE_1;
+	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_2;
+	r2context->mf_ga_tones.request_dnis_minus_2 = OR2_MF_TONE_7;
+	r2context->mf_ga_tones.request_dnis_minus_3 = OR2_MF_TONE_8;
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_INVALID;
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_5;
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_5;
 	r2context->mf_ga_tones.request_category_and_change_to_gc = OR2_MF_TONE_INVALID;
@@ -364,6 +371,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_INVALID;
+	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_INVALID;
 
 	/* Group C tones. Similar to Group A but for Mexico */
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
@@ -559,6 +567,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "Network Congestion";
 	case OR2_CAUSE_UNALLOCATED_NUMBER:
 		return "Unallocated Number";
+	case OR2_CAUSE_NUMBER_CHANGED:
+		return "Number Changed";
 	case OR2_CAUSE_OUT_OF_ORDER:
 		return "Line Out Of Order";
 	case OR2_CAUSE_UNSPECIFIED:
@@ -590,7 +600,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->ani_ptr = NULL;
 	r2chan->dnis[0] = '\0';
 	r2chan->dnis_len = 0;
-	r2chan->dnis_ptr = NULL;
+	r2chan->dnis_index = 0;
 	r2chan->caller_ani_is_restricted = 0;
 	r2chan->caller_category = OR2_MF_TONE_INVALID;
 	r2chan->r2_state = OR2_IDLE;
@@ -813,18 +823,38 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 	}	
 }
 
-static void mf_send_dnis(openr2_chan_t *r2chan)
+/* this function just accepts from -3 to 1 as valid offsets */
+static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
-	/* TODO: Handle sending of previous DNIS digits */
 	OR2_CHAN_STACK;
+	int a_offset = abs(offset);
+	switch (offset) {
+	case -1:
+	case -2:
+	case -3:
+		/* get a previous DNIS */
+		r2chan->dnis_index = r2chan->dnis_index >= a_offset ? (r2chan->dnis_index - a_offset) : 0;
+		break;
+	case 0:
+		/* do nothing to dnis_index, the current DNIS index has the requested DNIS to send */
+		break;
+	case 1:
+		/* get the next DNIS digit */
+		r2chan->dnis_index++;
+		break;
+	default:
+		/* a bug in the library definitely */
+		openr2_log(r2chan, OR2_LOG_ERROR, "BUG: invalid DNIS offset\n");
+		handle_protocol_error(r2chan, OR2_LIBRARY_BUG);
+		return;
+	}
 	/* if there are still some DNIS to send out */
-	if ( *r2chan->dnis_ptr ) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending DNIS digit %c\n", *r2chan->dnis_ptr);
+	if (r2chan->dnis[r2chan->dnis_index]) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending DNIS digit %c\n", r2chan->dnis[r2chan->dnis_index]);
 		r2chan->mf_state = OR2_MF_DNIS_TXD;
-		prepare_mf_tone(r2chan, *r2chan->dnis_ptr);
-		r2chan->dnis_ptr++;
+		prepare_mf_tone(r2chan, r2chan->dnis[r2chan->dnis_index]);
 	/* if no more DNIS, and there is a signal for it, use it */
-	} else if ( GI_TONE(r2chan).no_more_dnis_available ) {
+	} else if (GI_TONE(r2chan).no_more_dnis_available) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
 		r2chan->mf_state = OR2_MF_DNIS_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).no_more_dnis_available);
@@ -1030,7 +1060,7 @@ handlecas:
 			r2chan->mf_group = OR2_MF_GI;
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
-			mf_send_dnis(r2chan);
+			mf_send_dnis(r2chan, 0);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
@@ -1350,11 +1380,12 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 	if (OR2_MF_TONE_INVALID == GI_TONE(r2chan).no_more_dnis_available
 	     && r2chan->mf_group == OR2_MF_GA
 	     && r2chan->mf_state == OR2_MF_DNIS_RQ_TXD) {
-		
-		force compilation error here
+	
+		/*
+		TODO:	
 		how dow we know that the other end is in tone off condition?,
 		we dont know that, we could have timeout even before they put off their tone
-		if they never detect our tone
+		if they never detect our tone */
 
 
 
@@ -1822,14 +1853,38 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
         }
 }
 
+static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
+{
+	OR2_CHAN_STACK;
+	int diff;
+	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
+		mf_send_dnis(r2chan, 1);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_1) {
+		mf_send_dnis(r2chan, -1);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_2) {
+		mf_send_dnis(r2chan, -2);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_dnis_minus_3){
+		mf_send_dnis(r2chan, -3);
+		return 1;
+	} else if (tone == GA_TONE(r2chan).request_all_dnis_again) {
+		diff = r2chan->dnis_index = 0;
+		mf_send_dnis(r2chan, 0);
+		return 1;
+	}
+	return 0;
+}
+
 static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
 	openr2_mf_tone_t request_category_tone = GA_TONE(r2chan).request_category ?
 						 GA_TONE(r2chan).request_category :
 						 GA_TONE(r2chan).request_category_and_change_to_gc;
-	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
-		mf_send_dnis(r2chan);
+	if (handle_dnis_request(r2chan, tone)) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Group A DNIS request handled\n");
 	} else if (r2chan->category_sent && (tone == GA_TONE(r2chan).request_next_ani_digit)) {
 		mf_send_ani(r2chan);
 	} else if (tone == request_category_tone) {
@@ -1862,7 +1917,7 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 		mf_send_category(r2chan);
 	} else if (tone == GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga) {
 		r2chan->mf_group = OR2_MF_GI;
-		mf_send_dnis(r2chan);
+		mf_send_dnis(r2chan, 1);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
@@ -1884,6 +1939,9 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).unallocated_number) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
+	} else if (tone == GB_TONE(r2chan).number_changed) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_NUMBER_CHANGED);
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
 		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
@@ -2106,7 +2164,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	} else {
 		r2chan->dnis[0] = '\0';
 	}	
-	r2chan->dnis_ptr = r2chan->dnis;
+	r2chan->dnis_index = 0;
 	/* cannot wait forever for seize ack, put a timer */
 	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, NULL);
 	return 0;
@@ -2130,6 +2188,9 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 		break;
 	case OR2_CAUSE_UNALLOCATED_NUMBER:
 		tone = GB_TONE(r2chan).unallocated_number;
+		break;
+	case OR2_CAUSE_NUMBER_CHANGED:
+		tone = GB_TONE(r2chan).number_changed ? GB_TONE(r2chan).number_changed : GB_TONE(r2chan).unallocated_number;
 		break;
 	case OR2_CAUSE_OUT_OF_ORDER:
 		tone = GB_TONE(r2chan).line_out_of_order;

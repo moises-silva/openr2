@@ -217,6 +217,10 @@ typedef enum {
 /* names for the GA MF tones */
 typedef struct {
 	openr2_mf_tone_t request_next_dnis_digit;
+	openr2_mf_tone_t request_dnis_minus_1;
+	openr2_mf_tone_t request_dnis_minus_2;
+	openr2_mf_tone_t request_dnis_minus_3;
+	openr2_mf_tone_t request_all_dnis_again;
 	openr2_mf_tone_t request_next_ani_digit;
 	openr2_mf_tone_t request_category;
 	openr2_mf_tone_t request_category_and_change_to_gc;
@@ -235,6 +239,7 @@ typedef struct {
 	openr2_mf_tone_t line_out_of_order;
 	openr2_mf_tone_t special_info_tone;
 	openr2_mf_tone_t reject_collect_call;
+	openr2_mf_tone_t number_changed;
 } openr2_mf_gb_tones_t;
 
 /* names for the GC MF tones */
