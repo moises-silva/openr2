@@ -1856,7 +1856,6 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
-	int diff;
 	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
 		mf_send_dnis(r2chan, 1);
 		return 1;
@@ -1870,7 +1869,7 @@ static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
 		mf_send_dnis(r2chan, -3);
 		return 1;
 	} else if (tone == GA_TONE(r2chan).request_all_dnis_again) {
-		diff = r2chan->dnis_index = 0;
+		r2chan->dnis_index = 0;
 		mf_send_dnis(r2chan, 0);
 		return 1;
 	}
