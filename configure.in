@@ -9,10 +9,10 @@
 # Package and LT versions are not the same (they can match sometimes though)
 # see http://sources.redhat.com/autobook/autobook/autobook_91.html for details
 
-AC_INIT([OpenR2], [1.0.0])
+AC_INIT([OpenR2], [1.1.0])
 
 OPENR2_LT_CURRENT=1
-OPENR2_LT_REVISION=0
+OPENR2_LT_REVISION=1
 OPENR2_LT_AGE=0
 
 AC_SUBST(OPENR2_LT_CURRENT)
