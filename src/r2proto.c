@@ -830,28 +830,30 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 	}	
 }
 
+/* this function just accepts from -3 to 1 as valid offsets */
 static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
 	OR2_CHAN_STACK;
+	int a_offset = abs(offset);
 	switch (offset) {
 	case -1:
-		r2chan->dnis_index = r2chan->dnis_index >= 1 ? (r2chan->dnis_index - 1) : 0;
-		break;
 	case -2:
-		r2chan->dnis_index = r2chan->dnis_index >= 2 ? (r2chan->dnis_index - 2) : 0;
-		break;
 	case -3:
-		r2chan->dnis_index = r2chan->dnis_index >= 3 ? (r2chan->dnis_index - 3) : 0;
+		/* get a previous DNIS */
+		r2chan->dnis_index = r2chan->dnis_index >= a_offset ? (r2chan->dnis_index - a_offset) : 0;
 		break;
 	case 0:
+		/* do nothing to dnis_index, the current DNIS index has the requested DNIS to send */
 		break;
 	case 1:
+		/* get the next DNIS digit */
 		r2chan->dnis_index++;
 		break;
 	default:
+		/* a bug in the library definitely */
 		openr2_log(r2chan, OR2_LOG_ERROR, "BUG: invalid DNIS offset\n");
 		handle_protocol_error(r2chan, OR2_LIBRARY_BUG);
-		break;
+		return;
 	}
 	/* if there are still some DNIS to send out */
 	if (r2chan->dnis[r2chan->dnis_index]) {
