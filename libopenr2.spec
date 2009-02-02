@@ -1,5 +1,5 @@
 Name:           libopenr2
-Version:        1.0.0
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
@@ -8,6 +8,7 @@ Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.libopenr2.org/
 Source0:        http://www.libopenr2.org/%{name}-%{version}.tar.gz
+Source0:        http://openr2.googlecode.com/files/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:	chrpath
@@ -82,6 +83,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Feb 02 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Updated package version number
+- Add compilance with ANATEL (Brazilian telecomunications agency)
+
 * Mon Jan 12 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update package version
 

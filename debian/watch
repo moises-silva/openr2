@@ -11,7 +11,7 @@ version=3
 #http://www.libopenr2.org/downloads.php libopenr2-(.*)\.tar\.gz
 
 # Uncomment to examine a Webserver directory
-http://www.libopenr2.org/libopenr2-(.*)\.tar\.gz
+http://openr2.googlecode.com/files/openr2-(.*)\.tar\.gz
 
 # Uncommment to examine a FTP server
 #ftp://ftp.example.com/pub/libopenr2-(.*)\.tar\.gz debian uupdate
