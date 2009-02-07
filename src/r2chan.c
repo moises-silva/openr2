@@ -38,7 +38,6 @@
 #include "openr2/r2chan-pvt.h"
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2ioabs.h"
-#include "openr2/r2hwcompat.h"
 
 static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
 {
@@ -142,21 +141,21 @@ openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd
 	return r2chan;
 }
 
-static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
+static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t event)
 {
 	OR2_CHAN_STACK;
 	switch (event) {
-	case OR2_HW_EVENT_BITS_CHANGED:
+	case OR2_OOB_EVENT_CAS_CHANGE:
 		openr2_proto_handle_cas(r2chan);
 		break;
-	case OR2_HW_EVENT_ALARM:
-	case OR2_HW_EVENT_NO_ALARM:
-		openr2_log(r2chan, OR2_LOG_DEBUG, (event == OR2_HW_EVENT_ALARM) ? "Alarm Raised\n" : "Alarm Cleared\n");
-		r2chan->inalarm = (event == OR2_HW_EVENT_ALARM) ? 1 : 0;
+	case OR2_OOB_EVENT_ALARM_ON:
+	case OR2_OOB_EVENT_ALARM_OFF:
+		openr2_log(r2chan, OR2_LOG_DEBUG, (event == OR2_OOB_EVENT_ALARM_ON) ? "Alarm Raised\n" : "Alarm Cleared\n");
+		r2chan->inalarm = (event == OR2_OOB_EVENT_ALARM_ON) ? 1 : 0;
 		EMI(r2chan)->on_hardware_alarm(r2chan, r2chan->inalarm);
 		break;
 	default:
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Unhandled hardware event %d\n", event);
+		openr2_log(r2chan, OR2_LOG_NOTICE, "Unhandled OOB event %d\n", event);
 		break;
 	}
 	return 0;
@@ -167,9 +166,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	openr2_sched_timer_t schedtimer;
-	int myerrno;
 	struct timeval nowtv;
-	int interesting_events, events, res, tone_result, wrote;
+	int interesting_events, res, tone_result, wrote;
+	openr2_oob_event_t event;
 	unsigned i;
 	int t = 0;
 	int ms;
@@ -198,39 +197,35 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 
 	while(1) {
 
-		/* we're always interested in CAS bit events and we don't want not block */
-		interesting_events = OR2_HW_IO_MUX_SIG_EVENT | OR2_HW_IO_MUX_NO_WAIT;
+		/* we're always interested in CAS and ALARM events */
+		interesting_events = OR2_IO_OOB_EVENT;
 
 		/* we also want to be notified about read-ready if we have read enabled */
 		if (r2chan->read_enabled) {
-			interesting_events |= OR2_HW_IO_MUX_READ;
+			interesting_events |= OR2_IO_READ;
 		}
 
 		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
 		if (OR2_MF_OFF_STATE != r2chan->mf_state && MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
-			interesting_events |= OR2_HW_IO_MUX_WRITE;
+			interesting_events |= OR2_IO_WRITE;
 		}
-
-		res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_IO_MUX, &interesting_events);
+		res = openr2_io_wait(r2chan, &interesting_events, 0);
 		if (res) {
-			myerrno = errno;
-			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
-			EMI(r2chan)->on_os_error(r2chan, myerrno);
 			return -1;
 		}	
 		/* if there is no interesting events, do nothing */
 		if (!interesting_events) {
-			return -1;
+			return 0;
 		}
-		/* if there is a signaling eventset, probably CAS bits just changed */
-		if (OR2_HW_IO_MUX_SIG_EVENT & interesting_events) {
-			res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
-			if ( !res && events ) {
-				openr2_chan_handle_zap_event(r2chan, events);
+		/* if there is an OOB event, probably CAS bits just changed */
+		if (OR2_IO_OOB_EVENT & interesting_events) {
+			res = openr2_io_get_oob_event(r2chan, &event);
+			if (!res && event != OR2_OOB_EVENT_NONE) {
+				openr2_chan_handle_oob_event(r2chan, event);
 			}
 			continue;
 		}
-		if (OR2_HW_IO_MUX_READ & interesting_events) {
+		if (OR2_IO_READ & interesting_events) {
 			res = openr2_io_read(r2chan->fd, read_buf, sizeof(read_buf));
 			if (-1 == res) {
 				return -1;
@@ -255,7 +250,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
-		if (OR2_HW_IO_MUX_WRITE & interesting_events) {
+		if (OR2_IO_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
 			/* if there are no samples to convert and write then continue,
 			   the generate routine already took care of it */

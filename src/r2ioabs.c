@@ -213,3 +213,62 @@ int openr2_io_setup(openr2_chan_t *r2chan)
 	return 0;
 }
 
+int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait)
+{
+	int res = 0, myerrno = 0, zapflags = 0;
+	if (!flags || !*flags) {
+		return -1;
+	}
+	if (!wait) {
+		zapflags |= OR2_HW_IO_MUX_NO_WAIT;
+	}
+	if (*flags & OR2_IO_READ) {
+		zapflags |= OR2_HW_IO_MUX_READ;
+	}
+	if (*flags & OR2_IO_WRITE) {
+		zapflags |= OR2_HW_IO_MUX_WRITE;
+	}
+	if (*flags & OR2_IO_OOB_EVENT) {
+		zapflags |= OR2_HW_IO_MUX_SIG_EVENT;
+	}
+	res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_IO_MUX, &zapflags);
+	if (res) {
+		myerrno = errno;
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+		return -1;
+	}
+	*flags = 0;
+	if (zapflags & OR2_HW_IO_MUX_SIG_EVENT) {
+		*flags |= OR2_IO_OOB_EVENT;
+	}
+	if (zapflags & OR2_HW_IO_MUX_READ) {
+		*flags |= OR2_IO_READ;
+	}
+	if (zapflags & OR2_HW_IO_MUX_SIG_EVENT) {
+		*flags |= OR2_IO_OOB_EVENT;
+	}
+	return 0;
+}
+
+int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
+{
+	int res, zapevent;
+	if (!event) {
+		return -1;
+	}
+	*event = OR2_OOB_EVENT_NONE;
+	res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_GET_EVENT, &zapevent);	
+	if (res) {
+		return -1;
+	}
+	if (zapevent == OR2_HW_EVENT_BITS_CHANGED) {
+		*event = OR2_OOB_EVENT_CAS_CHANGE;
+	} else if (zapevent == OR2_HW_EVENT_ALARM) {
+		*event = OR2_OOB_EVENT_ALARM_ON;
+	} else if (zapevent == OR2_HW_EVENT_NO_ALARM) {
+		*event = OR2_OOB_EVENT_ALARM_OFF;
+	}
+	return 0;
+}
+
