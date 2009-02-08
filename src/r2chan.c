@@ -226,7 +226,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			continue;
 		}
 		if (OR2_IO_READ & interesting_events) {
-			res = openr2_io_read(r2chan->fd, read_buf, sizeof(read_buf));
+			res = openr2_io_read(r2chan, read_buf, sizeof(read_buf));
 			if (-1 == res) {
 				return -1;
 			}

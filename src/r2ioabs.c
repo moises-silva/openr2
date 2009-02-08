@@ -60,7 +60,8 @@ openr2_io_fd_t openr2_io_open(openr2_context_t *r2context, int channo)
 int openr2_io_close(openr2_chan_t *r2chan)
 {
 	int myerrno = 0;
-	if (close((int)(long)r2chan->fd)) {
+	int fd = (long)r2chan->fd;
+	if (close(fd)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to close I/O descriptor: %s\n", strerror(myerrno));
@@ -72,7 +73,8 @@ int openr2_io_close(openr2_chan_t *r2chan)
 int openr2_io_set_cas(openr2_chan_t *r2chan, int cas)
 {
 	int myerrno = 0;
-	if (ioctl((int)(long)r2chan->fd, OR2_HW_OP_SET_TX_BITS, &cas)) {
+	int fd = (long)r2chan->fd;
+	if (ioctl(fd, OR2_HW_OP_SET_TX_BITS, &cas)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Setting CAS bits failed: %s\n", strerror(myerrno));
@@ -85,7 +87,8 @@ int openr2_io_flush_write_buffers(openr2_chan_t *r2chan)
 {
 	int myerrno = 0;
 	int flush_write = OR2_HW_FLUSH_WRITE;
-	if (ioctl((int)(long)r2chan->fd, OR2_HW_OP_FLUSH, &flush_write)) {
+	int fd = (long)r2chan->fd;
+	if (ioctl(fd, OR2_HW_OP_FLUSH, &flush_write)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Flush write buffer failed: %s\n", strerror(myerrno));
@@ -97,7 +100,8 @@ int openr2_io_flush_write_buffers(openr2_chan_t *r2chan)
 int openr2_io_get_cas(openr2_chan_t *r2chan, int *cas)
 {
 	int myerrno = 0;
-	if (ioctl((int)(long)r2chan->fd, OR2_HW_OP_GET_RX_BITS, cas)) {
+	int fd = (long)r2chan->fd;
+	if (ioctl(fd, OR2_HW_OP_GET_RX_BITS, cas)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Getting CAS bits failed: %s\n", strerror(myerrno));
@@ -110,7 +114,8 @@ int openr2_io_read(openr2_chan_t *r2chan, const void *buf, int size)
 {
 	int myerrno = 0;
 	int bytes = -1;
-	if ((bytes = read((int)(long)r2chan->fd, (void *)buf, size))) {
+	int fd = (long)r2chan->fd;
+	if (-1 == (bytes = read(fd, (void *)buf, size))) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read: %s\n", strerror(myerrno));
@@ -123,7 +128,8 @@ int openr2_io_write(openr2_chan_t *r2chan, const void *buf, int size)
 {
 	int myerrno = 0;
 	int bytes = -1;
-	if ((bytes = write((int)(long)r2chan->fd, buf, size))) {
+	int fd = (long)r2chan->fd;
+	if (-1 == (bytes = write(fd, buf, size))) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write: %s\n", strerror(myerrno));
@@ -215,7 +221,7 @@ int openr2_io_setup(openr2_chan_t *r2chan)
 
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait)
 {
-	int res = 0, myerrno = 0, zapflags = 0;
+	int res = 0, myerrno = 0, zapflags = 0, fd = 0;
 	if (!flags || !*flags) {
 		return -1;
 	}
@@ -231,7 +237,8 @@ int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait)
 	if (*flags & OR2_IO_OOB_EVENT) {
 		zapflags |= OR2_HW_IO_MUX_SIG_EVENT;
 	}
-	res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_IO_MUX, &zapflags);
+	fd = (long)r2chan->fd;
+	res = ioctl(fd, OR2_HW_OP_IO_MUX, &zapflags);
 	if (res) {
 		myerrno = errno;
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
@@ -254,11 +261,12 @@ int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait)
 int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 {
 	int res, zapevent;
+	int fd = (long)r2chan->fd;
 	if (!event) {
 		return -1;
 	}
 	*event = OR2_OOB_EVENT_NONE;
-	res = ioctl((int)(long)r2chan->fd, OR2_HW_OP_GET_EVENT, &zapevent);	
+	res = ioctl(fd, OR2_HW_OP_GET_EVENT, &zapevent);	
 	if (res) {
 		return -1;
 	}

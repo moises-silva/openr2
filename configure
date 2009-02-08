@@ -1927,7 +1927,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 OPENR2_LT_CURRENT=1
-OPENR2_LT_REVISION=0
+OPENR2_LT_REVISION=1
 OPENR2_LT_AGE=0
 
 
