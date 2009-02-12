@@ -32,18 +32,6 @@ extern "C" {
 
 #include "r2exports.h"
 
-#define OR2_IO_READ      (1 << 0)
-#define OR2_IO_WRITE     (1 << 1)
-#define OR2_IO_OOB_EVENT (1 << 2)
-
-/* Out of Band events */
-typedef enum {
-	OR2_OOB_EVENT_NONE,
-	OR2_OOB_EVENT_CAS_CHANGE,
-	OR2_OOB_EVENT_ALARM_ON,
-	OR2_OOB_EVENT_ALARM_OFF
-} openr2_oob_event_t;
-
 /* --custom-io (disables verification of presence of either zaptel, dahdi or openzap) 
  * and therefore an I/O interface definition should be provided at runtime
  * otherwise r2 channels cannot be created
@@ -58,6 +46,7 @@ int openr2_io_read(openr2_chan_t *r2chan, const void *buf, int size);
 int openr2_io_setup(openr2_chan_t *r2chan);
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait);
 int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event);
+openr2_io_interface_t *openr2_io_get_zt_interface(void);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

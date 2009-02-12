@@ -35,6 +35,7 @@
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2chan-pvt.h"
 #include "openr2/r2context-pvt.h"
+#include "openr2/r2ioabs.h"
 
 static void on_call_init_default(openr2_chan_t *r2chan)
 {
@@ -289,6 +290,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 		free(r2context);
 		return NULL;
 	}
+	openr2_context_set_io_type(r2context, OR2_IO_DEFAULT, NULL);
 	return r2context;
 }
 
@@ -409,6 +411,8 @@ const char *openr2_context_error_string(openr2_liberr_t error)
 	case OR2_LIBERR_SYSCALL_FAILED: return "System call failed";
 	case OR2_LIBERR_INVALID_CHAN_SIGNALING: return "Invalid channel signaling";
 	case OR2_LIBERR_CANNOT_SET_IDLE: return "Failed to set IDLE state on channel";
+	case OR2_LIBERR_NO_IO_IFACE_AVAILABLE: return "No I/O interface available for channel";
+	case OR2_LIBERR_INVALID_CHAN_NUMBER: return "Invalid channel number";
 	default: return "*Unknown*";
 	}
 }
@@ -589,6 +593,79 @@ int openr2_context_get_double_answer(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->timers.r2_double_answer ? 1 : 0;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_type, openr2_io_interface_t *io_interface)
+{
+	OR2_CONTEXT_STACK;
+	openr2_io_interface_t *internal_io_interface = NULL;
+	switch (io_type) {
+	case OR2_IO_CUSTOM:
+		/* sanity check for all members */
+		if (!io_interface) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "I/O interface cannot be null!\n");
+			return -1;
+		}
+		if (!io_interface->open) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: open\n");
+			return -1;
+		}
+		if (!io_interface->close) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: close\n");
+			return -1;
+		}
+		if (!io_interface->set_cas) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: set_cas\n");
+			return -1;
+		}
+		if (!io_interface->get_cas) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: get_cas\n");
+			return -1;
+		}
+		if (!io_interface->flush_write_buffers) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: flush_write_buffers\n");
+			return -1;
+		}
+		if (!io_interface->write) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: write\n");
+			return -1;
+		}
+		if (!io_interface->read) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: read\n");
+			return -1;
+		}
+		if (!io_interface->setup) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: setup\n");
+			return -1;
+		}
+		if (!io_interface->wait) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: wait\n");
+			return -1;
+		}
+		if (!io_interface->get_oob_event) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: get_oob_event\n");
+			return -1;
+		}
+		r2context->io = io_interface;
+		r2context->io_type = io_type;
+		return 0;
+	case OR2_IO_ZT:
+	case OR2_IO_DEFAULT:
+		/* check that zaptel interface is available */
+		internal_io_interface = openr2_io_get_zt_interface();
+		if (!internal_io_interface) {
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable Zaptel or DAHDI I/O interface!\n");
+			return -1;
+		}
+		r2context->io_type = io_type;
+		r2context->io = internal_io_interface;
+		return 0;
+	default:
+		break;
+	}
+	openr2_log2(r2context, OR2_LOG_ERROR, "Invalid I/O type %d\n", io_type);
+	return -1;
 }
 
 #define LOADTONE(mytone) \

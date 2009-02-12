@@ -39,7 +39,7 @@
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2ioabs.h"
 
-static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
+static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle, int openchan)
 {
 	openr2_chan_t *r2chan = NULL;
 #ifdef OR2_MF_DEBUG
@@ -97,20 +97,24 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	/* start the timer id in 1 to avoid confusion when memset'ing */
 	r2chan->timer_id = 1;
 
-	/* prepare the I/O for R2 signaling if needed */
-	if (channo) {
+	/* open channel only if requested */
+	if (openchan) {
 		/* channel fd */
 		r2chan->fd = openr2_io_open(r2context, channo);
 		if (!r2chan->fd) {
 			openr2_chan_delete(r2chan);
 			return NULL;
 		}
+		/* setup the I/O for R2 signaling */
 		if (openr2_io_setup(r2chan)) {
 			openr2_chan_delete(r2chan);
 			return NULL;
 		}
 		r2chan->fd_created = 1;
 	}	
+
+	r2chan->number = channo;
+	r2chan->io_buf_size = OR2_CHAN_READ_SIZE;
 
 	/* add ourselves to the list of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
@@ -123,21 +127,27 @@ OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
 {
 	if (channo <=0 ) {
+		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
+		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
-	return __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle);
+	return __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle, 1);
 }
 
 OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo, void *mf_write_handle, void *mf_read_handle)
 {
-	openr2_chan_t *r2chan = __openr2_chan_new(r2context, 0, mf_write_handle, mf_read_handle);
+	if (channo <=0 ) {
+		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
+		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
+		return NULL;
+	}
+	openr2_chan_t *r2chan = __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle, 0);
 	if (!r2chan) {
 		return NULL;
 	}
 	r2chan->fd = chanfd;
 	r2chan->fd_created = 0;
-	r2chan->number = channo;
 	return r2chan;
 }
 
@@ -202,6 +212,8 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 
 		/* we also want to be notified about read-ready if we have read enabled */
 		if (r2chan->read_enabled) {
+			/* XXX read enabled is NOT enough, we should also check if the MF engine is turned on
+			   or the channel is answered XXX*/
 			interesting_events |= OR2_IO_READ;
 		}
 

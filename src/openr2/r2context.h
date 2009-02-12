@@ -139,13 +139,28 @@ typedef struct {
 	openr2_handle_billing_pulse_received_func on_billing_pulse_received;
 } openr2_event_interface_t;
 
-typedef openr2_io_fd_t (*openr2_io_open_func)(openr2_context_t* r2context);
+#define OR2_IO_READ      (1 << 0)
+#define OR2_IO_WRITE     (1 << 1)
+#define OR2_IO_OOB_EVENT (1 << 2)
+
+/* Out of Band events */
+typedef enum {
+	OR2_OOB_EVENT_NONE,
+	OR2_OOB_EVENT_CAS_CHANGE,
+	OR2_OOB_EVENT_ALARM_ON,
+	OR2_OOB_EVENT_ALARM_OFF
+} openr2_oob_event_t;
+
+typedef openr2_io_fd_t (*openr2_io_open_func)(openr2_context_t* r2context, int channo);
 typedef int (*openr2_io_close_func)(openr2_chan_t *r2chan);
 typedef int (*openr2_io_set_cas_func)(openr2_chan_t *r2chan, int cas);
 typedef int (*openr2_io_get_cas_func)(openr2_chan_t *r2chan, int *cas);
 typedef int (*openr2_io_flush_write_buffers_func)(openr2_chan_t *r2chan);
 typedef int (*openr2_io_write_func)(openr2_chan_t *r2chan, const void *buf, int size);
 typedef int (*openr2_io_read_func)(openr2_chan_t *r2chan, const void *buf, int size);
+typedef int (*openr2_io_setup_func)(openr2_chan_t *r2chan);
+typedef int (*openr2_io_wait_func)(openr2_chan_t *r2chan, int *flags, int block);
+typedef int (*openr2_io_get_oob_event_func)(openr2_chan_t *r2chan, openr2_oob_event_t *event);
 typedef struct {
 	openr2_io_open_func open;
 	openr2_io_close_func close;
@@ -154,7 +169,18 @@ typedef struct {
 	openr2_io_flush_write_buffers_func flush_write_buffers;
 	openr2_io_write_func write;
 	openr2_io_read_func read;
+	openr2_io_setup_func setup;
+	openr2_io_wait_func wait;
+	openr2_io_get_oob_event_func get_oob_event;
 } openr2_io_interface_t;
+
+typedef enum {
+	OR2_IO_DEFAULT = 0, /* Default is Zaptel */
+	/* OR2_IO_OPENZAP (libopenzap I/O) */
+	/* OR2_IO_SANGOMA (libsangoma I/O) */
+	OR2_IO_ZT, /* Zaptel or DAHDI I/O */
+	OR2_IO_CUSTOM = 9 /* any unsupported vendor I/O (pika, digivoice, kohmp etc) */
+} openr2_io_type_t;
 
 /* Transcoding interface. Users should provide this interface
    to provide transcoding services from linear to alaw and 
@@ -175,7 +201,9 @@ typedef enum {
 	/* cannot set to IDLE the channel when creating it */
 	OR2_LIBERR_CANNOT_SET_IDLE,
 	/* No I/O interface is available */
-	OR2_LIBERR_NO_IO_IFACE_AVAILABLE
+	OR2_LIBERR_NO_IO_IFACE_AVAILABLE,
+	/* Invalid channel number provided  */
+	OR2_LIBERR_INVALID_CHAN_NUMBER
 } openr2_liberr_t;
 
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context);
@@ -204,6 +232,7 @@ int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
 int openr2_context_get_double_answer(openr2_context_t *r2context);
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
+int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_type, openr2_io_interface_t *io_interface);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t 

@@ -80,6 +80,13 @@ typedef struct openr2_context_s {
 	   functions to the R2 channels */
 	openr2_transcoder_interface_t *transcoder;
 
+	/* this interface provide I/O
+	   functions to the R2 channels */
+	openr2_io_interface_t *io;
+
+	/* Type of I/O interface */
+	openr2_io_type_t io_type;
+
 	/* R2 variant to use in this context channels */
 	openr2_variant_t variant;
 
@@ -135,10 +142,6 @@ typedef struct openr2_context_s {
 
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;
-
-	/* this interface provide transcoding 
-	   functions to the R2 channels */
-	openr2_io_interface_t *io;
 
 } openr2_context_t;
 
