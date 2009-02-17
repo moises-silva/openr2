@@ -5,4 +5,16 @@
 - Add support for use 1 variant for outgoing calls and one for incoming calls
 - Port to Windows
 - Port to Mac OS
-- add support for DNIS-1, repeat all dnis and that stuff, is it worth?
+- Add metering pulse on demand after answering
+The Answer has Forward "0 0" and backward "0 1"
+Metering will change from  "|0 0|0 1|" and  to "|0 0|1 1|" for 150ms
+before changing back to "|0 0| 0 1|"
+it's like when a caller calls in
+we answer the call
+then play voice prompt asking if the caller wants to use the service by pressing DTMF
+if not, hang them up
+once the caller press whatever digit, we then send metering pulse to tell telco we want to start charging
+so, it will be sent only once 
+but if we want to change the tariff during the call we send again I think
+in my services I only send once
+
