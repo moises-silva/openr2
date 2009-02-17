@@ -173,14 +173,14 @@ static void r2config_colombia(openr2_context_t *r2context)
 
 static const int standard_cas_signals[OR2_NUM_CAS_SIGNALS] =
 {
-	/* OR2_CAS_IDLE */ 0x8,
-	/* OR2_CAS_BLOCK */ 0xC,
-	/* OR2_CAS_SEIZE */ 0x0,
-	/* OR2_CAS_SEIZE_ACK */ 0xC,
-	/* OR2_CAS_CLEAR_BACK */ 0xC,
-	/* OR2_CAS_FORCED_RELEASE */ 0x0,
-	/* OR2_CAS_CLEAR_FORWARD */ 0x8,
-	/* OR2_CAS_ANSWER */ 0x4
+	/* OR2_CAS_IDLE */ 0x8,           /* 1001 */
+	/* OR2_CAS_BLOCK */ 0xC,          /* 1101 */
+	/* OR2_CAS_SEIZE */ 0x0,          /* 0001 */
+	/* OR2_CAS_SEIZE_ACK */ 0xC,      /* 1101 */
+	/* OR2_CAS_CLEAR_BACK */ 0xC,     /* 1101 */
+	/* OR2_CAS_FORCED_RELEASE */ 0x0, /* 0001 */
+	/* OR2_CAS_CLEAR_FORWARD */ 0x8,  /* 1001 */
+	/* OR2_CAS_ANSWER */ 0x4          /* 0101 */
 };
 
 static const char *cas_names[OR2_NUM_CAS_SIGNALS] =
