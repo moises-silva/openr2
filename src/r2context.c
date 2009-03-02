@@ -651,15 +651,28 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 		r2context->io_type = io_type;
 		return 0;
 	case OR2_IO_ZT:
-	case OR2_IO_DEFAULT:
 		/* check that zaptel interface is available */
 		internal_io_interface = openr2_io_get_zt_interface();
 		if (!internal_io_interface) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable Zaptel or DAHDI I/O interface!\n");
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable Zaptel or DAHDI I/O interface.\n");
 			return -1;
 		}
 		r2context->io_type = io_type;
 		r2context->io = internal_io_interface;
+		return 0;
+	case OR2_IO_DEFAULT:
+		/* check first if zaptel interface is available */
+		internal_io_interface = openr2_io_get_zt_interface();
+		if (!internal_io_interface) {
+			/* if not available, bail out with error since we don't have any other built-in interface yet,
+			   but we should check for openr2_io_get_oz_interface to get openzap interface or openr2_io_get_wp_interface
+			   for wanpipe interface */
+			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable default I/O interface.\n");
+			return -1;
+		}
+		r2context->io_type = io_type;
+		r2context->io = internal_io_interface;
+		return 0;
 		return 0;
 	default:
 		break;
