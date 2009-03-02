@@ -115,6 +115,9 @@ typedef struct openr2_context_s {
 	/* whether or not to get the ANI before getting DNIS */
 	int get_ani_first;
 
+	/* Skip category request and go to GII/B signals right away */
+	int skip_category;
+
 	/* whether or not accept the call bypassing the use of group B and II tones */
 	int immediate_accept;
 

@@ -438,6 +438,23 @@ int openr2_context_get_ani_first(openr2_context_t *r2context)
 }
 
 OR2_EXPORT_SYMBOL
+void openr2_context_set_skip_category_request(openr2_context_t *r2context, int skip_category)
+{
+	OR2_CONTEXT_STACK;
+	if (skip_category < 0) {
+		return;
+	}
+	r2context->skip_category = skip_category ? 1 : 0;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_get_skip_category_request(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->skip_category;
+}
+
+OR2_EXPORT_SYMBOL
 void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
 {
 	OR2_CONTEXT_STACK;
