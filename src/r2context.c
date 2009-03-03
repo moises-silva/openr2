@@ -598,6 +598,9 @@ OR2_EXPORT_SYMBOL
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
 {
 	OR2_CONTEXT_STACK;
+	if (enable < 0) {
+		return;
+	}
 	r2context->timers.r2_double_answer = enable ? 400 : 0;
 }
 
