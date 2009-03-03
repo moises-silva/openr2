@@ -1314,32 +1314,6 @@ static void request_calling_party_category(openr2_chan_t *r2chan)
 	prepare_mf_tone(r2chan, tone);
 }
 
-static void set_silence(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	prepare_mf_tone(r2chan, 0);
-	r2chan->mf_write_tone = 0;
-}
-
-static void mf_back_resume_cycle(openr2_chan_t *r2chan, void *data)
-{
-	OR2_CHAN_STACK;
-	set_silence(r2chan);
-}
-
-static void request_change_to_g2(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	/* request to change to group 2 can come from either from Group C (only for Mexico)
-	   or Group A (All the world, including Mexico) */
-	int change_tone = (OR2_MF_GC == r2chan->mf_group) ? GC_TONE(r2chan).request_change_to_g2
-		                                          : GA_TONE(r2chan).request_change_to_g2;
-	r2chan->mf_group = OR2_MF_GB;
-	r2chan->mf_state = OR2_MF_CHG_GII_TXD;
-	openr2_log(r2chan, OR2_LOG_DEBUG, "Requesting change to Group II with signal 0x%X\n", change_tone);
-	prepare_mf_tone(r2chan, change_tone);
-}
-
 static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -1374,6 +1348,52 @@ static void bypass_change_to_g2(openr2_chan_t *r2chan)
 	EMI(r2chan)->on_call_offered(r2chan, r2chan->caller_ani_is_restricted ? NULL : r2chan->ani, r2chan->dnis, tone2category(r2chan));
 }
 
+static void request_change_to_g2(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	/* request to change to group 2 can come from either from Group C (only for Mexico)
+	   or Group A (All the world, including Mexico) */
+	int change_tone = (OR2_MF_GC == r2chan->mf_group) ? GC_TONE(r2chan).request_change_to_g2
+		                                          : GA_TONE(r2chan).request_change_to_g2;
+	r2chan->mf_group = OR2_MF_GB;
+	r2chan->mf_state = OR2_MF_CHG_GII_TXD;
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Requesting change to Group II with signal 0x%X\n", change_tone);
+	prepare_mf_tone(r2chan, change_tone);
+}
+
+static void try_change_to_g2(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	if (r2chan->r2context->immediate_accept) {
+		bypass_change_to_g2(r2chan);
+		return;
+	}
+	request_change_to_g2(r2chan);
+}
+
+static void try_request_calling_party_category(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	if (r2chan->r2context->skip_category) {
+		try_change_to_g2(r2chan);
+		return;
+	}
+	request_calling_party_category(r2chan);
+}
+
+static void set_silence(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	prepare_mf_tone(r2chan, 0);
+	r2chan->mf_write_tone = 0;
+}
+
+static void mf_back_resume_cycle(openr2_chan_t *r2chan, void *data)
+{
+	OR2_CHAN_STACK;
+	set_silence(r2chan);
+}
+
 static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_STACK;
@@ -1403,16 +1423,12 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 			/* we were not asked to get the ANI first, hence when this
 		           timeout occurs we know for sure we have not retrieved ANI yet,
 		           let's retrieve it now. */
-			request_calling_party_category(r2chan);
+			try_request_calling_party_category(r2chan);
 		} else {
 			/* ANI must have been retrieved already (before DNIS),
 			   let's go directly to GII or directly accept the call without changing
 			   to GII if immediate_accept has been setted, the final stage */
-			if (r2chan->r2context->immediate_accept) {
-				bypass_change_to_g2(r2chan);
-			} else {
-				request_change_to_g2(r2chan);
-			}
+			try_change_to_g2(r2chan);
 		}
 	} else {
 		openr2_log(r2chan, OR2_LOG_WARNING, "MF back cycle timed out!\n");
@@ -1452,16 +1468,12 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 			   we were not required to get the ANI first, request it now, 
 			   otherwise is time to go to GII signals */
 			if (1 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
-				request_calling_party_category(r2chan);
+				try_request_calling_party_category(r2chan);
 			} else {
-				if (r2chan->r2context->immediate_accept) {
-					bypass_change_to_g2(r2chan);
-				} else {
-					request_change_to_g2(r2chan);
-				}
+				try_change_to_g2(r2chan);
 			} 
 		} else if (1 == r2chan->dnis_len && r2chan->r2context->get_ani_first) {
-			request_calling_party_category(r2chan);
+			try_request_calling_party_category(r2chan);
 		} else {
 			request_next_dnis_digit(r2chan);
 		}
@@ -1469,7 +1481,7 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 		/* not sure if we ever could get no more dnis as first DNIS tone
 		   but let's handle it just in case */
 		if (0 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
-			request_calling_party_category(r2chan);
+			try_request_calling_party_category(r2chan);
 		} else {
 			if (r2chan->r2context->immediate_accept) {
 				bypass_change_to_g2(r2chan);
