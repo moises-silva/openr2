@@ -1,8 +1,3 @@
 == This TODO list is in order of importance (what I think is more important for users to have) ==
-
-- Send logs to syslog
-- DTMF/R2
-- Add support for use 1 variant for outgoing calls and one for incoming calls
-- Port to Windows
-- Port to Mac OS
-- add support for DNIS-1, repeat all dnis and that stuff, is it worth?
+Since this is a stable release, no new feature are planned and just bug fixes or small
+features on demand will be added
