@@ -106,6 +106,7 @@ typedef struct chan_group_data_s {
 	int charge_calls;
 	int double_answer;
 	int immediateaccept;
+	int skipcategory;
 	int playaudio;
 	char dnid[OR2_MAX_DNIS];
 	char cid[OR2_MAX_ANI];
@@ -421,6 +422,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 	int charge_calls = 1;
 	int double_answer = 0;
 	int immediateaccept = 0;
+	int skipcategory = 0;
 	char strvalue[512];
 	char r2file[512];
 	char audiofile[512];
@@ -465,6 +467,7 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 			confdata[g].collect_calls = collect_calls;
 			confdata[g].double_answer = double_answer;
 			confdata[g].immediateaccept = immediateaccept;
+			confdata[g].skipcategory = skipcategory;
 			confdata[g].charge_calls = charge_calls;
 			confdata[g].playaudio = playaudio;
 			strcpy(confdata[g].dnid, dnid);
@@ -522,6 +525,15 @@ static int parse_config(FILE *conf, chan_group_data_t *confdata)
 				immediateaccept = 0;
 			} else {
 				fprintf(stderr, "Invalid value '%s' for 'immediateaccept' parameter.\n", strvalue);
+			}
+		} else if (1 == sscanf(line, "skipcategory=%s", strvalue)) {
+			printf("found option skipcategory=%s\n", strvalue);
+			if (STR_IS_EQUAL(strvalue,"yes")) {
+				skipcategory = 1;
+			} else if (STR_IS_EQUAL(strvalue,"no")) {
+				skipcategory = 0;
+			} else {
+				fprintf(stderr, "Invalid value '%s' for 'skipcategory' parameter.\n", strvalue);
 			}
 		} else if (1 == sscanf(line, "meteringpulsetimeout=%s", strvalue)) {
 			printf("found option meteringpulsetimeout=%s\n", strvalue);
@@ -823,6 +835,7 @@ int main(int argc, char *argv[])
 		openr2_context_set_metering_pulse_timeout(g_confdata[c].context, g_confdata[c].meteringpulse_timeout);
 		openr2_context_set_double_answer(g_confdata[c].context, g_confdata[c].double_answer);
 		openr2_context_set_immediate_accept(g_confdata[c].context, g_confdata[c].immediateaccept);
+		openr2_context_set_skip_category_request(g_confdata[c].context, g_confdata[c].skipcategory);
 		if (g_confdata[c].r2file[0] != 0) {
 			if (openr2_context_configure_from_advanced_file(g_confdata[c].context, g_confdata[c].r2file)) {
 				fprintf(stderr, "failed to configure R2 context with file %s\n", g_confdata[c].r2file);

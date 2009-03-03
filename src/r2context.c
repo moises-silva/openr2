@@ -442,13 +442,13 @@ int openr2_context_get_ani_first(openr2_context_t *r2context)
 }
 
 OR2_EXPORT_SYMBOL
-void openr2_context_set_skip_category_request(openr2_context_t *r2context, int skip_category)
+void openr2_context_set_skip_category_request(openr2_context_t *r2context, int skipcategory)
 {
 	OR2_CONTEXT_STACK;
-	if (skip_category < 0) {
+	if (skipcategory < 0) {
 		return;
 	}
-	r2context->skip_category = skip_category ? 1 : 0;
+	r2context->skip_category = skipcategory ? 1 : 0;
 }
 
 OR2_EXPORT_SYMBOL
