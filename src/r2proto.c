@@ -827,6 +827,11 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 			openr2_log(r2chan, OR2_LOG_MF_TRACE, "MF Tx >> %c [ON]\n", tone);
 		}	
 		r2chan->mf_write_tone = tone;
+    if (r2chan->direction == OR2_DIR_BACKWARD) {
+      /* schedule a new timer that will handle the timeout for our backward request */
+      r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
+                                                  mf_back_cycle_timeout_expired, NULL);
+    }
 	}	
 }
 
@@ -1577,12 +1582,8 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
-	/* schedule a new timer that will handle the timeout for our tone signal */
-	//openr2_log(r2chan, OR2_LOG_NOTICE, "Cancelling MF timer %d\n", r2chan->timer_ids.mf_back_cycle);
+  /* Cancel MF back timer since we got a response from the forward side */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
-	r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
-			                                        mf_back_cycle_timeout_expired, NULL);
-	//openr2_log(r2chan, OR2_LOG_NOTICE, "Registered MF timer %d\n", r2chan->timer_ids.mf_back_cycle);
 	switch (r2chan->mf_group) {
 	/* we just sent the seize ACK and we are starting with the MF dance */
 	case OR2_MF_BACK_INIT:
