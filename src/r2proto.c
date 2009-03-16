@@ -336,8 +336,8 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
-	r2context->timers.r2_double_answer = 0;
 	r2context->timers.r2_answer_delay = 150;
+	r2context->timers.r2_double_answer = 400;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? OR2_MAX_DNIS - 1 : max_dnis;
@@ -799,6 +799,7 @@ static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan, void *data)
 	handle_protocol_error(r2chan, OR2_FWD_SAFETY_TIMEOUT);
 }
 
+static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data);
 static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
@@ -827,11 +828,11 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 			openr2_log(r2chan, OR2_LOG_MF_TRACE, "MF Tx >> %c [ON]\n", tone);
 		}	
 		r2chan->mf_write_tone = tone;
-    if (r2chan->direction == OR2_DIR_BACKWARD) {
-      /* schedule a new timer that will handle the timeout for our backward request */
-      r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
-                                                  mf_back_cycle_timeout_expired, NULL);
-    }
+		if (r2chan->direction == OR2_DIR_BACKWARD) {
+			/* schedule a new timer that will handle the timeout for our backward request */
+			r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
+			mf_back_cycle_timeout_expired, NULL);
+		}
 	}	
 }
 
@@ -1300,11 +1301,11 @@ static void double_answer_handler(openr2_chan_t *r2chan, void *data)
 	}
 }
 
-int openr2_proto_answer_call(openr2_chan_t *r2chan)
+static int openr2_proto_do_answer(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	if (r2chan->call_state != OR2_CALL_ACCEPTED) {
-		openr2_log(r2chan, OR2_LOG_WARNING, "Cannot answer call if the call is not accepted first\n");
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot answer call if the call is not accepted first\n");
 		return -1;
 	}
 	if (set_cas_signal(r2chan, OR2_CAS_ANSWER)) {
@@ -1314,9 +1315,31 @@ int openr2_proto_answer_call(openr2_chan_t *r2chan)
 	r2chan->call_state = OR2_CALL_ANSWERED;
 	r2chan->r2_state = OR2_ANSWER_TXD;
 	r2chan->answered = 1;
-	EMI(r2chan)->on_call_answered(r2chan);
-	if (TIMER(r2chan).r2_double_answer) {
-		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, double_answer_handler, NULL);
+	return 0;
+}
+
+int openr2_proto_answer_call(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	if (openr2_proto_do_answer(r2chan)) {
+		return -1;
+	}
+	if (r2chan->r2context->double_answer) {
+		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, 
+				double_answer_handler, NULL);
+	}
+	return 0;
+}
+
+int openr2_proto_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
+{
+	OR2_CHAN_STACK;
+	if (openr2_proto_do_answer(r2chan)) {
+		return -1;
+	}
+	if (OR2_ANSWER_DOUBLE == mode) {
+		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, 
+				double_answer_handler, NULL);
 	}
 	return 0;
 }
@@ -1582,7 +1605,7 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
-  /* Cancel MF back timer since we got a response from the forward side */
+	/* Cancel MF back timer since we got a response from the forward side */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
 	switch (r2chan->mf_group) {
 	/* we just sent the seize ACK and we are starting with the MF dance */

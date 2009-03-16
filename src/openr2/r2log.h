@@ -23,8 +23,6 @@
 #ifndef _OPENR2_LOG_H_
 #define _OPENR2_LOG_H_
 
-#include <stdarg.h>
-
 #if defined(__cplusplus)
 extern "C" {
 #endif

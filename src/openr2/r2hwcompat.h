@@ -22,10 +22,6 @@
 #ifndef __OR2_HW_COMPAT_H__
 #define __OR2_HW_COMPAT_H__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 /* Start checking from newer -> older order */
 #if defined (HAVE_DAHDI_USER_H)
 #include <dahdi/user.h>

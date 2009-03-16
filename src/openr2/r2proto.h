@@ -126,6 +126,12 @@ typedef enum {
 	OR2_CALL_UNKNOWN
 } openr2_call_mode_t;
 
+/* Answer modes */
+typedef enum {
+	OR2_ANSWER_SIMPLE,
+	OR2_ANSWER_DOUBLE
+} openr2_answer_mode_t;
+
 /* Disconnect causes */
 typedef enum {
 	OR2_CAUSE_BUSY_NUMBER,

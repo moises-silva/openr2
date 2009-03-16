@@ -23,7 +23,6 @@
 #ifndef _OPENR2_CONTEXT_H_
 #define _OPENR2_CONTEXT_H_
 
-#include <pthread.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include "r2proto.h"

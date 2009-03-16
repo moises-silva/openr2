@@ -23,8 +23,7 @@
 #ifndef _OPENR2_CHAN_H_
 #define _OPENR2_CHAN_H_
 
-#include <stdio.h>
-#include <sys/time.h>
+#include <stdarg.h>
 #include "r2proto.h"
 #include "r2log.h"
 #include "r2context.h"
@@ -56,6 +55,7 @@ void openr2_chan_delete(openr2_chan_t *r2chan);
 int openr2_chan_process_event(openr2_chan_t *r2chan);
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t accept);
 int openr2_chan_answer_call(openr2_chan_t *r2chan);
+int openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode);
 int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category);
 openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan);

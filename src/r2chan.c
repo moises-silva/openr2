@@ -536,6 +536,13 @@ int openr2_chan_answer_call(openr2_chan_t *r2chan)
 }
 
 OR2_EXPORT_SYMBOL
+int openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_answer_call_with_mode(r2chan, mode);
+}
+
+OR2_EXPORT_SYMBOL
 int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;

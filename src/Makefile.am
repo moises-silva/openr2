@@ -21,7 +21,7 @@ libopenr2_la_CFLAGS = $(AM_CFLAGS) -D__OR2_COMPILING_LIBRARY__
 if HAVE_ATTR_VISIBILITY_HIDDEN
 libopenr2_la_CFLAGS += -fvisibility=hidden
 endif
-libopenr2_la_LDFLAGS = -lm -lpthread -version-info $(OPENR2_LT_CURRENT):@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
+libopenr2_la_LDFLAGS = -lm -lpthread -version-info @OPENR2_LT_CURRENT@:@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
 
 
 if WANT_R2TEST
