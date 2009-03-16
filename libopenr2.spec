@@ -1,5 +1,5 @@
 Name:           libopenr2
-Version:        1.1.0
+Version:        1.2.0
 Release:        1%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
@@ -83,6 +83,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Mar 16 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Updated package version number
+- Updated to OpenR2 source package 1.2.0
+
 * Mon Feb 02 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Updated package version number
 - Add compilance with ANATEL (Brazilian telecomunications agency)

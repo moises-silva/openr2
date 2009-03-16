@@ -1,1 +1,611 @@
+2009-03-03 03:36  moy
+
+	* src/r2context.c: make double answer to accept just enable >= 0
+
+2009-03-03 03:25  moy
+
+	* doc/r2test.conf, src/openr2/r2context.h, src/r2context.c,
+	  src/r2test.c: added support to skip category in the r2test
+
+2009-03-03 02:57  moy
+
+	* TODO: updated TODO to reflect that this is a stable release
+
+2009-03-02 21:46  moy
+
+	* configure, configure.in, src/openr2/r2context-pvt.h,
+	  src/openr2/r2context.h, src/r2context.c, src/r2proto.c: Add new
+	  API openr2_context_set_skip_category_request
+
+2009-02-03 18:15  moy
+
+	* src/r2context.c: fixed small bug introduced when updating openr2
+	  for ANATEL compliance
+
+2009-02-02 23:08  alexandre.alencar
+
+	* debian/changelog, debian/files, debian/watch, libopenr2.spec:
+	  change packages version to 1.1.0
+
+2009-02-02 04:25  moy
+
+	* Makefile.in, aclocal.m4, bootstrap, configure, configure.in,
+	  src/Makefile.in: preparing for 1.1.0 release that includes ANATEL
+	  changes
+
+2009-02-02 04:17  moy
+
+	* src/r2proto.c: remove unused variable
+
+2009-02-02 04:00  moy
+
+	* src/r2proto.c: a bit of cleanup and better handling of library
+	  bug
+
+2009-01-29 17:50  moises.silva
+
+	* src/openr2/r2proto.h, src/r2proto.c: added number_change tone to
+	  Group B per Brazilian requirement
+
+2009-01-29 17:40  moises.silva
+
+	* doc/r2proto.conf, src/openr2/r2proto-pvt.h, src/r2context.c,
+	  src/r2proto.c: added number_change tone to Group B per Brazilian
+	  requirement
+
+2009-01-28 15:31  moises.silva
+
+	* src/r2proto.c: added new definition of DNIS -1 for Brazil
+
+2009-01-27 18:23  moises.silva
+
+	* src/openr2/r2chan-pvt.h, src/r2proto.c: added new easy handling
+	  of DNIS requests
+
+2009-01-27 17:34  moises.silva
+
+	* src/r2proto.c: fixed calculation of remaining DNIS digits
+
+2009-01-27 17:24  moises.silva
+
+	* src/r2proto.c: send the first DNIS when seize ack is received
+
+2009-01-27 17:18  moises.silva
+
+	* src/r2proto.c: fixed calculation of DNIS offset
+
+2009-01-27 16:55  moy
+
+	* doc/r2proto.conf, src/openr2/r2proto-pvt.h, src/r2context.c,
+	  src/r2proto.c: added initial support for previous DNIS requests,
+	  needs testing
+
+2009-01-13 03:30  moy
+
+	* README: merging README trunk rev 141 into release-1 branch
+
+2009-01-12 19:47  moy
+
+	* debian/changelog, debian/control, debian/files,
+	  debian/libopenr2-0-dev.dirs, debian/libopenr2-0-dev.install,
+	  debian/libopenr2-0.dirs, debian/libopenr2-0.docs,
+	  debian/libopenr2-0.install, debian/libopenr2-0.postinst,
+	  debian/libopenr2-0.shlibs, debian/libopenr2-0.substvars,
+	  debian/libopenr2-dev.dirs, debian/libopenr2-dev.install,
+	  debian/libopenr2.dirs, debian/libopenr2.docs,
+	  debian/libopenr2.install, debian/libopenr2.postinst,
+	  debian/libopenr2.shlibs, debian/libopenr2.substvars,
+	  libopenr2.spec: merged changes from rev 139
+
+2009-01-08 04:45  moy
+
+	* src/r2proto.c: Allow signal for ANI restricted by default
+
+2009-01-08 04:42  moy
+
+	* doc/asterisk/ar/README: add a new sample configuration for
+	  Argentina
+
+2008-12-01 04:09  alexandre.alencar
+
+	* debian/docs, debian/libopenr2-0-dev.substvars,
+	  debian/libopenr2-0.docs, debian/libopenr2-0.postinst,
+	  debian/libopenr2-0.shlibs, debian/libopenr2-0.substvars,
+	  debian/rules, debian/shlibs, doc/README, doc/README.asterisk,
+	  libopenr2.spec, src/openr2/openr2.h: merged changes from trunk
+	  rev 131
+
+2008-11-29 04:12  alexandre.alencar
+
+	* doc/asterisk/br/README, libopenr2.spec: merged changes from trunk
+	  rev 124
+
+2008-11-22 16:24  moy
+
+	* src/r2chan.c: rev trunk120: remove buggy log message about timer
+	  being cancelled
+
+2008-11-21 20:51  moy
+
+	* README, src/r2proto.c: merged revision 118 from trunk: be
+	  tolerant and accept backward disconnection if we already sent
+	  forward disconnection
+
+2008-11-21 19:54  moy
+
+	* src/r2proto.c: merged change from trunk rev 116 - allow
+	  restricted ANI for Venezuela
+
+2008-11-21 18:42  moy
+
+	* Makefile.in, configure, configure.in, src/Makefile.am,
+	  src/Makefile.in: merged changes from trunk for --without-r2test
+	  and gcc visibility option checking
+
+2008-11-20 16:27  moises.silva
+
+	* src/r2proto.c: make sure to set to NULL the logfile just after
+	  fclose
+
+2008-11-19 02:40  moy
+
+	* configure, configure.in: bumped the library version to 1.0.0
+
+2008-11-19 02:29  moises.silva
+
+	* .: Creating branch for release 1
+
+2008-11-19 00:45  moy
+
+	* removed __GNUC__ check for visibility attribute, which seems to
+	  be available in at least GNU C 3.4.6
+
+2008-11-18 23:08  moy
+
+	* a lot of refactoring changes to export only public symbols and
+	  public prototypes in headers
+
+2008-11-18 00:34  moy
+
+	* added various sample configurations
+
+2008-11-17 20:19  moy
+
+	* added suggestion of file for r2test
+
+2008-11-17 20:16  alexandre.alencar
+
+	* sample audio files for r2test
+
+2008-11-17 20:08  moy
+
+	* fixed typo in README and added a small doc hint in r2test.conf
+
+2008-11-17 19:11  alexandre.alencar
+
+	* add sample configs for Brazil
+
+2008-11-17 02:43  moy
+
+	* updated macro OR2_MAX_LOGDIR to be OR2_MAX_PATH
+
+2008-11-06 23:39  moy
+
+	* updated TODO
+
+2008-11-05 04:25  alexandre.alencar
+
+	* add command line options to r2test and update man pages
+
+2008-11-04 23:04  alexandre.alencar
+
+	* update r2test man page
+
+2008-11-04 04:58  moy
+
+	* changed ANI/DNIS displaying when a call is offered
+
+2008-11-04 03:35  moy
+
+	* minor fixes to r2test
+
+2008-11-04 03:12  alexandre.alencar
+
+	* add show version and variant list command line options
+
+2008-11-04 02:42  moy
+
+	* improved handling of alarms
+
+2008-11-03 19:24  moy
+
+	* added API openr2_proto_get_variant_list
+
+2008-11-03 17:47  alexandre.alencar
+
+	* add country names for the variant info
+
+2008-11-03 05:00  moy
+
+	* added contributors to r2proto.c
+
+2008-11-03 04:13  moy
+
+	* immediate accept and ani first should be ignored when the value
+	  is -1
+
+2008-11-02 05:18  moy
+
+	* added OR2_LOG_EX_DEBUG for extremme debugging messages
+
+2008-11-02 03:01  moy
+
+	* reverted back to library version 0.0.0 and package 0.1.1 given
+	  that we are still under development
+
+2008-11-02 02:52  moy
+
+	* Several build changes for the upcoming 1.0.0 release
+
+2008-11-01 18:24  moy
+
+	* updated AUTHORS file and other contact information
+
+2008-11-01 08:22  alexandre.alencar
+
+	* force debugging flags
+
+2008-11-01 07:44  alexandre.alencar
+
+	* add support to play an alaw audio file in r2test
+
+2008-10-30 20:04  alexandre.alencar
+
+	* fix invalid values notice in r2test
+
+2008-10-30 19:39  alexandre.alencar
+
+	* update spec file
+
+2008-10-28 20:06  moy
+
+	* removed extremely debug messages when MF threshold is ON. I
+	  should add I new category OR2_LOG_EXDEBUG for those
+
+2008-10-28 01:51  moy
+
+	* Added Mac OS port to the list of TODOs
+
+2008-10-28 01:46  moy
+
+	* added some extended comments to r2proto
+
+2008-10-28 01:36  moy
+
+	* new TODO: alarms
+
+2008-10-27 01:08  moy
+
+	* remove annoying message when cas bits did not change
+
+2008-10-25 19:09  moy
+
+	* fixed call state comparison when ANSWER CAS is received before
+	  the ACCEPT tone
+
+2008-10-25 18:59  moy
+
+	* added mf_threshold to the r2proto.conf settings
+
+2008-10-25 17:18  moy
+
+	* added new routines to r2utils and code changes to compile with
+	  -std=c99 -pedantic w/o GNU extensions
+
+2008-10-25 03:39  moy
+
+	* added CAS signaling persistence check configurable from
+	  r2proto.conf
+
+2008-10-20 19:27  moy
+
+	* fixed svn revision checking
+
+2008-10-11 22:53  alexandre.alencar
+
+	* fix debian dependence issues
+
+2008-10-11 22:14  alexandre.alencar
+
+	* add debian package support
+
+2008-10-10 03:07  moy
+
+	* added Arnaldo Pereira patch for --with-trace-stacks
+
+2008-10-10 03:04  moy
+
+	* added missing call to on_billing_pulse_received
+
+2008-10-03 17:28  moy
+
+	* fixing regression in alarm notification, duh!
+
+2008-09-28 16:09  moy
+
+	* implemented chargecalls parameter for r2test
+
+2008-09-27 22:13  moy
+
+	* added on_ani_digit_received event callback and fixed a possible
+	  overflow with ANI/DNIS digits
+
+2008-09-27 18:45  moy
+
+	* Dynamic DNIS interface added, now it is possible for users to
+	  decide to stop getting more DNIS. Billing pulses notification
+	  added as well
+
+2008-09-25 06:20  moy
+
+	* colombia variant, initial commit
+
+2008-09-24 08:55  moy
+
+	* man page for r2test.conf included and added proper rules to the
+	  makefile to install configuration files
+
+2008-09-23 17:09  moy
+
+	* added r2test man page, still missing r2test.conf man page
+
+2008-09-21 18:39  moy
+
+	* added forced release check when seize sent to avoid reporting
+	  protocol error
+
+2008-09-16 23:38  moy
+
+	* updated TODO
+
+2008-09-16 19:10  moy
+
+	* updated libopenr2.spec to include the r2hwcompat.h header
+
+2008-09-14 18:22  moy
+
+	* added support for forced release signal, AFAIK only used in
+	  Brazil
+
+2008-09-10 19:58  moy
+
+	* fixing my stupid compilation error with -DOR2_TRACE_STACKS
+
+2008-09-07 21:11  moy
+
+	* Added DAHDI support
+
+2008-08-18 14:11  moy
+
+	* setting default value for ABCD rx/tx signals in order to more
+	  accurately reflect the line state
+
+2008-08-04 13:45  moy
+
+	* fixed potential bug when configuring from advanced protocol file
+
+2008-08-03 02:39  moy
+
+	* updated TODO with an idea to by-pass DNIS timeout
+
+2008-07-20 19:38  moy
+
+	* added more fixes to abcd_rx_signal to properly restore the ABCD
+	  state at the end of calls
+
+2008-07-20 10:40  moy
+
+	* added documentation for the advanced configuration file
+
+2008-07-20 10:40  moy
+
+	* added support to override tones and timers via an advanced
+	  configuration file
+
+2008-07-20 05:59  moy
+
+	* improved handling of R2 state for more accurate displaying
+
+2008-07-20 00:47  moy
+
+	* added ANI restricted handling for outgoing calls
+
+2008-07-19 23:29  moy
+
+	* improved call logging to include thread id and added time of call
+	  to the name of the .call files
+
+2008-07-19 04:12  moy
+
+	* added immediateaccept parameter
+
+2008-07-19 03:55  moy
+
+	* added a small comment to clarify the ITU spec being followed
+
+2008-07-18 03:32  moy
+
+	* added immediate accept support for the backward side
+
+2008-07-16 03:15  moy
+
+	* added venezuela to the list of supported variants
+
+2008-07-14 05:01  moy
+
+	* added double answer capabilities
+
+2008-07-13 20:12  moy
+
+	* added support for allowing and blocking collect calls using a new
+	  Group B signal for Brazil
+
+2008-07-13 01:18  moy
+
+	* added metering pulse to r2test tool and minor refactoring to R2
+	  variants handling
+
+2008-07-11 05:01  moy
+
+	* added CREDITS file
+
+2008-07-11 04:53  moy
+
+	* updated libopenr2.spec
+
+2008-07-11 04:30  moy
+
+	* added on_call_end event even when the call was not answered
+
+2008-07-10 16:05  moy
+
+	* added openr2_get_revision API to get the SVN revision of the code
+
+2008-07-09 03:36  moy
+
+	* added OR2_BLOCKED handling when the ABCD bits change
+
+2008-07-04 18:01  moy
+
+	* fixed r2test mess
+
+2008-07-04 17:02  moy
+
+	* added call mode support and special tone handling
+
+2008-07-04 02:11  moy
+
+	* updated disconnect reason to match more properly the spec
+
+2008-06-29 04:03  moy
+
+	* added openr2_proto_set_blocked API
+
+2008-06-29 01:51  moy
+
+	* auto-create loggin directory if it doesnt exists already
+
+2008-06-15 04:54  moy
+
+	* fixed bug in alarm signaling and changed name to hardware alarm
+	  instead of zap alarm
+
+2008-06-02 04:52  moy
+
+	* added ECUADOR variant keyword
+
+2008-05-30 05:32  moy
+
+	* added support for ITU group A signal adress complete and network
+	  congestion. Incomplete support for Group B special tone
+
+2008-05-23 15:31  moy
+
+	* added enum for china and czech
+
+2008-05-22 16:01  moy
+
+	* added czech variant as ITU, probably other changes for that
+	  variant will be required later
+
+2008-05-22 03:22  moy
+
+	* added preliminary china variant
+
+2008-05-13 14:33  moy
+
+	* modified AUTHORS file to reflect the code borrowed from SpanDSP
+
+2008-05-13 14:29  moy
+
+	* added spec libopenr2.spec
+
+2008-05-12 02:12  moy
+
+	* added r2 detection and generation code from LGPL spandsp version
+
+2008-05-09 18:42  moy
+
+	* LOG_ERROR should be LOG_DEBUG when reporting a call being
+	  attempted
+
+2008-05-09 06:02  moy
+
+	* updated TODO
+
+2008-05-09 05:42  moy
+
+	* added management of metering pulses
+
+2008-05-08 16:29  moy
+
+	* added Philippines to the r2variants since seems to work per ITU
+	  spec
+
+2008-05-08 15:45  moy
+
+	* added ANI and DNIS sanity checks when making calls. All must be
+	  digits.
+
+2008-05-05 17:20  moy
+
+	* added varios fixes to the build system. --with-r2test is now
+	  required to compile the r2test tool
+
+2008-05-03 01:42  moy
+
+	* renamed disconnect reason to disconnect cause
+
+2008-05-02 00:29  moy
+
+	* added proper error handling when setting ABCD signals fail
+
+2008-05-02 00:05  moy
+
+	* improved build configuration to only build r2test if spandsp is
+	  present
+
+2008-05-01 22:53  moy
+
+	* added stack logging
+
+2008-05-01 22:24  moy
+
+	* TODO changes
+
+2008-05-01 22:14  moy
+
+	* added configurable MF timeout
+
+2008-05-01 01:20  moy
+
+	* disabling call files when any error ocurrs seems to be confusing.
+	  Dont do it anymore.
+
+2008-04-29 20:55  moy
+
+	* added flag of category sent to avoid confusion with ANI request
+	  tone
+
+2008-04-29 17:48  moy
+
+	* added basic Group A signalling handling
+
+2008-04-29 14:12  moy
+
+	* make configure and install-sh executable
+
+2008-04-29 04:47  root
+
+	* initial openr2 import
 
