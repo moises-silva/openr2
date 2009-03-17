@@ -1,5 +1,5 @@
 Name:           libopenr2
-Version:        1.0.0
+Version:        1.2.0
 Release:        1%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
@@ -7,7 +7,7 @@ Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.libopenr2.org/
-Source0:        http://www.libopenr2.org/%{name}-%{version}.tar.gz
+Source0:        http://openr2.googlecode.com/files/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:	chrpath
@@ -26,6 +26,7 @@ depend directly on spandsp, libteletone or zaptel for tone generation and detect
 Summary:        Development files for %{name}
 Group:          Development/Libraries
 Requires:       %{name} = %{version}-%{release}
+Provides:       libopenr2-1.1.0.so
 
 %description    devel
 The %{name}-devel package contains libraries and header files for
@@ -64,7 +65,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.alaw
 %doc doc/README.asterisk
 %doc %dir doc/asterisk
-%{_datadir}/%{name}/*.alaw
 %{_bindir}/r2test
 %{_libdir}/*.so.*
 %{_mandir}/man5/r2test.conf.5.gz
@@ -82,6 +82,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Mar 16 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Updated to the latest OpenR2 upstream package
+- Fixed some typos
+
 * Mon Jan 12 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Update package version
 
