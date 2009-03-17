@@ -7,7 +7,6 @@ Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 Group:          System Environment/Libraries
 License:        LGPL
 URL:            http://www.libopenr2.org/
-Source0:        http://www.libopenr2.org/%{name}-%{version}.tar.gz
 Source0:        http://openr2.googlecode.com/files/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -65,7 +64,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.alaw
 %doc doc/README.asterisk
 %doc %dir doc/asterisk
-%{_datadir}/%{name}/*.alaw
 %{_bindir}/r2test
 %{_libdir}/*.so.*
 %{_mandir}/man5/r2test.conf.5.gz
@@ -86,6 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Mar 16 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Updated package version number
 - Updated to OpenR2 source package 1.2.0
+- Fixed some typos
 
 * Mon Feb 02 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Updated package version number
