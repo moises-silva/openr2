@@ -272,40 +272,52 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 	return 0;
 }
 
+static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
+{
+	struct timeval nowtv;
+	openr2_sched_timer_t to_dispatch[OR2_MAX_SCHED_TIMERS];
+	int res, ms, t, i;
+
+	res = gettimeofday(&nowtv, NULL);
+	if (res == -1) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Yikes! gettimeofday failed, me may miss events!!\n");
+		return;
+	}
+	i = 0;
+
+	/* get the timers to dispatch */
+	for (t = 0; t < r2chan->timers_count; t++) {
+		ms = ((r2chan->sched_timers[t].time.tv_sec - nowtv.tv_sec) * 1000) +
+		     ((r2chan->sched_timers[t].time.tv_usec - nowtv.tv_usec)/1000);
+		if (ms <= 0) {
+			memcpy(&to_dispatch[i], &r2chan->sched_timers[t], sizeof(to_dispatch[0]));
+			i++;
+		}	
+	}
+	i--; 
+	
+	/* cancell them */
+	for ( ; i >= 0; i--) {
+		openr2_chan_cancel_timer(r2chan, &to_dispatch[i].id);
+	}
+
+	/* dispatch them */
+	for ( ; i >= 0; i--) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d callback\n", to_dispatch[i].id);
+		to_dispatch[i].callback(r2chan, to_dispatch[i].data);
+	}
+}
+
 OR2_EXPORT_SYMBOL
 int openr2_chan_process_event(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_sched_timer_t schedtimer;
 	int myerrno;
-	struct timeval nowtv;
 	int interesting_events, events, res, tone_result, wrote;
 	unsigned i;
-	int t = 0;
-	int ms;
 	uint8_t read_buf[OR2_CHAN_READ_SIZE];
 	int16_t tone_buf[OR2_CHAN_READ_SIZE];
-	res = gettimeofday(&nowtv, NULL);
-	if (res == -1) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Yikes! gettimeofday failed, me may miss events!!\n");
-	}
-	/* handle any scheduled timer */
-	if (res != -1) {
-		for (; t < r2chan->timers_count; t++) {
-			ms = ((r2chan->sched_timers[t].time.tv_sec - nowtv.tv_sec) * 1000) +
-			     ((r2chan->sched_timers[t].time.tv_usec - nowtv.tv_usec)/1000);
-			if (ms <= 0) {
-				memcpy(&schedtimer, &r2chan->sched_timers[t], sizeof(schedtimer));
-				openr2_chan_cancel_timer(r2chan, &schedtimer.id);
-				openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer callback\n");
-				schedtimer.callback(r2chan, schedtimer.data);
-				/* at this point, r2chan->timers_count has been decremented, 
-				   we must decrement t as well */
-				t--;
-			}	
-		}
-	}
-
+	openr2_chan_handle_timers(r2chan);
 	while(1) {
 
 		/* we're always interested in CAS bit events and we don't want not block */
