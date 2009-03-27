@@ -294,17 +294,16 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 			i++;
 		}	
 	}
-	i--; 
 	
 	/* cancell them */
-	for ( ; i >= 0; i--) {
-		openr2_chan_cancel_timer(r2chan, &to_dispatch[i].id);
+	for (t = 0 ; t < i; t++) {
+		openr2_chan_cancel_timer(r2chan, &to_dispatch[t].id);
 	}
 
 	/* dispatch them */
-	for ( ; i >= 0; i--) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d callback\n", to_dispatch[i].id);
-		to_dispatch[i].callback(r2chan, to_dispatch[i].data);
+	for (t = 0; t < i; t++) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d callback\n", to_dispatch[t].id);
+		to_dispatch[t].callback(r2chan, to_dispatch[t].data);
 	}
 }
 
