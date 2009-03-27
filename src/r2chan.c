@@ -276,7 +276,7 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 {
 	struct timeval nowtv;
 	openr2_sched_timer_t to_dispatch[OR2_MAX_SCHED_TIMERS];
-	int res, ms, t, i;
+	int res, ms, t, i, timerid;
 
 	res = gettimeofday(&nowtv, NULL);
 	if (res == -1) {
@@ -297,13 +297,14 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 	
 	/* cancell them */
 	for (t = 0 ; t < i; t++) {
-		openr2_chan_cancel_timer(r2chan, &to_dispatch[t].id);
+		timerid = to_dispatch[t].id;
+		openr2_chan_cancel_timer(r2chan, &timerid);
 	}
 
 	/* dispatch them */
 	for (t = 0; t < i; t++) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d callback\n", to_dispatch[t].id);
-		to_dispatch[t].callback(r2chan, to_dispatch[t].data);
+		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d (%s) callback\n", to_dispatch[t].id, to_dispatch[t].name);
+		to_dispatch[t].callback(r2chan);
 	}
 }
 
@@ -407,7 +408,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 	return 0;
 }
 
-int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data)
+int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, const char *name)
 {
 	OR2_CHAN_STACK;
 	int myerrno;
@@ -444,7 +445,7 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 		 newtimer.time.tv_usec -= 1000000;
 	}
 	newtimer.callback = callback;
-	newtimer.data = cb_data;
+	newtimer.name = name;
 	newtimer.id = ++r2chan->timer_id;
 	/* find the proper slot for the timer */
 	for (i = 0; i < r2chan->timers_count; i++) {
@@ -463,8 +464,8 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 	r2chan->timers_count++;
 
 	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
-
-	return r2chan->timer_id;
+	openr2_log(r2chan, OR2_LOG_EX_DEBUG, "scheduled timer id %d (%s)\n", newtimer.id, newtimer.name);
+	return newtimer.id;
 }
 
 void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
