@@ -128,6 +128,9 @@ typedef struct openr2_context_s {
 	/* whether or not accept the call bypassing the use of group B and II tones */
 	int immediate_accept;
 
+	/* use double answer with all channels */
+	int double_answer;
+
 	/* MF threshold time in ms */
 	int mf_threshold;
 

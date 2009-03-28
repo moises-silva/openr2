@@ -333,8 +333,8 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
-	r2context->timers.r2_double_answer = 0;
 	r2context->timers.r2_answer_delay = 150;
+	r2context->timers.r2_double_answer = 400;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? OR2_MAX_DNIS - 1 : max_dnis;
@@ -790,12 +790,13 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	EMI(r2chan)->on_call_init(r2chan);
 }
 
-static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan, void *data)
+static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	handle_protocol_error(r2chan, OR2_FWD_SAFETY_TIMEOUT);
 }
 
+static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan);
 static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
@@ -818,6 +819,11 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 		}
 		if (tone) {
 			openr2_log(r2chan, OR2_LOG_MF_TRACE, "MF Tx >> %c [ON]\n", tone);
+			if (r2chan->direction == OR2_DIR_BACKWARD) {
+				/* schedule a new timer that will handle the timeout for our backward request */
+				r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
+				mf_back_cycle_timeout_expired, "mf_back_cycle");
+			}
 		}	
 		r2chan->mf_write_tone = tone;
 	}	
@@ -866,7 +872,7 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 		/* even when we are waiting the other end to timeout we
 		   cannot wait forever, put a timer to make sure of that */
 		r2chan->timer_ids.mf_fwd_safety = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_fwd_safety, 
-				mf_fwd_safety_timeout_expired, NULL);
+				mf_fwd_safety_timeout_expired, "mf_fwd_safety");
 	}
 }
 
@@ -887,7 +893,7 @@ static void report_call_end(openr2_chan_t *r2chan)
 	fix_rx_signal(r2chan);
 }
 
-static void r2_metering_pulse(openr2_chan_t *r2chan, void *data)
+static void r2_metering_pulse(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
@@ -920,7 +926,7 @@ static int check_backward_disconnection(openr2_chan_t *r2chan, int cas,
 	return 0;
 }
 
-static void persistence_check_expired(openr2_chan_t *r2chan, void *data)
+static void persistence_check_expired(openr2_chan_t *r2chan)
 {
 	int cas, res, myerrno;
 	int rawcas;
@@ -946,7 +952,7 @@ static void persistence_check_expired(openr2_chan_t *r2chan, void *data)
 				r2chan->cas_read, cas);
 		r2chan->cas_persistence_check_signal = cas;
 		r2chan->timer_ids.cas_persistence_check = openr2_chan_add_timer(r2chan, TIMER(r2chan).cas_persistence_check,
-				                                                persistence_check_expired, NULL);
+				                                                persistence_check_expired, "cas_persistence_check");
 	}
 	/* else, we just returned to the state we were on, let's pretend this never happened */
 	else {
@@ -997,7 +1003,7 @@ int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 		openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.cas_persistence_check);
 		r2chan->cas_persistence_check_signal = cas;
 		r2chan->timer_ids.cas_persistence_check = openr2_chan_add_timer(r2chan, TIMER(r2chan).cas_persistence_check,
-				                                                persistence_check_expired, NULL);
+				                                                persistence_check_expired, "cas_persistence_check");
 		return 0;
 	}
 
@@ -1137,7 +1143,7 @@ handlecas:
 				   a clear back but a metering pulse, lets put the timer. If the CAS signal does not
 				   come back to ANSWER then is really a clear back */
 				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
-						r2_metering_pulse, NULL);
+						r2_metering_pulse, "r2_metering_pulse");
 			} else {
 				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 			}
@@ -1262,7 +1268,7 @@ static int send_forced_release(openr2_chan_t *r2chan)
 	return set_cas_signal(r2chan, OR2_CAS_FORCED_RELEASE);	
 }
 
-static void double_answer_handler(openr2_chan_t *r2chan, void *data)
+static void double_answer_handler(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	if (r2chan->r2_state == OR2_ANSWER_TXD) {
@@ -1272,7 +1278,7 @@ static void double_answer_handler(openr2_chan_t *r2chan, void *data)
 		}
 		r2chan->r2_state = OR2_EXECUTING_DOUBLE_ANSWER;
 		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, 
-				                     double_answer_handler, NULL);
+				                     double_answer_handler, "r2_double_answer");
 	} else if (r2chan->r2_state == OR2_EXECUTING_DOUBLE_ANSWER) {
 		if (set_cas_signal(r2chan, OR2_CAS_ANSWER)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Cannot re-send ANSWER signal, failed to answer call!\n");
@@ -1284,11 +1290,11 @@ static void double_answer_handler(openr2_chan_t *r2chan, void *data)
 	}
 }
 
-int openr2_proto_answer_call(openr2_chan_t *r2chan)
+static int openr2_proto_do_answer(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	if (r2chan->call_state != OR2_CALL_ACCEPTED) {
-		openr2_log(r2chan, OR2_LOG_WARNING, "Cannot answer call if the call is not accepted first\n");
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot answer call if the call is not accepted first\n");
 		return -1;
 	}
 	if (set_cas_signal(r2chan, OR2_CAS_ANSWER)) {
@@ -1298,9 +1304,31 @@ int openr2_proto_answer_call(openr2_chan_t *r2chan)
 	r2chan->call_state = OR2_CALL_ANSWERED;
 	r2chan->r2_state = OR2_ANSWER_TXD;
 	r2chan->answered = 1;
-	EMI(r2chan)->on_call_answered(r2chan);
-	if (TIMER(r2chan).r2_double_answer) {
-		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, double_answer_handler, NULL);
+	return 0;
+}
+
+int openr2_proto_answer_call(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	if (openr2_proto_do_answer(r2chan)) {
+		return -1;
+	}
+	if (r2chan->r2context->double_answer) {
+		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, 
+				double_answer_handler, "r2_double_answer");
+	}
+	return 0;
+}
+
+int openr2_proto_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
+{
+	OR2_CHAN_STACK;
+	if (openr2_proto_do_answer(r2chan)) {
+		return -1;
+	}
+	if (OR2_ANSWER_DOUBLE == mode) {
+		r2chan->timer_ids.r2_double_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_double_answer, 
+				double_answer_handler, "r2_double_answer");
 	}
 	return 0;
 }
@@ -1388,13 +1416,13 @@ static void set_silence(openr2_chan_t *r2chan)
 	r2chan->mf_write_tone = 0;
 }
 
-static void mf_back_resume_cycle(openr2_chan_t *r2chan, void *data)
+static void mf_back_resume_cycle(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	set_silence(r2chan);
 }
 
-static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
+static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	if (OR2_MF_TONE_INVALID == GI_TONE(r2chan).no_more_dnis_available
@@ -1418,7 +1446,7 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan, void *data)
 		   state we will not get a 'tone off' condition, hence we need a timeout to mute 
 		   our tone */
 		r2chan->timer_ids.mf_back_resume_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_resume_cycle, 
-				                                               mf_back_resume_cycle, NULL);
+				                                               mf_back_resume_cycle, "mf_back_resume_cycle");
 		if (!r2chan->r2context->get_ani_first) {
 			/* we were not asked to get the ANI first, hence when this
 		           timeout occurs we know for sure we have not retrieved ANI yet,
@@ -1575,12 +1603,8 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
-	/* schedule a new timer that will handle the timeout for our tone signal */
-	//openr2_log(r2chan, OR2_LOG_NOTICE, "Cancelling MF timer %d\n", r2chan->timer_ids.mf_back_cycle);
+	/* Cancel MF back timer since we got a response from the forward side */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
-	r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
-			                                        mf_back_cycle_timeout_expired, NULL);
-	//openr2_log(r2chan, OR2_LOG_NOTICE, "Registered MF timer %d\n", r2chan->timer_ids.mf_back_cycle);
 	switch (r2chan->mf_group) {
 	/* we just sent the seize ACK and we are starting with the MF dance */
 	case OR2_MF_BACK_INIT:
@@ -1676,7 +1700,7 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 	}
 }
 
-static void ready_to_answer(openr2_chan_t *r2chan, void *data)
+static void ready_to_answer(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	/* mode not important here, the BACKWARD side accepted the call so they already know that. 
@@ -1700,7 +1724,7 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 				turn_off_mf_engine(r2chan);
 				r2chan->call_state = OR2_CALL_ACCEPTED;
 				r2chan->timer_ids.r2_answer_delay = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer_delay, 
-						                                          ready_to_answer, NULL);
+						                                          ready_to_answer, "r2_answer_delay");
 				break;
 			default:
 				/* no further action required. The other end should 
@@ -1728,7 +1752,7 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 			turn_off_mf_engine(r2chan);
 			r2chan->call_state = OR2_CALL_ACCEPTED;
 			r2chan->timer_ids.r2_answer_delay = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer_delay, 
-					                                          ready_to_answer, NULL);
+					                                          ready_to_answer, "r2_answer_delay");
 			break;
 		case OR2_MF_DISCONNECT_TXD:	
 			/* we did not accept the call and sent some disconnect tone 
@@ -1799,11 +1823,11 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 		r2chan->mf_state = OR2_MF_WAITING_TIMEOUT;
 		/* even when we are waiting the other end to timeout we
 		   cannot wait forever, put a timer to make sure of that */
-		r2chan->timer_ids.mf_fwd_safety = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_fwd_safety, mf_fwd_safety_timeout_expired, NULL);
+		r2chan->timer_ids.mf_fwd_safety = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_fwd_safety, mf_fwd_safety_timeout_expired, "mf_fwd_safety");
 	}
 }
 
-static void r2_answer_timeout_expired(openr2_chan_t *r2chan, void *data)
+static void r2_answer_timeout_expired(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	report_call_disconnection(r2chan, OR2_CAUSE_NO_ANSWER);
@@ -1860,7 +1884,7 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
                    wait for answer. */
                 r2chan->r2_state = OR2_ACCEPT_RXD;
                 r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
-				                                    r2_answer_timeout_expired, NULL);
+				                                    r2_answer_timeout_expired, "r2_answer");
                 EMI(r2chan)->on_call_accepted(r2chan, mode);
         }
 }
@@ -2097,7 +2121,7 @@ void openr2_proto_handle_mf_tone(openr2_chan_t *r2chan, int tone)
 	}
 }
 
-static void seize_timeout_expired(openr2_chan_t *r2chan, void *data)
+static void seize_timeout_expired(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_WARNING, "Seize Timeout Expired!\n");
@@ -2177,7 +2201,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	}	
 	r2chan->dnis_index = 0;
 	/* cannot wait forever for seize ack, put a timer */
-	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, NULL);
+	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
 	return 0;
 }
 

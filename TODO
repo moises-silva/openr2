@@ -19,3 +19,6 @@ once the caller press whatever digit, we then send metering pulse to tell telco 
 want to start charging so, it will be sent only once but if we want to change the tariff 
 during the call we send again I think. In my services I only send once
 
+- block calls per specific category
+mfcr2_category_block=1,5,7 (that should block categories 1 5 and 7 whatever they are)
+

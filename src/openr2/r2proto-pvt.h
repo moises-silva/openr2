@@ -275,6 +275,7 @@ int openr2_proto_get_rx_mf_signal(struct openr2_chan_s *r2chan);
 int openr2_proto_make_call(struct openr2_chan_s *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
 int openr2_proto_accept_call(struct openr2_chan_s *r2chan, openr2_call_mode_t accept);
 int openr2_proto_answer_call(struct openr2_chan_s *r2chan);
+int openr2_proto_answer_call_with_mode(struct openr2_chan_s *r2chan, openr2_answer_mode_t mode);
 int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_proto_handle_cas(struct openr2_chan_s *r2chan);
 int openr2_proto_set_idle(struct openr2_chan_s *r2chan);

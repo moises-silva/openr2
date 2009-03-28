@@ -39,13 +39,13 @@ struct openr2_context_s;
 
 /* function type to be called when a scheduled event 
    for the channel is triggered */
-typedef void (*openr2_callback_t)(struct openr2_chan_s *r2chan, void *cb_data);
+typedef void (*openr2_callback_t)(struct openr2_chan_s *r2chan);
 
 /* scheduled event */
 typedef struct {
 	struct timeval time;
 	openr2_callback_t callback;
-	void *data;
+	const char *name;
 	int id;
 } openr2_sched_timer_t;
 
@@ -222,7 +222,7 @@ typedef struct openr2_chan_s {
 	struct openr2_chan_s *next;
 } openr2_chan_t;
 
-int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, void *cb_data);
+int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, const char *name);
 void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id);
 void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan);
 

@@ -1,8 +1,6 @@
 #!/bin/bash
 autoheader
-libtoolize
+libtoolize --force
 aclocal
 automake
 autoconf
-./configure --prefix=/usr
-make
