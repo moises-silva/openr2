@@ -2202,9 +2202,24 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		r2chan->dnis[0] = '\0';
 	}	
 	r2chan->dnis_index = 0;
-	/* cannot wait forever for seize ack, put a timer */
-	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
+	if (!r2chan->r2context->dial_with_dtmf) {
+		/* cannot wait forever for seize ack, put a timer */
+		r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
+	} else {
+		/* we don't wait for seize ack when dialing with DTMF */
+		dtmf_tx_init(&r2chan->dtmf_txstate);
+		dtmf_tx_set_timing(&r2chan->dtmf_txstate, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
+		dtmf_tx_put(&r2chan->dtmf_txstate, r2chan->dnis, -1);
+		openr2_log(r2chan, OR2_LOG_NOTICE, "Dialing %s with DTMF/R2 (tone on = %d, tone off = %d)\n", 
+				r2chan->dnis, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
+		r2chan->dialing_dtmf = 1;
+	}
 	return 0;
+}
+
+void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
+{
+	r2chan->dialing_dtmf = 0;
 }
 
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)

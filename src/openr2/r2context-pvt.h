@@ -127,6 +127,11 @@ typedef struct openr2_context_s {
 	/* MF threshold time in ms */
 	int mf_threshold;
 
+	/* use DTMF for outbound dialing */
+	int dial_with_dtmf;
+	int dtmf_on;
+	int dtmf_off;
+
 	/* R2 logging mask */
 	openr2_log_level_t loglevel;
 

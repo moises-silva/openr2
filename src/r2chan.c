@@ -329,7 +329,10 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 
 		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
-		if (OR2_MF_OFF_STATE != r2chan->mf_state && MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
+		if (r2chan->dialing_dtmf) {
+			interesting_events |= OR2_HW_IO_MUX_WRITE;
+		} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
+	            MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
 			interesting_events |= OR2_HW_IO_MUX_WRITE;
 		}
 
@@ -380,7 +383,15 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
-		if (OR2_HW_IO_MUX_WRITE & interesting_events) {
+		if (r2chan->dialing_dtmf && (OR2_HW_IO_MUX_READ & interesting_events)) {
+			res = dtmf_tx(&r2chan->dtmf_txstate, tone_buf, r2chan->zap_buf_size);
+			if (res <= 0) {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF generation\n");
+				openr2_proto_handle_dtmf_end(r2chan);
+				continue;
+			}
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Generated %d samples of DTMF\n", res);
+		} else if (OR2_HW_IO_MUX_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->zap_buf_size);
 			/* if there are no samples to convert and write then continue,
 			   the generate routine already took care of it */

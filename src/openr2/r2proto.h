@@ -42,6 +42,8 @@ typedef void* openr2_context_t;
 
 #define OR2_MAX_ANI 80
 #define OR2_MAX_DNIS 80
+#define OR2_DEFAULT_DTMF_ON 50
+#define OR2_DEFAULT_DTMF_OFF 100
 
 /* 
    This are known as Multi Frequency signals ( MF signals). the same 15 inter-register signals 

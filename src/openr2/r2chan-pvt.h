@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include <spandsp.h>
 #include "r2engine.h"
 #include "r2log.h"
 #include "r2chan.h"
@@ -176,6 +177,10 @@ typedef struct openr2_chan_s {
 
 	/* MF tone detection handle */
 	void *mf_read_handle;
+
+	/* DTMF tone handle */
+	dtmf_tx_state_t dtmf_txstate;
+	int dialing_dtmf;
 
 	/* default MF tone generation handle */
 	openr2_mf_tx_state_t default_mf_write_handle;

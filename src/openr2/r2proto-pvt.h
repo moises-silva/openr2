@@ -283,6 +283,7 @@ int openr2_proto_set_blocked(struct openr2_chan_s *r2chan);
 int openr2_proto_set_cas_signal(struct openr2_chan_s *r2chan, openr2_cas_signal_t signal);
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);
 void openr2_proto_handle_mf_tone(struct openr2_chan_s *r2chan, int tone);
+void openr2_proto_handle_dtmf_end(struct openr2_chan_s *r2chan);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

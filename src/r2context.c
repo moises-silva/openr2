@@ -503,6 +503,30 @@ int openr2_context_get_mf_threshold(openr2_context_t *r2context)
 }
 
 OR2_EXPORT_SYMBOL
+void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off)
+{
+	OR2_CONTEXT_STACK;
+	r2context->dial_with_dtmf = enable ? 1 : 0;
+	if (r2context->dial_with_dtmf) {
+		r2context->dtmf_on = dtmf_on > 0 ? dtmf_on : OR2_DEFAULT_DTMF_ON;
+		r2context->dtmf_off = dtmf_off > 0 ? dtmf_off : OR2_DEFAULT_DTMF_OFF;
+	}
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off)
+{
+	OR2_CONTEXT_STACK;
+	if (dtmf_on) {
+		*dtmf_on = r2context->dtmf_on;
+	}
+	if (dtmf_off) {
+		*dtmf_off = r2context->dtmf_off;
+	}	
+	return r2context->dtmf_on;
+}
+
+OR2_EXPORT_SYMBOL
 int openr2_context_set_log_directory(openr2_context_t *r2context, char *directory)
 {
 	OR2_CONTEXT_STACK;
