@@ -970,6 +970,7 @@ static void persistence_check_expired(openr2_chan_t *r2chan)
 	}
 }
 
+static void r2_answer_timeout_expired(openr2_chan_t *r2chan);
 int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -1078,6 +1079,22 @@ handlecas:
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
 			mf_send_dnis(r2chan, 0);
+		} else if (cas == R2(r2chan, ANSWER)) {
+			CAS_LOG_RX(ANSWER);
+			/* some of this is probably non-necessary, just copied it from the MF calls */
+			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call acknowledge!");
+			/* TODO: set some state here */
+		} else if (cas == R2(r2chan, IDLE)) {
+			CAS_LOG_RX(ANSWER);
+			/* some of this is probably non-necessary, just copied it from the MF calls */
+			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call accepted!");
+			/* TODO: set some state here */
+			/* They have accepted the call. We do nothing but
+			   wait for answer. */
+			r2chan->r2_state = OR2_ACCEPT_RXD;
+			r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
+									    r2_answer_timeout_expired, "r2_answer");
+			EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
@@ -1106,6 +1123,14 @@ handlecas:
 		   or some disconnection signal, anything else, protocol error */
 		if (cas == R2(r2chan, ANSWER)) {
 			CAS_LOG_RX(ANSWER);
+			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
+			r2chan->r2_state = OR2_ANSWER_RXD;
+			r2chan->call_state = OR2_CALL_ANSWERED;
+			turn_off_mf_engine(r2chan);
+			r2chan->answered = 1;
+			EMI(r2chan)->on_call_answered(r2chan);
+		} else if (cas == R2(r2chan, SEIZE)) {
+			CAS_LOG_RX(SEIZE);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			r2chan->call_state = OR2_CALL_ANSWERED;
@@ -1148,6 +1173,18 @@ handlecas:
 	case OR2_ANSWER_RXD:
 		if (cas == R2(r2chan, CLEAR_BACK)) {
 			CAS_LOG_RX(CLEAR_BACK);
+			r2chan->r2_state = OR2_CLEAR_BACK_RXD;
+			if (TIMER(r2chan).r2_metering_pulse) {
+				/* if the variant may have metering pulses, this clear back could be not really
+				   a clear back but a metering pulse, lets put the timer. If the CAS signal does not
+				   come back to ANSWER then is really a clear back */
+				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
+						r2_metering_pulse, "r2_metering_pulse");
+			} else {
+				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+			}
+		} else if (cas == R2(r2chan, CLEAR_FORWARD)) {
+			CAS_LOG_RX(CLEAR_FORWARD);
 			r2chan->r2_state = OR2_CLEAR_BACK_RXD;
 			if (TIMER(r2chan).r2_metering_pulse) {
 				/* if the variant may have metering pulses, this clear back could be not really

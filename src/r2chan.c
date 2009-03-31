@@ -383,14 +383,23 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
-		if (r2chan->dialing_dtmf && (OR2_HW_IO_MUX_READ & interesting_events)) {
+		if (r2chan->dialing_dtmf && (OR2_HW_IO_MUX_WRITE & interesting_events)) {
 			res = dtmf_tx(&r2chan->dtmf_txstate, tone_buf, r2chan->zap_buf_size);
 			if (res <= 0) {
 				openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF generation\n");
 				openr2_proto_handle_dtmf_end(r2chan);
 				continue;
 			}
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Generated %d samples of DTMF\n", res);
+			/*TODO: we should transmit the DTMF in linear, changing here the zaptel codec 
+				and sending the buffer as returned by spandsp */
+			for (i = 0; i < res; i++) {
+				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
+			}
+			wrote = write(r2chan->fd, read_buf, res);
+			if (wrote != res) {
+				EMI(r2chan)->on_os_error(r2chan, errno);
+			}
+			continue;
 		} else if (OR2_HW_IO_MUX_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->zap_buf_size);
 			/* if there are no samples to convert and write then continue,
