@@ -2167,12 +2167,19 @@ static void seize_timeout_expired(openr2_chan_t *r2chan)
 	handle_protocol_error(r2chan, OR2_SEIZE_TIMEOUT);
 }
 
+static void dtmf_seize_expired(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	openr2_log(r2chan, OR2_LOG_NOTICE, "Dialing %s with DTMF/R2 (tone on = %d, tone off = %d)\n", 
+			r2chan->dnis, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
+	r2chan->dialing_dtmf = 1;
+}
+
 int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
 	const char *digit;
-	int copy_ani = 1;
-	int copy_dnis = 1;
+	int copy_ani = 1, copy_dnis = 1, setlinear = 1, res = 0, myerrno = 0;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
 			dnis, openr2_proto_get_category_string(category));
 	/* we can dial only if we're in IDLE */
@@ -2243,20 +2250,41 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		/* cannot wait forever for seize ack, put a timer */
 		r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
 	} else {
-		/* we don't wait for seize ack when dialing with DTMF */
-		dtmf_tx_init(&r2chan->dtmf_txstate);
-		dtmf_tx_set_timing(&r2chan->dtmf_txstate, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
-		dtmf_tx_put(&r2chan->dtmf_txstate, r2chan->dnis, -1);
-		openr2_log(r2chan, OR2_LOG_NOTICE, "Dialing %s with DTMF/R2 (tone on = %d, tone off = %d)\n", 
-				r2chan->dnis, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
-		r2chan->dialing_dtmf = 1;
+		res = ioctl(r2chan->fd, OR2_HW_OP_SET_LINEAR, &setlinear);
+		if (res) {
+			myerrno = errno;
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to set channel in LINEAR mode for DTMF dialing, cannot make call!!\n");
+			EMI(r2chan)->on_os_error(r2chan, myerrno);
+			return -1;
+		}
+		if (!DTMF(r2chan)->dtmf_tx_init(r2chan->dtmf_write_handle)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
+			return -1;
+		}
+		DTMF(r2chan)->dtmf_tx_set_timing(r2chan->dtmf_write_handle, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
+		if (DTMF(r2chan)->dtmf_tx_put(r2chan->dtmf_write_handle, r2chan->dnis, -1)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmit queue, cannot make call!!\n");
+			return -1;
+		}
+		/* put just a small timer to start dialing */
+		r2chan->timer_ids.dtmf_start_dial = openr2_chan_add_timer(r2chan, 
+				TIMER(r2chan).dtmf_start_dial, dtmf_seize_expired, "dtmf_start_dial");
 	}
 	return 0;
 }
 
 void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 {
+	OR2_CHAN_STACK;
+	int zapval = OR2_HW_LAW_ALAW;
+	int myerrno;
 	r2chan->dialing_dtmf = 0;
+	/* once we're done dialing we can set the codec back to alaw */
+	if (ioctl(r2chan->fd, OR2_HW_OP_SET_LAW, &zapval)) {
+		myerrno = errno;
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to put channel back to ALAW mode, audio may not work!!\n");
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+	}
 }
 
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)

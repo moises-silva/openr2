@@ -49,7 +49,10 @@ extern "C" {
 #define EMI(r2chan) (r2chan)->r2context->evmanager
 
 /* quick access to the Transcoding Interface */
-#define TI(r2c) (r2chan)->r2context->transcoder
+#define TI(r2chan) (r2chan)->r2context->transcoder
+
+/* quick access to the DTMF Interface */
+#define DTMF(r2chan) (r2chan)->r2context->dtmfeng
 
 int openr2_mkdir_recursive(char *dir, mode_t mode);
 

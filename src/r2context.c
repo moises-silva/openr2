@@ -178,6 +178,13 @@ static openr2_event_interface_t default_evmanager = {
 	.on_billing_pulse_received = on_billing_pulse_received_default
 };
 
+static openr2_dtmf_interface_t default_dtmf_engine = {
+	.dtmf_tx_init = (openr2_dtmf_tx_init_func)openr2_dtmf_tx_init,
+	.dtmf_tx_set_timing = (openr2_dtmf_tx_set_timing_func)openr2_dtmf_tx_set_timing,
+	.dtmf_tx_put = (openr2_dtmf_tx_put_func)openr2_dtmf_tx_put,
+	.dtmf_tx = (openr2_dtmf_tx_func)openr2_dtmf_tx
+};
+
 OR2_EXPORT_SYMBOL
 openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *evmanager, 
 		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis)
@@ -283,6 +290,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	r2context->evmanager = evmanager;
 	r2context->transcoder = transcoder;
 	r2context->variant = variant;
+	r2context->dtmfeng = &default_dtmf_engine;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
 	pthread_mutex_init(&r2context->timers_lock, NULL);
 	if (openr2_proto_configure_context(r2context, variant, max_ani, max_dnis)) {
@@ -290,6 +298,29 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 		return NULL;
 	}
 	return r2context;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface)
+{
+	if (!dtmf_interface) {
+		r2context->dtmfeng = &default_dtmf_engine;
+		return 0;
+	}
+	if (!dtmf_interface->dtmf_tx_init) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_tx_set_timing) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_tx_put) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_tx) {
+		return -1;
+	}
+	r2context->dtmfeng = dtmf_interface;
+	return 0;
 }
 
 /* Is this really needed? in anycase, read events from hardware are likely to wake us up
@@ -506,6 +537,9 @@ OR2_EXPORT_SYMBOL
 void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off)
 {
 	OR2_CONTEXT_STACK;
+	if (enable < 0) {
+		return;
+	}
 	r2context->dial_with_dtmf = enable ? 1 : 0;
 	if (r2context->dial_with_dtmf) {
 		r2context->dtmf_on = dtmf_on > 0 ? dtmf_on : OR2_DEFAULT_DTMF_ON;
@@ -742,6 +776,7 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		LOADTIMER(timers.r2_double_answer)
 		LOADTIMER(timers.r2_answer_delay)
 		LOADTIMER(timers.cas_persistence_check)
+		LOADTIMER(timers.dtmf_start_dial)
 
 		/* misc settings */
 		LOADSETTING(mf_threshold)

@@ -58,6 +58,8 @@ typedef struct {
 	int r2_answer_delay;
 	/* time to wait for CAS signaling before handling the new signal */
 	int cas_persistence_check;
+	/* safety timer before starting to dial DTMF */
+	int dtmf_start_dial;
 } openr2_timers_t;
 
 
@@ -79,6 +81,10 @@ typedef struct openr2_context_s {
 	/* this interface provide transcoding 
 	   functions to the R2 channels */
 	openr2_transcoder_interface_t *transcoder;
+
+	/* this interface provides DTMF functions
+	   to the R2 channels */
+	openr2_dtmf_interface_t *dtmfeng;
 
 	/* R2 variant to use in this context channels */
 	openr2_variant_t variant;

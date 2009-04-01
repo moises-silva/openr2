@@ -88,6 +88,7 @@ const char *openr2_chan_get_mf_state_string(openr2_chan_t *r2chan);
 const char *openr2_chan_get_mf_group_string(openr2_chan_t *r2chan);
 int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan);
 int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan);
+int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_handle);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t

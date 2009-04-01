@@ -2,9 +2,10 @@
  * OpenR2 
  * MFC/R2 call setup library
  *
- * r2engine.c - MFC/R2 tone generation and detection.
+ * r2engine.h - MFC/R2 tone generation and detection.
+ *              DTMF tone generation
  *
- * Borrowed and slightly modified from the SpanDSP library,
+ * Borrowed and slightly modified from the LGPL SpanDSP library, 
  * Written by Steve Underwood <steveu@coppice.org>
  *
  * Copyright (C) 2001 Steve Underwood
@@ -2648,4 +2649,136 @@ static float dds_modf(uint32_t *phase_acc, int32_t phase_rate, float scale, int3
 	return amp;
 }
 
+
+/******* DTMF routines ********/
+
+#define DEFAULT_DTMF_TX_LEVEL       -10
+#define DEFAULT_DTMF_TX_ON_TIME     50
+#define DEFAULT_DTMF_TX_OFF_TIME    55
+
+#define DTMF_THRESHOLD              171032462.0f    /* -42dBm0 [((DTMF_SAMPLES_PER_BLOCK*32768.0/1.4142)*10^((-42 - DBM0_MAX_SINE_POWER)/20.0))^2 => 171032462.0] */
+#define DTMF_NORMAL_TWIST           6.309f          /* 8dB [10^(8/10) => 6.309] */
+#define DTMF_REVERSE_TWIST          2.512f          /* 4dB */
+#define DTMF_RELATIVE_PEAK_ROW      6.309f          /* 8dB */
+#define DTMF_RELATIVE_PEAK_COL      6.309f          /* 8dB */
+#define DTMF_TO_TOTAL_ENERGY        83.868f         /* -0.85dB [DTMF_SAMPLES_PER_BLOCK*10^(-0.85/10.0)] */
+#define DTMF_POWER_OFFSET           110.395f        /* 10*log(32768.0*32768.0*DTMF_SAMPLES_PER_BLOCK) */
+#define DTMF_SAMPLES_PER_BLOCK      102
+
+static const float dtmf_row[] =
+{
+     697.0f,  770.0f,  852.0f,  941.0f
+};
+static const float dtmf_col[] =
+{
+    1209.0f, 1336.0f, 1477.0f, 1633.0f
+};
+
+static const char dtmf_positions[] = "123A" "456B" "789C" "*0#D";
+
+static int dtmf_tx_inited = FALSE;
+static openr2_tone_gen_descriptor_t dtmf_digit_tones[16];
+
+static void dtmf_tx_initialise(void)
+{
+    int row;
+    int col;
+
+    if (dtmf_tx_inited)
+        return;
+    for (row = 0;  row < 4;  row++)
+    {
+        for (col = 0;  col < 4;  col++)
+        {
+            make_tone_gen_descriptor(&dtmf_digit_tones[row*4 + col],
+                                     (int) dtmf_row[row],
+                                     DEFAULT_DTMF_TX_LEVEL,
+                                     (int) dtmf_col[col],
+                                     DEFAULT_DTMF_TX_LEVEL,
+                                     DEFAULT_DTMF_TX_ON_TIME,
+                                     DEFAULT_DTMF_TX_OFF_TIME,
+                                     0,
+                                     0,
+                                     FALSE);
+        }
+    }
+    dtmf_tx_inited = TRUE;
+}
+
+void openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist)
+{
+    s->low_level = dds_scaling_dbm0f((float) level);
+    s->high_level = dds_scaling_dbm0f((float) (level + twist));
+}
+
+openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
+{
+    if (s == NULL)
+    {
+        if ((s = (openr2_dtmf_tx_state_t *) malloc(sizeof (*s))) == NULL)
+            return  NULL;
+    }
+    if (!dtmf_tx_inited)
+        dtmf_tx_initialise();
+    tone_gen_init(&(s->tones), &dtmf_digit_tones[0]);
+    openr2_dtmf_tx_set_level(s, DEFAULT_DTMF_TX_LEVEL, 0);
+    openr2_dtmf_tx_set_timing(s, -1, -1);
+    queue_init(&s->queue.queue, OR2_MAX_DTMF_DIGITS, QUEUE_READ_ATOMIC | QUEUE_WRITE_ATOMIC);
+    s->tones.current_section = -1;
+    return s;
+}
+
+void openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time)
+{
+    s->on_time = ((on_time >= 0)  ?  on_time  :  DEFAULT_DTMF_TX_ON_TIME)*SAMPLE_RATE/1000;
+    s->off_time = ((off_time >= 0)  ?  off_time  :  DEFAULT_DTMF_TX_OFF_TIME)*SAMPLE_RATE/1000;
+}
+
+size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len)
+{
+    size_t space;
+
+    /* This returns the number of characters that would not fit in the buffer.
+       The buffer will only be loaded if the whole string of digits will fit,
+       in which case zero is returned. */
+    if (len < 0)
+    {
+        if ((len = strlen(digits)) == 0)
+            return 0;
+    }
+    if ((space = queue_free_space(&s->queue.queue)) < len)
+        return len - space;
+    if (queue_write(&s->queue.queue, (const uint8_t *) digits, len) >= 0)
+        return 0;
+    return -1;
+}
+
+int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
+{
+    int len;
+    const char *cp;
+    int digit;
+
+    len = 0;
+    if (s->tones.current_section >= 0)
+    {
+        /* Deal with the fragment left over from last time */
+        len = tone_gen(&(s->tones), amp, max_samples);
+    }
+    while (len < max_samples  &&  (digit = queue_read_byte(&s->queue.queue)) >= 0)
+    {
+        /* Step to the next digit */
+        if (digit == 0)
+            continue;
+        if ((cp = strchr(dtmf_positions, digit)) == NULL)
+            continue;
+        tone_gen_init(&(s->tones), &dtmf_digit_tones[cp - dtmf_positions]);
+        s->tones.tone[0].gain = s->low_level;
+        s->tones.tone[1].gain = s->high_level;
+        s->tones.duration[0] = s->on_time;
+        s->tones.duration[1] = s->off_time;
+        len += tone_gen(&(s->tones), amp + len, max_samples - len);
+    }
+    return len;
+}
 

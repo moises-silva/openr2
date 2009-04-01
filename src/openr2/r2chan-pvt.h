@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <sys/time.h>
-#include <spandsp.h>
 #include "r2engine.h"
 #include "r2log.h"
 #include "r2chan.h"
@@ -78,6 +77,9 @@ typedef struct openr2_chan_timer_ids_s {
 
 	/* CAS persistence check */
 	int cas_persistence_check;
+
+	/* DTMF dial startup */
+	int dtmf_start_dial;
 } openr2_chan_timer_ids_t;
 
 /* R2 channel. Hold the states of the R2 signaling, zap device etc.
@@ -178,9 +180,14 @@ typedef struct openr2_chan_s {
 	/* MF tone detection handle */
 	void *mf_read_handle;
 
-	/* DTMF tone handle */
-	dtmf_tx_state_t dtmf_txstate;
+	/* DTMF tone generation handle */
+	void *dtmf_write_handle;
+
+	/* whether or not we are in the middle of dialing DTMF */
 	int dialing_dtmf;
+
+	/* default DTMF tone generation handle */
+	openr2_dtmf_tx_state_t default_dtmf_write_handle;
 
 	/* default MF tone generation handle */
 	openr2_mf_tx_state_t default_mf_write_handle;

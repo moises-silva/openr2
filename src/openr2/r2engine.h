@@ -3,8 +3,9 @@
  * MFC/R2 call setup library
  *
  * r2engine.h - MFC/R2 tone generation and detection.
+ *              DTMF tone generation
  *
- * Borrowed and slightly modified from the SpanDSP library, 
+ * Borrowed and slightly modified from the LGPL SpanDSP library, 
  * Written by Steve Underwood <steveu@coppice.org>
  *
  * Copyright (C) 2001 Steve Underwood
@@ -30,12 +31,14 @@
 #define _OPENR2_ENGINE_H_
 
 #include <inttypes.h>
+#include "openr2/queue.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 #define OR2_ALAW_AMI_MASK 0x55
+#define OR2_MAX_DTMF_DIGITS 128
 
 typedef struct
 {
@@ -118,12 +121,40 @@ typedef struct
     int current_digit;
 } openr2_mf_rx_state_t;
 
+
+/*!
+    DTMF generator state descriptor. This defines the state of a single
+    working instance of a DTMF generator.
+*/
+typedef struct
+{
+    openr2_tone_gen_state_t tones;
+    float low_level;
+    float high_level;
+    int on_time;
+    int off_time;
+    union
+    {
+        queue_state_t queue;
+        uint8_t buf[QUEUE_STATE_T_SIZE(OR2_MAX_DTMF_DIGITS)];
+    } queue;
+} openr2_dtmf_tx_state_t;
+
+/* MF Rx routines */
 openr2_mf_rx_state_t *openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd);
 int openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples);
 
+/* MF Tx routines */
 openr2_mf_tx_state_t *openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd);
 int openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples);
 int openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit);
+
+/* DTMF Tx routines */
+int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples);
+size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len);
+void openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time);
+void openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist);
+openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s);
 
 static __inline__ int openr2_top_bit(unsigned int bits)
 {

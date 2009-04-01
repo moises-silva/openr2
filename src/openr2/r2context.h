@@ -159,6 +159,20 @@ typedef struct {
 	openr2_linear_to_alaw_func linear_to_alaw;
 } openr2_transcoder_interface_t;
 
+
+/* DTMF transmitter interface */
+typedef void *(*openr2_dtmf_tx_init_func)(void *dtmf_write_handle);
+typedef void (*openr2_dtmf_tx_set_timing_func)(void *dtmf_write_handle, int on_time, int off_time);
+typedef int (*openr2_dtmf_tx_put_func)(void *dtmf_write_handle, const char *digits, int len);
+typedef int (*openr2_dtmf_tx_func)(void *dtmf_write_handle, int16_t amp[], int max_samples);
+
+typedef struct {
+	openr2_dtmf_tx_init_func dtmf_tx_init;
+	openr2_dtmf_tx_set_timing_func dtmf_tx_set_timing;
+	openr2_dtmf_tx_put_func dtmf_tx_put;
+	openr2_dtmf_tx_func dtmf_tx;
+} openr2_dtmf_interface_t;
+
 /* Library errors */
 typedef enum {
 	/* Failed system call */
@@ -199,6 +213,7 @@ int openr2_context_get_double_answer(openr2_context_t *r2context);
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
 void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off);
 int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off);
+int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t 
