@@ -34,8 +34,20 @@ struct openr2_chan_s;
 struct openr2_context_s;
 
 /* Number of CAS signals. CAS signaling is
-   known as line supervisory signaling  */
-#define OR2_NUM_CAS_SIGNALS 8
+   known as line supervisory signaling  
+
+   WATCH OUT!!
+   This number MUST match the number of 
+   enums AND r2proto.c standard_cas_signals
+   and cas_names arrays!!
+*/
+#define OR2_NUM_CAS_SIGNALS 11
+
+/*
+   WATCH OUT!!
+   Each value of this enum should correspond to the
+   proper index in standard_cas_signals and cas_names arrays!!
+   */
 typedef enum {
 	/* Invalid signal */
 	OR2_CAS_INVALID = -1,
@@ -62,7 +74,21 @@ typedef enum {
 	OR2_CAS_CLEAR_FORWARD,
 	/* We set this to let know the other end we are ANSWERing the call and the
 	   speech path is open */
-	OR2_CAS_ANSWER
+	OR2_CAS_ANSWER,
+
+	/* DTMF R2 */
+
+	/* This names should be reviewed, I just made them up */
+
+	/* Acknowledge of seize when dialing DTMF */
+	OR2_CAS_SEIZE_ACK_DTMF,
+
+	/* DTMF accepted */
+	OR2_CAS_ACCEPT_DTMF,
+
+	/* DTMF R2 call answered */
+	OR2_CAS_ANSWER_DTMF
+
 } openr2_cas_signal_t;
 
 /* MF groups */

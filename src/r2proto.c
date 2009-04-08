@@ -181,7 +181,13 @@ static const int standard_cas_signals[OR2_NUM_CAS_SIGNALS] =
 	/* OR2_CAS_CLEAR_BACK */ 0xC,
 	/* OR2_CAS_FORCED_RELEASE */ 0x0,
 	/* OR2_CAS_CLEAR_FORWARD */ 0x8,
-	/* OR2_CAS_ANSWER */ 0x4
+	/* OR2_CAS_ANSWER */ 0x4,
+
+	/* For DTMF/R2 */
+	/* OR2_CAS_SEIZE_ACK_DTMF */ 0x4,
+	/* OR2_CAS_ACCEPT_DTMF */ 0x8,
+	/* OR2_CAS_ANSWER_DTMF */ 0x0
+
 };
 
 static const char *cas_names[OR2_NUM_CAS_SIGNALS] =
@@ -193,7 +199,15 @@ static const char *cas_names[OR2_NUM_CAS_SIGNALS] =
 	/* OR2_CAS_CLEAR_BACK */ "CLEAR BACK",
 	/* OR2_CAS_FORCED_RELEASE */ "FORCED RELEASE",
 	/* OR2_CAS_CLEAR_FORWARD */ "CLEAR FORWARD",
-	/* OR2_CAS_ANSWER */ "ANSWER" 
+	/* OR2_CAS_ANSWER */ "ANSWER",
+
+	/* For DTMF/R2 */
+
+	/* These names should be reviewed, I just made them up */
+
+	/* OR2_CAS_SEIZE_ACK_DTMF */ "ACK DTMF",
+	/* OR2_CAS_ACCEPT_DTMF */ "ACCEPT DTMF",
+	/* OR2_CAS_ANSWER_DTMF */ "ANSWER DTMF"
 };
 
 static openr2_variant_entry_t r2variants[] =
@@ -1248,9 +1262,8 @@ handlecas:
 
 	/* DTMF R2 states */
 	case OR2_SEIZE_IN_DTMF_TXD:
-		/* After we send all DTMF digits we get ANSWER first then pause then IDLE */
-		if (cas == R2(r2chan, ANSWER)) {
-			CAS_LOG_RX(ANSWER);
+		if (cas == R2(r2chan, SEIZE_ACK_DTMF)) {
+			CAS_LOG_RX(SEIZE_ACK_DTMF);
 			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call acknowledge!\n");
 			r2chan->r2_state = OR2_SEIZE_ACK_IN_DTMF_RXD;
 			/* this is kind of a seize ack, cancel seize ack timer */
@@ -1262,8 +1275,8 @@ handlecas:
 		break;
 
 	case OR2_SEIZE_ACK_IN_DTMF_RXD:
-		if (cas == R2(r2chan, IDLE)) {
-			CAS_LOG_RX(IDLE);
+		if (cas == R2(r2chan, ACCEPT_DTMF)) {
+			CAS_LOG_RX(ACCEPT_DTMF);
 			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call accepted!\n");
 			/* They have accepted the call. We do nothing but wait for answer. */
 			r2chan->r2_state = OR2_ACCEPT_IN_DTMF_RXD;
@@ -1277,8 +1290,8 @@ handlecas:
 		break;
 
 	case OR2_ACCEPT_IN_DTMF_RXD:
-		if (cas == R2(r2chan, SEIZE)) {
-			CAS_LOG_RX(SEIZE);
+		if (cas == R2(r2chan, ANSWER_DTMF)) {
+			CAS_LOG_RX(ANSWER_DTMF);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			r2chan->call_state = OR2_CALL_ANSWERED;
