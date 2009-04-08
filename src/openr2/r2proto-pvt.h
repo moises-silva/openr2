@@ -80,7 +80,10 @@ typedef enum {
 	OR2_MF_FWD_INIT,
 	OR2_MF_GI,
 	OR2_MF_GII,
-	OR2_MF_GIII
+	OR2_MF_GIII,
+
+	OR2_MF_DTMF_FWD_INIT
+	/* possible DTMF forward groups */
 } openr2_mf_group_t;
 
 /* possible backward MF states */
@@ -131,7 +134,17 @@ typedef enum {
 
 	/* we did not sent a tone, we are waiting for the other side to timeout
 	   expecting our tone */
-	OR2_MF_WAITING_TIMEOUT = 305
+	OR2_MF_WAITING_TIMEOUT = 305,
+
+	/*** DTMF R2 Related ***/
+
+	/* Backward DTMF states */
+
+	/* Backward still not supported :-( */
+
+	/* Forward DTMF states */
+	/* We're dialing DTMF */
+	OR2_MF_DIALING_DTMF = 500
 } openr2_mf_state_t;
 
 /* R2 state machine */
@@ -195,7 +208,22 @@ typedef enum {
 	OR2_FORCED_RELEASE_RXD = 308,
 
 	/* Blocked line */
-	OR2_BLOCKED = 400
+	OR2_BLOCKED = 400,
+
+	/*** DTMF R2 Related ***/
+
+	/* Backward not supported yet */
+
+	/* Forward */
+
+	/* Seize for DTMF R2 */
+	OR2_SEIZE_IN_DTMF_TXD = 600,
+
+	/* Seize Ack for DTMF R2 */
+	OR2_SEIZE_ACK_IN_DTMF_RXD = 601,
+
+	/* Accept in DTMF R2 */
+	OR2_ACCEPT_IN_DTMF_RXD = 602
 } openr2_cas_state_t;
 
 /* Call States */

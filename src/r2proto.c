@@ -273,7 +273,13 @@ static openr2_variant_entry_t r2variants[] =
 static void turn_off_mf_engine(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
+	/* this is not needed for DTMF R2 mf engine, but does not hurt either */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
+
+	/* this is not needed for MFC R2 mf engine, but does not hurt either */
+	r2chan->dialing_dtmf = 0;
+
+	/* set the MF state to OFF */
 	r2chan->mf_state = OR2_MF_OFF_STATE;
 }
 
@@ -417,12 +423,18 @@ static const char *r2state2str(openr2_cas_state_t r2state)
 		return "Clear Forward Received";
 	case OR2_SEIZE_TXD:
 		return "Seize Transmitted";
+	case OR2_SEIZE_IN_DTMF_TXD:
+		return "Seize DTMF Transmitted";
 	case OR2_SEIZE_ACK_RXD:
 		return "Seize ACK Received";
+	case OR2_SEIZE_ACK_IN_DTMF_RXD:
+		return "Seize ACK DTMF Received";
 	case OR2_CLEAR_BACK_TONE_RXD:
 		return "Clear Back Tone Received";
 	case OR2_ACCEPT_RXD:
 		return "Accept Received";
+	case OR2_ACCEPT_IN_DTMF_RXD:
+		return "DTMF Accept Received";
 	case OR2_ANSWER_RXD:
 		return "Answer Received";
 	case OR2_CLEAR_BACK_RXD:
@@ -473,6 +485,9 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 		return "End of ANI Transmitted";
 	case OR2_MF_WAITING_TIMEOUT:
 		return "Waiting Far End Timeout";
+
+	case OR2_MF_DIALING_DTMF:
+		return "Dialing DTMF";
 
 	default:
 		return "*Unknown*";
@@ -535,6 +550,9 @@ static const char *mfgroup2str(openr2_mf_group_t mf_group)
 		return "Forward Group II";
 	case OR2_MF_GIII:
 		return "Forward Group III";
+
+	case OR2_MF_DTMF_FWD_INIT:
+		return "Forward DTMF init";
 
 	default:
 		return "*Unknown*";
@@ -1079,22 +1097,6 @@ handlecas:
 			MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 			MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
 			mf_send_dnis(r2chan, 0);
-		} else if (cas == R2(r2chan, ANSWER)) {
-			CAS_LOG_RX(ANSWER);
-			/* some of this is probably non-necessary, just copied it from the MF calls */
-			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call acknowledge!");
-			/* TODO: set some state here */
-		} else if (cas == R2(r2chan, IDLE)) {
-			CAS_LOG_RX(ANSWER);
-			/* some of this is probably non-necessary, just copied it from the MF calls */
-			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call accepted!");
-			/* TODO: set some state here */
-			/* They have accepted the call. We do nothing but
-			   wait for answer. */
-			r2chan->r2_state = OR2_ACCEPT_RXD;
-			r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
-									    r2_answer_timeout_expired, "r2_answer");
-			EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Disconnection before seize ack detected!");
 			/* I believe we just fall here with release forced since clear back signal is usually (always?) the
@@ -1123,14 +1125,6 @@ handlecas:
 		   or some disconnection signal, anything else, protocol error */
 		if (cas == R2(r2chan, ANSWER)) {
 			CAS_LOG_RX(ANSWER);
-			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
-			r2chan->r2_state = OR2_ANSWER_RXD;
-			r2chan->call_state = OR2_CALL_ANSWERED;
-			turn_off_mf_engine(r2chan);
-			r2chan->answered = 1;
-			EMI(r2chan)->on_call_answered(r2chan);
-		} else if (cas == R2(r2chan, SEIZE)) {
-			CAS_LOG_RX(SEIZE);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			r2chan->call_state = OR2_CALL_ANSWERED;
@@ -1251,6 +1245,51 @@ handlecas:
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Doing nothing on CAS change, we're blocked.\n");
 		}	
 		break;
+
+	/* DTMF R2 states */
+	case OR2_SEIZE_IN_DTMF_TXD:
+		/* After we send all DTMF digits we get ANSWER first then pause then IDLE */
+		if (cas == R2(r2chan, ANSWER)) {
+			CAS_LOG_RX(ANSWER);
+			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call acknowledge!\n");
+			r2chan->r2_state = OR2_SEIZE_ACK_IN_DTMF_RXD;
+			/* this is kind of a seize ack, cancel seize ack timer */
+			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_seize);
+		} else {
+			CAS_LOG_RX(INVALID);
+			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
+		}
+		break;
+
+	case OR2_SEIZE_ACK_IN_DTMF_RXD:
+		if (cas == R2(r2chan, IDLE)) {
+			CAS_LOG_RX(IDLE);
+			openr2_log(r2chan, OR2_LOG_NOTICE, "DTMF/R2 call accepted!\n");
+			/* They have accepted the call. We do nothing but wait for answer. */
+			r2chan->r2_state = OR2_ACCEPT_IN_DTMF_RXD;
+			r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
+									    r2_answer_timeout_expired, "r2_answer");
+			EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
+		} else {
+			CAS_LOG_RX(INVALID);
+			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
+		}
+		break;
+
+	case OR2_ACCEPT_IN_DTMF_RXD:
+		if (cas == R2(r2chan, SEIZE)) {
+			CAS_LOG_RX(SEIZE);
+			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
+			r2chan->r2_state = OR2_ANSWER_RXD;
+			r2chan->call_state = OR2_CALL_ANSWERED;
+			r2chan->answered = 1;
+			EMI(r2chan)->on_call_answered(r2chan);
+		} else {
+			CAS_LOG_RX(INVALID);
+			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
+		}
+		break;
+
 	default:
 		CAS_LOG_RX(INVALID);
 		handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
@@ -2173,13 +2212,14 @@ static void dtmf_seize_expired(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_LOG_NOTICE, "Dialing %s with DTMF/R2 (tone on = %d, tone off = %d)\n", 
 			r2chan->dnis, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
 	r2chan->dialing_dtmf = 1;
+	r2chan->mf_state = OR2_MF_DIALING_DTMF;
 }
 
 int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
 	const char *digit;
-	int copy_ani = 1, copy_dnis = 1, setlinear = 1, res = 0, myerrno = 0;
+	int copy_ani = 1, copy_dnis = 1;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
 			dnis, openr2_proto_get_category_string(category));
 	/* we can dial only if we're in IDLE */
@@ -2227,11 +2267,8 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to seize line!, cannot make a call!\n");
 		return -1;
 	}
-	r2chan->call_state = OR2_CALL_DIALING;
-	r2chan->r2_state = OR2_SEIZE_TXD;
-	r2chan->mf_group = OR2_MF_FWD_INIT;
-	r2chan->direction = OR2_DIR_FORWARD;
-	r2chan->caller_category = category2tone(r2chan, category);
+	/* cannot wait forever for seize ack, put a timer */
+	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
 	if (copy_ani) {
 		strncpy(r2chan->ani, ani, sizeof(r2chan->ani)-1);
 		r2chan->ani[sizeof(r2chan->ani)-1] = '\0';
@@ -2246,17 +2283,15 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		r2chan->dnis[0] = '\0';
 	}	
 	r2chan->dnis_index = 0;
+	r2chan->call_state = OR2_CALL_DIALING;
+	r2chan->direction = OR2_DIR_FORWARD;
+	r2chan->caller_category = category2tone(r2chan, category);
 	if (!r2chan->r2context->dial_with_dtmf) {
-		/* cannot wait forever for seize ack, put a timer */
-		r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
+		r2chan->r2_state = OR2_SEIZE_TXD;
+		r2chan->mf_group = OR2_MF_DTMF_FWD_INIT;
 	} else {
-		res = ioctl(r2chan->fd, OR2_HW_OP_SET_LINEAR, &setlinear);
-		if (res) {
-			myerrno = errno;
-			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to set channel in LINEAR mode for DTMF dialing, cannot make call!!\n");
-			EMI(r2chan)->on_os_error(r2chan, myerrno);
-			return -1;
-		}
+		r2chan->r2_state = OR2_SEIZE_IN_DTMF_TXD;
+		r2chan->mf_group = OR2_MF_DTMF_FWD_INIT;
 		if (!DTMF(r2chan)->dtmf_tx_init(r2chan->dtmf_write_handle)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
 			return -1;
@@ -2276,15 +2311,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	int zapval = OR2_HW_LAW_ALAW;
-	int myerrno;
-	r2chan->dialing_dtmf = 0;
-	/* once we're done dialing we can set the codec back to alaw */
-	if (ioctl(r2chan->fd, OR2_HW_OP_SET_LAW, &zapval)) {
-		myerrno = errno;
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to put channel back to ALAW mode, audio may not work!!\n");
-		EMI(r2chan)->on_os_error(r2chan, myerrno);
-	}
+	turn_off_mf_engine(r2chan);
 }
 
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)

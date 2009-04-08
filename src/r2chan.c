@@ -401,6 +401,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 				openr2_proto_handle_dtmf_end(r2chan);
 				continue;
 			}
+			for (i = 0; i < res; i++) {
+				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
+			}
 			wrote = write(r2chan->fd, read_buf, res);
 			if (wrote != res) {
 				EMI(r2chan)->on_os_error(r2chan, errno);
