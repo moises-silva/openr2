@@ -172,6 +172,9 @@ static void r2config_colombia(openr2_context_t *r2context)
 	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_6;
 }
 
+/* These are the R2 signals to be sent in th A and B CAS bits, the
+   CD bits are usually static in 01, therefore 0x8 means 0x9 in the
+   line (0x8 + 0x1) or (0x8 + whatever CD bits are set to) */
 static const int standard_cas_signals[OR2_NUM_CAS_SIGNALS] =
 {
 	/* OR2_CAS_IDLE */ 0x8,
@@ -183,6 +186,9 @@ static const int standard_cas_signals[OR2_NUM_CAS_SIGNALS] =
 	/* OR2_CAS_CLEAR_FORWARD */ 0x8,
 	/* OR2_CAS_ANSWER */ 0x4,
 
+/* Another approach probably more correct is to redefine the standard_cas_signals
+   when configuring the variant, changing OR2_CAS_ANSWER from 0x4 to 0x0, however
+   that may be more risky and I dont want to affect current working code */
 	/* For DTMF/R2 */
 	/* OR2_CAS_SEIZE_ACK_DTMF */ 0x4,
 	/* OR2_CAS_ACCEPT_DTMF */ 0x8,
@@ -1191,18 +1197,12 @@ handlecas:
 			} else {
 				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 			}
+		/* For DTMF R2, for some strange reason they send CLEAR_FORWARD even when they are the backward side!! */
 		} else if (cas == R2(r2chan, CLEAR_FORWARD)) {
 			CAS_LOG_RX(CLEAR_FORWARD);
-			r2chan->r2_state = OR2_CLEAR_BACK_RXD;
-			if (TIMER(r2chan).r2_metering_pulse) {
-				/* if the variant may have metering pulses, this clear back could be not really
-				   a clear back but a metering pulse, lets put the timer. If the CAS signal does not
-				   come back to ANSWER then is really a clear back */
-				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
-						r2_metering_pulse, "r2_metering_pulse");
-			} else {
-				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
-			}
+			r2chan->r2_state = OR2_CLEAR_FWD_RXD;
+			/* should we test for metering pulses here? */
+			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 		} else if (cas == R2(r2chan, FORCED_RELEASE)) {
 			CAS_LOG_RX(FORCED_RELEASE);
 			r2chan->r2_state = OR2_FORCED_RELEASE_RXD;
@@ -2370,6 +2370,11 @@ static int send_clear_forward(openr2_chan_t *r2chan)
 	return set_cas_signal(r2chan, OR2_CAS_CLEAR_FORWARD);
 }
 
+static void dtmf_r2_set_call_down(openr2_chan_t *r2chan)
+{
+	report_call_end(r2chan);
+}
+
 /* BUG BUG BUG: As of now, when the call is in OR2_CALL_OFFERED state, the user has to call
    openr2_chan_disconnect_call to reject a call with a reason, this will cause a MF tone to
    be sent to the forward side to let them know we are rejecting the call, at that moment
@@ -2415,6 +2420,15 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 			}
 		}
 	} else {
+		/* 
+		 * DTMF call clear down is simply going to IDLE (which happens to be the same as clear forward)
+		 * however for the sake of clarity we send clear forward and wait 100ms before reporting call end
+		 */
+		if (r2chan->r2context->dial_with_dtmf) {
+			/* TODO: is it worth to configure this timer? */
+			openr2_chan_add_timer(r2chan, 100, dtmf_r2_set_call_down, "dtmf_r2_set_call_down");
+		} 
+		
 		if (send_clear_forward(r2chan)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
 			return -1;

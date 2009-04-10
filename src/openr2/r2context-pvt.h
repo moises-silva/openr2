@@ -135,7 +135,11 @@ typedef struct openr2_context_s {
 
 	/* use DTMF for outbound dialing */
 	int dial_with_dtmf;
+	
+	/* How much time a DTMF digit should be ON */
 	int dtmf_on;
+
+	/* How much time the dtmf engine should be OFF between digits */
 	int dtmf_off;
 
 	/* R2 logging mask */

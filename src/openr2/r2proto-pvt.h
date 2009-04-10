@@ -30,6 +30,63 @@
 extern "C" {
 #endif
 
+/* MFC-R2 protocol explanation */
+/* TODO */
+
+/* DTMF R2 protocol explanation */
+/*
+ * Call Setup
+ *
+ * DTMF R2 is used AFAIK un Venezuela for outgoing dialing. The current openr2 implementation of DTMF R2 works as follow.
+ *
+ * 1. We send Seize and put a small timer to start dialing (about 100ms) and a second timer to abort the call in the case
+ * where we don't receive any kind of response from the other side (seize ack timer).
+ *
+ * 2. After the first timer of 100ms expires we dial the destiny number with DTMF tones with a default of 50ms tone ON and
+ * 100ms of tone OFF. There is no ANI transmission in DTMF R2 mode.
+ *
+ * 3. After dialing all the digits we expect a pulse in the R2 bits going from 0x9 -> 0x5 -> 0x9, in typical R2 signaling
+ * this means IDLE -> ANSWER -> IDLE, however I redefine this to make more sense out of it as IDLE -> Seize Ack DTMF -> Accept DTMF
+ *
+ * 4. When we're in the Accept DTMF state we just wait for the ANSWER signal which is 0x1 for this DTMF R2 variant
+ *
+ * OpenR2 Side 					Telco Side
+ *
+ * ---------------> R2 Seize ---------------------------->
+ *
+ * ++++++++++++++++ Small dial delay (around 100ms) ++++++
+ *
+ * ===============> DTMF DNIS Digit 1 ===================>
+ * ===============> DTMF DNIS Digit 2 ===================>
+ * ===============> DTMF DNIS Digit ... =================>
+ * ===============> DTMF DNIS Digit N ===================>
+ *
+ * <--------------- R2 Seize Ack DTMF(0x5) <-------------
+ *
+ * ++++++++++++++++ Small pulse delay +++++++++++++++++++
+ *
+ * <--------------- R2 Accept DTMF(0x9) <----------------
+ *
+ * ++++++++++++++++ Waiting for Answer ++++++++++++++++++
+ *
+ * <--------------- R2 Answer DTMF (0x1) <---------------
+ * 
+ *
+ * Call Teardown
+ *
+ * When clearing up the call the behavior is the same for both the backward or forward side, either side of the call wanting to
+ * hangup just send CLEAR FORWARD and expect for the other side to become IDLE
+ *
+ * OpenR2 Side 					Telco Side
+ *
+ * ---------------> R2 Clear Forward --------------------->
+ * <--------------> R2 Idle <------------------------------
+ * ---------------> R2 Idle ------------------------------>
+ *
+ * I have received information from people in Venezuela about other DTMF R2 variant, that may be implemented on demand
+ *
+ */
+
 struct openr2_chan_s;
 struct openr2_context_s;
 
