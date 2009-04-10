@@ -37,7 +37,10 @@ extern "C" {
 /*
  * Call Setup
  *
- * DTMF R2 is used AFAIK un Venezuela for outgoing dialing. The current openr2 implementation of DTMF R2 works as follow.
+ * DTMF R2 is used AFAIK un Venezuela for outgoing dialing. The current openr2 implementation of DTMF R2 works with Venezuela
+ * CANTV telco.
+ *
+ * This is how it works:
  *
  * 1. We send Seize and put a small timer to start dialing (about 100ms) and a second timer to abort the call in the case
  * where we don't receive any kind of response from the other side (seize ack timer).
@@ -83,7 +86,7 @@ extern "C" {
  * <--------------> R2 Idle <------------------------------
  * ---------------> R2 Idle ------------------------------>
  *
- * I have received information from people in Venezuela about other DTMF R2 variant, that may be implemented on demand
+ * It seems there are more than one DTMF R2 variant.
  *
  */
 
