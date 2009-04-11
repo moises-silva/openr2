@@ -30,12 +30,84 @@
 extern "C" {
 #endif
 
+/* MFC-R2 protocol explanation */
+/* TODO */
+
+/* DTMF R2 protocol explanation */
+/*
+ * Call Setup
+ *
+ * DTMF R2 is used AFAIK un Venezuela for outgoing dialing. The current openr2 implementation of DTMF R2 works with Venezuela
+ * CANTV telco.
+ *
+ * This is how it works:
+ *
+ * 1. We send Seize and put a small timer to start dialing (about 100ms) and a second timer to abort the call in the case
+ * where we don't receive any kind of response from the other side (seize ack timer).
+ *
+ * 2. After the first timer of 100ms expires we dial the destiny number with DTMF tones with a default of 50ms tone ON and
+ * 100ms of tone OFF. There is no ANI transmission in DTMF R2 mode.
+ *
+ * 3. After dialing all the digits we expect a pulse in the R2 bits going from 0x9 -> 0x5 -> 0x9, in typical R2 signaling
+ * this means IDLE -> ANSWER -> IDLE, however I redefine this to make more sense out of it as IDLE -> Seize Ack DTMF -> Accept DTMF
+ *
+ * 4. When we're in the Accept DTMF state we just wait for the ANSWER signal which is 0x1 for this DTMF R2 variant
+ *
+ * OpenR2 Side 					Telco Side
+ *
+ * ---------------> R2 Seize ---------------------------->
+ *
+ * ++++++++++++++++ Small dial delay (around 100ms) ++++++
+ *
+ * ===============> DTMF DNIS Digit 1 ===================>
+ * ===============> DTMF DNIS Digit 2 ===================>
+ * ===============> DTMF DNIS Digit ... =================>
+ * ===============> DTMF DNIS Digit N ===================>
+ *
+ * <--------------- R2 Seize Ack DTMF(0x5) <-------------
+ *
+ * ++++++++++++++++ Small pulse delay +++++++++++++++++++
+ *
+ * <--------------- R2 Accept DTMF(0x9) <----------------
+ *
+ * ++++++++++++++++ Waiting for Answer ++++++++++++++++++
+ *
+ * <--------------- R2 Answer DTMF (0x1) <---------------
+ * 
+ *
+ * Call Teardown
+ *
+ * When clearing up the call the behavior is the same for both the backward or forward side, either side of the call wanting to
+ * hangup just send CLEAR FORWARD and expect for the other side to become IDLE
+ *
+ * OpenR2 Side 					Telco Side
+ *
+ * ---------------> R2 Clear Forward --------------------->
+ * <--------------> R2 Idle <------------------------------
+ * ---------------> R2 Idle ------------------------------>
+ *
+ * It seems there are more than one DTMF R2 variant.
+ *
+ */
+
 struct openr2_chan_s;
 struct openr2_context_s;
 
 /* Number of CAS signals. CAS signaling is
-   known as line supervisory signaling  */
-#define OR2_NUM_CAS_SIGNALS 8
+   known as line supervisory signaling  
+
+   WATCH OUT!!
+   This number MUST match the number of 
+   enums AND r2proto.c standard_cas_signals
+   and cas_names arrays!!
+*/
+#define OR2_NUM_CAS_SIGNALS 11
+
+/*
+   WATCH OUT!!
+   Each value of this enum should correspond to the
+   proper index in standard_cas_signals and cas_names arrays!!
+   */
 typedef enum {
 	/* Invalid signal */
 	OR2_CAS_INVALID = -1,
@@ -62,7 +134,21 @@ typedef enum {
 	OR2_CAS_CLEAR_FORWARD,
 	/* We set this to let know the other end we are ANSWERing the call and the
 	   speech path is open */
-	OR2_CAS_ANSWER
+	OR2_CAS_ANSWER,
+
+	/* DTMF R2 */
+
+	/* This names should be reviewed, I just made them up */
+
+	/* Acknowledge of seize when dialing DTMF */
+	OR2_CAS_SEIZE_ACK_DTMF,
+
+	/* DTMF accepted */
+	OR2_CAS_ACCEPT_DTMF,
+
+	/* DTMF R2 call answered */
+	OR2_CAS_ANSWER_DTMF
+
 } openr2_cas_signal_t;
 
 /* MF groups */
@@ -80,7 +166,10 @@ typedef enum {
 	OR2_MF_FWD_INIT,
 	OR2_MF_GI,
 	OR2_MF_GII,
-	OR2_MF_GIII
+	OR2_MF_GIII,
+
+	OR2_MF_DTMF_FWD_INIT
+	/* possible DTMF forward groups */
 } openr2_mf_group_t;
 
 /* possible backward MF states */
@@ -131,7 +220,17 @@ typedef enum {
 
 	/* we did not sent a tone, we are waiting for the other side to timeout
 	   expecting our tone */
-	OR2_MF_WAITING_TIMEOUT = 305
+	OR2_MF_WAITING_TIMEOUT = 305,
+
+	/*** DTMF R2 Related ***/
+
+	/* Backward DTMF states */
+
+	/* Backward still not supported :-( */
+
+	/* Forward DTMF states */
+	/* We're dialing DTMF */
+	OR2_MF_DIALING_DTMF = 500
 } openr2_mf_state_t;
 
 /* R2 state machine */
@@ -195,7 +294,22 @@ typedef enum {
 	OR2_FORCED_RELEASE_RXD = 308,
 
 	/* Blocked line */
-	OR2_BLOCKED = 400
+	OR2_BLOCKED = 400,
+
+	/*** DTMF R2 Related ***/
+
+	/* Backward not supported yet */
+
+	/* Forward */
+
+	/* Seize for DTMF R2 */
+	OR2_SEIZE_IN_DTMF_TXD = 600,
+
+	/* Seize Ack for DTMF R2 */
+	OR2_SEIZE_ACK_IN_DTMF_RXD = 601,
+
+	/* Accept in DTMF R2 */
+	OR2_ACCEPT_IN_DTMF_RXD = 602
 } openr2_cas_state_t;
 
 /* Call States */
@@ -283,6 +397,7 @@ int openr2_proto_set_blocked(struct openr2_chan_s *r2chan);
 int openr2_proto_set_cas_signal(struct openr2_chan_s *r2chan, openr2_cas_signal_t signal);
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);
 void openr2_proto_handle_mf_tone(struct openr2_chan_s *r2chan, int tone);
+void openr2_proto_handle_dtmf_end(struct openr2_chan_s *r2chan);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

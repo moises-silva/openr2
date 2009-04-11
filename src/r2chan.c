@@ -86,6 +86,7 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	/* MF tone detection hooks handles */
 	r2chan->mf_write_handle = mf_write_handle ? mf_write_handle : &r2chan->default_mf_write_handle;
 	r2chan->mf_read_handle = mf_read_handle ? mf_read_handle : &r2chan->default_mf_read_handle;
+	r2chan->dtmf_write_handle = &r2chan->default_dtmf_write_handle;
 
 	/* set default logger and default logging level */
 	r2chan->on_channel_log = openr2_log_channel_default;
@@ -121,6 +122,16 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 
 	OR2_CHAN_STACK;
 	return r2chan;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_handle)
+{
+	if (!dtmf_write_handle) {
+		return -1;
+	}
+	r2chan->dtmf_write_handle = dtmf_write_handle;
+	return 0;
 }
 
 OR2_EXPORT_SYMBOL
@@ -230,7 +241,10 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 
 		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
-		if (OR2_MF_OFF_STATE != r2chan->mf_state && MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
+		if (r2chan->dialing_dtmf) {
+			interesting_events |= OR2_IO_WRITE;
+		} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
+	            MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
 			interesting_events |= OR2_IO_WRITE;
 		}
 		res = openr2_io_wait(r2chan, &interesting_events, 0);
@@ -249,6 +263,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			}
 			continue;
 		}
+
 		if (OR2_IO_READ & interesting_events) {
 			res = openr2_io_read(r2chan, read_buf, sizeof(read_buf));
 			if (-1 == res) {
@@ -272,9 +287,25 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			}
 			continue;
 		}
+
 		/* we only write tones here. Speech write is responsibility of the user, he should call
 		   openr2_chan_write for that */
-		if (OR2_IO_WRITE & interesting_events) {
+		if (r2chan->dialing_dtmf && (OR2_IO_WRITE & interesting_events)) {
+			res = DTMF(r2chan)->dtmf_tx(r2chan->dtmf_write_handle, tone_buf, r2chan->io_buf_size);
+			if (res <= 0) {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF generation\n");
+				openr2_proto_handle_dtmf_end(r2chan);
+				continue;
+			}
+			for (i = 0; i < res; i++) {
+				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
+			}
+			wrote = openr2_io_write(r2chan, read_buf, res);
+			if (wrote != res) {
+				EMI(r2chan)->on_os_error(r2chan, errno);
+			}
+			continue;
+		} else if (OR2_IO_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
 			/* if there are no samples to convert and write then continue,
 			   the generate routine already took care of it */
@@ -298,6 +329,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			}
 			continue;
 		}
+
 	}	
 	return 0;
 }

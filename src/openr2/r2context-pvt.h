@@ -58,6 +58,8 @@ typedef struct {
 	int r2_answer_delay;
 	/* time to wait for CAS signaling before handling the new signal */
 	int cas_persistence_check;
+	/* safety timer before starting to dial DTMF */
+	int dtmf_start_dial;
 } openr2_timers_t;
 
 
@@ -86,6 +88,10 @@ typedef struct openr2_context_s {
 
 	/* Type of I/O interface */
 	openr2_io_type_t io_type;
+
+	/* this interface provides DTMF functions
+	   to the R2 channels */
+	openr2_dtmf_interface_t *dtmfeng;
 
 	/* R2 variant to use in this context channels */
 	openr2_variant_t variant;
@@ -133,6 +139,15 @@ typedef struct openr2_context_s {
 
 	/* MF threshold time in ms */
 	int mf_threshold;
+
+	/* use DTMF for outbound dialing */
+	int dial_with_dtmf;
+	
+	/* How much time a DTMF digit should be ON */
+	int dtmf_on;
+
+	/* How much time the dtmf engine should be OFF between digits */
+	int dtmf_off;
 
 	/* R2 logging mask */
 	openr2_log_level_t loglevel;

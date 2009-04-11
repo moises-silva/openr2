@@ -62,7 +62,8 @@ libopenr2_la_LIBADD =
 am_libopenr2_la_OBJECTS = libopenr2_la-r2chan.lo \
 	libopenr2_la-r2context.lo libopenr2_la-r2log.lo \
 	libopenr2_la-r2proto.lo libopenr2_la-r2utils.lo \
-	libopenr2_la-r2engine.lo libopenr2_la-r2ioabs.lo
+	libopenr2_la-r2engine.lo libopenr2_la-r2ioabs.lo \
+	libopenr2_la-queue.lo
 libopenr2_la_OBJECTS = $(am_libopenr2_la_OBJECTS)
 libopenr2_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libopenr2_la_CFLAGS) \
@@ -220,7 +221,7 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2log.h \
 		         openr2/r2exports.h 
 
-libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c r2ioabs.c
+libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c r2engine.c r2ioabs.c queue.c
 libopenr2_la_CFLAGS = $(AM_CFLAGS) -D__OR2_COMPILING_LIBRARY__ \
 	$(am__append_3)
 libopenr2_la_LDFLAGS = -lm -lpthread -version-info @OPENR2_LT_CURRENT@:@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
@@ -328,6 +329,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-queue.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2chan.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2context.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2engine.Plo@am__quote@
@@ -406,6 +408,13 @@ libopenr2_la-r2ioabs.lo: r2ioabs.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='r2ioabs.c' object='libopenr2_la-r2ioabs.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -c -o libopenr2_la-r2ioabs.lo `test -f 'r2ioabs.c' || echo '$(srcdir)/'`r2ioabs.c
+
+libopenr2_la-queue.lo: queue.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -MT libopenr2_la-queue.lo -MD -MP -MF $(DEPDIR)/libopenr2_la-queue.Tpo -c -o libopenr2_la-queue.lo `test -f 'queue.c' || echo '$(srcdir)/'`queue.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libopenr2_la-queue.Tpo $(DEPDIR)/libopenr2_la-queue.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='queue.c' object='libopenr2_la-queue.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -c -o libopenr2_la-queue.lo `test -f 'queue.c' || echo '$(srcdir)/'`queue.c
 
 r2test-r2test.o: r2test.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(r2test_CFLAGS) $(CFLAGS) -MT r2test-r2test.o -MD -MP -MF $(DEPDIR)/r2test-r2test.Tpo -c -o r2test-r2test.o `test -f 'r2test.c' || echo '$(srcdir)/'`r2test.c
