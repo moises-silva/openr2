@@ -1,4 +1,4 @@
-Source: libopenr2
+Source: openr2
 Priority: extra
 Maintainer: Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
 Build-Depends: debhelper (>= 7), autotools-dev, zaptel-source | dahdi-linux
@@ -6,7 +6,7 @@ Standards-Version: 3.8.0
 Section: libs
 Homepage: http://www.libopenr2.org
 
-Package: libopenr2-dev
+Package: libopenr2-1-dev
 Section: libdevel
 Architecture: any
 Depends: libopenr2-1 (= ${binary:Version}), ${shlibs:Depends}
@@ -21,7 +21,7 @@ Description: MFC/R2 call setup library - Development
  general media transmission though)
  This package contains libraries and header files for developing applications.
 
-Package: libopenr2
+Package: libopenr2-1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
