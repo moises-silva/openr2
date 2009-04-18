@@ -1070,6 +1070,7 @@ handlecas:
 	/* ok, bits have changed, we need to know in which 
 	   CAS state we are to know what to do */
 	switch (r2chan->r2_state) {
+
 	case OR2_IDLE:
 		if (cas == R2(r2chan, BLOCK)) {
 			CAS_LOG_RX(BLOCK);
@@ -1091,6 +1092,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_SEIZE_ACK_TXD:
 	case OR2_ANSWER_TXD:
 		/* if call setup already started or the call is answered 
@@ -1099,12 +1101,21 @@ handlecas:
 		if (cas == R2(r2chan, CLEAR_FORWARD)) {
 			CAS_LOG_RX(CLEAR_FORWARD);
 			r2chan->r2_state = OR2_CLEAR_FWD_RXD;
-			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+			if (TIMER(r2chan).r2_metering_pulse) {
+				/* if the variant may have metering pulses, this clear forward could be not really
+				   a clear forward but a metering pulse, lets put the timer. If the CAS signal does not
+				   come back to ANSWER then is really a clear back */
+				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
+						r2_metering_pulse, "r2_metering_pulse_fwd");
+			} else {
+				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+			}
 		} else {
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_SEIZE_TXD:
 		/* if we transmitted a seize we expect the seize ACK */
 		if (cas == R2(r2chan, SEIZE_ACK)) {
@@ -1130,6 +1141,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_CLEAR_BACK_TXD:
 	case OR2_FORCED_RELEASE_TXD:
 		if (cas == R2(r2chan, CLEAR_FORWARD)) {
@@ -1140,6 +1152,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_ACCEPT_RXD:
 		/* once we got MF ACCEPT tone, we expect the CAS Answer 
 		   or some disconnection signal, anything else, protocol error */
@@ -1159,6 +1172,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_SEIZE_ACK_RXD:
 		/* This state means we're during call setup (ANI/DNIS transmission) and the ACCEPT signal
 		   has not been received, which requires some special handling, read below for more info ... */
@@ -1183,6 +1197,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_ANSWER_RXD_MF_PENDING:
 	case OR2_ANSWER_RXD:
 		if (cas == R2(r2chan, CLEAR_BACK)) {
@@ -1212,6 +1227,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_CLEAR_BACK_TONE_RXD:
 		if (cas == R2(r2chan, IDLE)) {
 			CAS_LOG_RX(IDLE);
@@ -1221,6 +1237,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_CLEAR_FWD_TXD:
 		if (cas == R2(r2chan, IDLE)) {
 			CAS_LOG_RX(IDLE);
@@ -1232,8 +1249,10 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_CLEAR_BACK_RXD:
-		/* we got clear back but we have not transmitted clear fwd yet, then, the only
+	case OR2_CLEAR_FWD_RXD:
+		/* we got clear back or clear fwd but we have not taken action for it yet, then, the only
 		   reason for CAS change is a possible metering pulse, if we are not detecting a metering
 		   pulse then is a protocol error */
 		if (TIMER(r2chan).r2_metering_pulse && cas == R2(r2chan, ANSWER)) {
@@ -1241,7 +1260,6 @@ handlecas:
 			CAS_LOG_RX(ANSWER);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_metering_pulse);
 			r2chan->r2_state = OR2_ANSWER_RXD;
-			/* TODO: we could notify the user here with a callback, but I have not seen a use for this yet */
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Metering pulse received");
 			EMI(r2chan)->on_billing_pulse_received(r2chan);
 		} else {
@@ -1249,6 +1267,7 @@ handlecas:
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
 		break;
+
 	case OR2_BLOCKED:
 		/* we're blocked, unless they are setting IDLE, we don't care */
 		if (cas == R2(r2chan, IDLE)) {
