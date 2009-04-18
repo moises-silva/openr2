@@ -62,7 +62,8 @@ static void r2config_argentina(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
-	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_15;
+	r2context->mf_g1_tones.no_more_ani_available = OR2_MF_TONE_12;
 	r2context->timers.r2_metering_pulse = 400;
 }
 
