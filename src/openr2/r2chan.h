@@ -39,8 +39,8 @@ extern "C" {
 /* callback for logging channel related info */
 typedef void (*openr2_logging_func_t)(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt, va_list ap);
 
-openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle);
-openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo, void *mf_write_handle, void *mf_read_handle);
+openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo);
+openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo);
 void openr2_chan_delete(openr2_chan_t *r2chan);
 int openr2_chan_process_event(openr2_chan_t *r2chan);
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t accept);
@@ -79,6 +79,7 @@ const char *openr2_chan_get_mf_group_string(openr2_chan_t *r2chan);
 int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan);
 int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan);
 int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_handle);
+int openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t

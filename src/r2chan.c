@@ -23,13 +23,19 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+/* it seems some of the flags we use to compile (like -std=c99??) may cause some pthread defs to be missing
+   should we get rid of those defs completely instead of defining __USE_UNIX98? */
+#define __USE_UNIX98
 #include <pthread.h>
+
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include "openr2/r2log-pvt.h"
@@ -39,7 +45,19 @@
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2ioabs.h"
 
-static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle, int openchan)
+/* helpers to lock the channel when setting and getting properties */
+#define OR2_CHAN_SET_PROP(property,value) openr2_chan_lock(r2chan); \
+				    r2chan->property = value; \
+				    openr2_chan_unlock(r2chan);
+
+#define OR2_CHAN_RET_PROP(type,property) type retproperty; \
+				       openr2_chan_lock(r2chan); \
+				       retproperty = r2chan->property; \
+				       openr2_chan_unlock(r2chan); \
+				       return retproperty;
+
+
+static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, int openchan)
 {
 	openr2_chan_t *r2chan = NULL;
 #ifdef OR2_MF_DEBUG
@@ -73,6 +91,11 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 		return NULL;
 	}
 #endif
+	/* someday I may get paid to check this return codes :-) */
+	pthread_mutexattr_t chanlockattr;
+	pthread_mutexattr_init(&chanlockattr);
+	pthread_mutexattr_settype(&chanlockattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&r2chan->lock, &chanlockattr);
 
 	/* no persistence check has been done */
 	r2chan->cas_persistence_check_signal = -1;
@@ -83,10 +106,10 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	/* set the owner context */
 	r2chan->r2context = r2context;
 
-	/* MF tone detection hooks handles */
-	r2chan->mf_write_handle = mf_write_handle ? mf_write_handle : &r2chan->default_mf_write_handle;
-	r2chan->mf_read_handle = mf_read_handle ? mf_read_handle : &r2chan->default_mf_read_handle;
+	/* DTMF and MF tone detection default hooks handles */
 	r2chan->dtmf_write_handle = &r2chan->default_dtmf_write_handle;
+	r2chan->mf_write_handle = &r2chan->default_mf_write_handle;
+	r2chan->mf_read_handle = &r2chan->default_mf_read_handle;
 
 	/* set default logger and default logging level */
 	r2chan->on_channel_log = openr2_log_channel_default;
@@ -130,36 +153,54 @@ int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_ha
 	if (!dtmf_write_handle) {
 		return -1;
 	}
+	openr2_chan_lock(r2chan);
 	r2chan->dtmf_write_handle = dtmf_write_handle;
+	openr2_chan_unlock(r2chan);
 	return 0;
 }
 
 OR2_EXPORT_SYMBOL
-openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo, void *mf_write_handle, void *mf_read_handle)
+openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo)
 {
 	if (channo <=0 ) {
 		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
-	return __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle, 1);
+	return __openr2_chan_new(r2context, channo, 1);
 }
 
 OR2_EXPORT_SYMBOL
-openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo, void *mf_write_handle, void *mf_read_handle)
+openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo)
 {
 	if (channo <=0 ) {
 		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
-	openr2_chan_t *r2chan = __openr2_chan_new(r2context, channo, mf_write_handle, mf_read_handle, 0);
+	openr2_chan_t *r2chan = __openr2_chan_new(r2context, channo, 0);
 	if (!r2chan) {
 		return NULL;
 	}
+	openr2_chan_lock(r2chan);
 	r2chan->fd = chanfd;
 	r2chan->fd_created = 0;
+	openr2_chan_unlock(r2chan);
 	return r2chan;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle)
+{
+	openr2_chan_lock(r2chan);
+	if (mf_write_handle) {
+		r2chan->mf_write_handle = mf_write_handle;
+	}
+	if (mf_read_handle) {
+		r2chan->mf_read_handle = mf_read_handle;
+	}
+	openr2_chan_unlock(r2chan);
+	return 0;
 }
 
 static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t event)
@@ -227,6 +268,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 	unsigned i;
 	uint8_t read_buf[OR2_CHAN_READ_SIZE];
 	int16_t tone_buf[OR2_CHAN_READ_SIZE];
+	/* just one return point in this function, set retcode and call goto done when done */
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
 	openr2_chan_handle_timers(r2chan);
 	while(1) {
 
@@ -249,11 +293,13 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 		res = openr2_io_wait(r2chan, &interesting_events, 0);
 		if (res) {
-			return -1;
+			retcode = -1;
+			goto done;
 		}	
 		/* if there is no interesting events, do nothing */
 		if (!interesting_events) {
-			return 0;
+			retcode = 0;
+			goto done;
 		}
 		/* if there is an OOB event, probably CAS bits just changed */
 		if (OR2_IO_OOB_EVENT & interesting_events) {
@@ -267,7 +313,8 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		if (OR2_IO_READ & interesting_events) {
 			res = openr2_io_read(r2chan, read_buf, sizeof(read_buf));
 			if (-1 == res) {
-				return -1;
+				retcode = -1;
+				goto done;
 			}
 			/* if the MF detector is enabled, we are supposed to detect tones */
 			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
@@ -315,7 +362,8 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			/* an error on tone generation, lets just bail out and hope for the best */
 			if (-1 == res) {
 				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to generate MF tone.\n");
-				return -1;
+				retcode = -1;
+				goto done;
 			}
 #ifdef OR2_MF_DEBUG
 			write(r2chan->mf_write_fd, tone_buf, res*2);
@@ -331,7 +379,9 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}
 
 	}	
-	return 0;
+done:
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, const char *name)
@@ -440,6 +490,7 @@ OR2_EXPORT_SYMBOL
 void openr2_chan_delete(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
+	openr2_chan_lock(r2chan);
 	if (MFI(r2chan)->mf_read_dispose) {
 		MFI(r2chan)->mf_read_dispose(r2chan->mf_read_handle);
 	}	
@@ -456,6 +507,7 @@ void openr2_chan_delete(openr2_chan_t *r2chan)
 	close(r2chan->mf_write_fd);
 	close(r2chan->mf_read_fd);
 #endif
+	openr2_chan_unlock(r2chan);
 	free(r2chan);
 }
 
@@ -463,105 +515,165 @@ OR2_EXPORT_SYMBOL
 int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_accept_call(r2chan, mode);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_accept_call(r2chan, mode);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_answer_call(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_answer_call(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_answer_call(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_answer_call_with_mode(r2chan, mode);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_answer_call_with_mode(r2chan, mode);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_disconnect_call(r2chan, cause);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_disconnect_call(r2chan, cause);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_set_idle(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_set_idle(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_set_idle(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_set_blocked(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_set_blocked(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_set_blocked(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_handle_cas(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_handle_cas(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_handle_cas(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_rx_cas_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_rx_cas_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_tx_cas_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_tx_cas_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_call_state_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_call_state_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_call_state_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_r2_state_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_r2_state_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_r2_state_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_mf_state_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_mf_state_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_mf_state_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_mf_group_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_mf_group_string(r2chan);
+	const char *retstr = 0;
+	openr2_chan_lock(r2chan);
+	retstr = openr2_proto_get_mf_group_string(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retstr;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_tx_mf_signal(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_get_tx_mf_signal(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_get_rx_mf_signal(r2chan);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_get_rx_mf_signal(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
@@ -571,6 +683,7 @@ int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_s
 	int myerrno;
 	int res = 0;
 	int wrote = 0;
+	openr2_chan_lock(r2chan);
 	while (wrote < buf_size) {
 		res = openr2_io_write(r2chan, buf, buf_size);
 		if (res == -1 && errno != EAGAIN) {
@@ -581,6 +694,7 @@ int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_s
 		}
 		wrote += res;
 	}	
+	openr2_chan_unlock(r2chan);
 	return wrote;
 }
 
@@ -588,56 +702,60 @@ OR2_EXPORT_SYMBOL
 int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
-	return openr2_proto_make_call(r2chan, ani, dnid, category);
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_make_call(r2chan, ani, dnid, category);
+	openr2_chan_unlock(r2chan);
+	return retcode;
 }
 
 OR2_EXPORT_SYMBOL
 openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->direction;
+	OR2_CHAN_RET_PROP(openr2_direction_t,direction);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback)
 {
 	OR2_CHAN_STACK;
-	r2chan->on_channel_log = logcallback;
+	OR2_CHAN_SET_PROP(on_channel_log,logcallback);
 }
 
 OR2_EXPORT_SYMBOL
 openr2_io_fd_t openr2_chan_get_fd(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->fd;
+	OR2_CHAN_RET_PROP(openr2_io_fd_t,fd);
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_get_number(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->number;
+	OR2_CHAN_RET_PROP(int,number);
 }
 
 OR2_EXPORT_SYMBOL
 openr2_context_t *openr2_chan_get_context(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->r2context;
+	OR2_CHAN_RET_PROP(openr2_context_t*,r2context);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_STACK;
-	r2chan->client_data = data;
+	OR2_CHAN_SET_PROP(client_data,data);
 }
 
 OR2_EXPORT_SYMBOL
 void *openr2_chan_get_client_data(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->client_data;
+	OR2_CHAN_RET_PROP(void*,client_data);
 }
 
 OR2_EXPORT_SYMBOL
@@ -647,34 +765,39 @@ int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 	int res, ms;
 	struct timeval currtime;
 	int myerrno;
-	
+	ms = -1;
+
+	openr2_chan_lock(r2chan);	
 	pthread_mutex_lock(&r2chan->r2context->timers_lock);
 
 	/* if no timers, return 'infinite' */
 	if (!r2chan->timers_count) {
-
-		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
-
-		return -1;
+		ms = -1;
+		goto done;
 	}
+
 	res = gettimeofday(&currtime, NULL);
+
 	if (-1 == res) {
 		myerrno = errno;
-
-		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
-
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get next event from channel. gettimeofday failed!\n");
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		return -1;
+		ms = -1;
+		goto done;
 	}
+
 	ms = (((r2chan->sched_timers[0].time.tv_sec - currtime.tv_sec) * 1000) + 
 	     ((r2chan->sched_timers[0].time.tv_usec - currtime.tv_usec) / 1000));
 
-	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
-
 	if (ms < 0) {
-		return 0;
+		ms = 0;
 	}	
+
+done:
+
+	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+	openr2_chan_unlock(r2chan);
+
 	return ms;
 }
 
@@ -682,8 +805,11 @@ OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level)
 {
 	OR2_CHAN_STACK;
-	openr2_log_level_t retlevel = r2chan->loglevel;
+	openr2_log_level_t retlevel = OR2_LOG_NOTHING;
+	openr2_chan_lock(r2chan);
+	retlevel = r2chan->loglevel;
 	r2chan->loglevel = level;
+	openr2_chan_unlock(r2chan);
 	return retlevel;
 }
 
@@ -691,60 +817,62 @@ OR2_EXPORT_SYMBOL
 openr2_log_level_t openr2_chan_get_log_level(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->loglevel;
+	OR2_CHAN_RET_PROP(openr2_log_level_t,loglevel);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_enable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	r2chan->read_enabled = 1;
+	OR2_CHAN_SET_PROP(read_enabled,1);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_disable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	r2chan->read_enabled = 0;
+	OR2_CHAN_SET_PROP(read_enabled,0);
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_get_read_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->read_enabled;
+	OR2_CHAN_RET_PROP(int,read_enabled);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_enable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	r2chan->call_files = 1;
+	OR2_CHAN_SET_PROP(call_files,1);
 }
 
 OR2_EXPORT_SYMBOL
 void openr2_chan_disable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	r2chan->call_files = 0;
+	OR2_CHAN_SET_PROP(call_files,0);
 }
 
 OR2_EXPORT_SYMBOL
 int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return r2chan->call_files;
+	OR2_CHAN_RET_PROP(int,call_files);
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_dnis(openr2_chan_t *r2chan)
 {
-	return r2chan->dnis;
+	OR2_CHAN_STACK;
+	OR2_CHAN_RET_PROP(const char *,dnis);
 }
 
 OR2_EXPORT_SYMBOL
 const char *openr2_chan_get_ani(openr2_chan_t *r2chan)
 {
-	return r2chan->ani;
+	OR2_CHAN_STACK;
+	OR2_CHAN_RET_PROP(const char *,ani);
 }
 

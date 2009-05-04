@@ -216,12 +216,15 @@ typedef enum {
 	/* No I/O interface is available */
 	OR2_LIBERR_NO_IO_IFACE_AVAILABLE,
 	/* Invalid channel number provided  */
-	OR2_LIBERR_INVALID_CHAN_NUMBER
+	OR2_LIBERR_INVALID_CHAN_NUMBER,
+	/* Out of memory */
+	OR2_LIBERR_OUT_OF_MEMORY,
+	/* Invalid interface provided */
+	OR2_LIBERR_INVALID_INTERFACE
 } openr2_liberr_t;
 
 int openr2_context_get_time_to_next_event(openr2_context_t *r2context);
-openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *callmgmt, 
-		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis);
+openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_interface_t *callmgmt, int max_ani, int max_dnis);
 void openr2_context_delete(openr2_context_t *r2context);
 openr2_liberr_t openr2_context_get_last_error(openr2_context_t *r2context);
 const char *openr2_context_error_string(openr2_liberr_t error);
@@ -251,6 +254,8 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off);
 int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off);
 int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface);
+int openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib_interface_t *mflib);
+int openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t 

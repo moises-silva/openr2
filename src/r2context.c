@@ -187,11 +187,8 @@ static openr2_dtmf_interface_t default_dtmf_engine = {
 };
 
 OR2_EXPORT_SYMBOL
-openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_event_interface_t *evmanager, 
-		              openr2_transcoder_interface_t *transcoder, openr2_variant_t variant, int max_ani, int max_dnis)
+openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_interface_t *evmanager, int max_ani, int max_dnis)
 {
-	/* TODO: set some error value when returning NULL */
-
 	if (!evmanager) {
 		evmanager = &default_evmanager;
 	} else {
@@ -247,50 +244,14 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	}
 	openr2_context_t *r2context = calloc(1, sizeof(*r2context));
 	if (!r2context) {
+		r2context->last_error = OR2_LIBERR_OUT_OF_MEMORY;
 		return NULL;
 	}
 
-	/* fix the MF iface */
-	if (!mflib) {
-		mflib = &default_mf_interface;
-	} else {
-		if (!mflib->mf_read_init) {
-			mflib->mf_read_init = mf_read_init_default;
-		}
-		if (!mflib->mf_write_init) {
-			mflib->mf_write_init = mf_write_init_default;
-		}
-		if (!mflib->mf_detect_tone) {
-			mflib->mf_detect_tone = mf_detect_tone_default;
-		}
-		if (!mflib->mf_generate_tone) {
-			mflib->mf_generate_tone = mf_generate_tone_default;
-		}
-		if (!mflib->mf_select_tone) {
-			mflib->mf_select_tone = mf_select_tone_default;
-		}
-		if (!mflib->mf_want_generate) {
-			mflib->mf_want_generate = mf_want_generate_default;
-		}
-		/* dispose routines are allowed to be NULL */
-	}
-
-	/* fix the transcoder interface */
-	if (!transcoder) {
-		transcoder = &default_transcoder;
-	} else {
-		if (!transcoder->alaw_to_linear) {
-			transcoder->alaw_to_linear = alaw_to_linear_default;
-		} 
-		if (!transcoder->linear_to_alaw) {
-			transcoder->linear_to_alaw = linear_to_alaw_default;
-		}
-	}
-
-	r2context->mflib = mflib;
-	r2context->evmanager = evmanager;
-	r2context->transcoder = transcoder;
+	r2context->mflib = &default_mf_interface;
+	r2context->transcoder = &default_transcoder;
 	r2context->variant = variant;
+	r2context->evmanager = evmanager;
 	r2context->dtmfeng = &default_dtmf_engine;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
 	pthread_mutex_init(&r2context->timers_lock, NULL);
@@ -300,6 +261,63 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	}
 	openr2_context_set_io_type(r2context, OR2_IO_DEFAULT, NULL);
 	return r2context;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib_interface_t *mflib)
+{
+	/* fix the MF iface */
+	if (!mflib) {
+		mflib = &default_mf_interface;
+		return 0;
+	} 
+	if (!mflib->mf_read_init) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	if (!mflib->mf_write_init) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	if (!mflib->mf_detect_tone) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	if (!mflib->mf_generate_tone) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	if (!mflib->mf_select_tone) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	if (!mflib->mf_want_generate) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	/* dispose routines are allowed to be NULL */
+	r2context->mflib = mflib;
+	return 0;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder)
+{
+	/* fix the transcoder interface */
+	if (!transcoder) {
+		transcoder = &default_transcoder;
+		return 0;
+	} 
+	if (!transcoder->alaw_to_linear) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	} 
+	if (!transcoder->linear_to_alaw) {
+		r2context->last_error = OR2_LIBERR_INVALID_INTERFACE;
+		return -1;
+	}
+	r2context->transcoder = transcoder;
+	return 0;
 }
 
 OR2_EXPORT_SYMBOL
@@ -444,6 +462,8 @@ const char *openr2_context_error_string(openr2_liberr_t error)
 	case OR2_LIBERR_CANNOT_SET_IDLE: return "Failed to set IDLE state on channel";
 	case OR2_LIBERR_NO_IO_IFACE_AVAILABLE: return "No I/O interface available for channel";
 	case OR2_LIBERR_INVALID_CHAN_NUMBER: return "Invalid channel number";
+	case OR2_LIBERR_OUT_OF_MEMORY: return "Out of memory";
+	case OR2_LIBERR_INVALID_INTERFACE: return "Invalid interface";
 	default: return "*Unknown*";
 	}
 }

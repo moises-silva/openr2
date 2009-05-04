@@ -823,8 +823,9 @@ int main(int argc, char *argv[])
 			mf_iface = &g_mf_dahdi_iface;
 		}
 #endif
-		g_confdata[c].context = openr2_context_new(mf_iface, &g_event_iface, 
-				NULL, g_confdata[c].variant, g_confdata[c].max_ani, g_confdata[c].max_dnis);
+		g_confdata[c].context = openr2_context_new(g_confdata[c].variant, &g_event_iface, 
+							   g_confdata[c].max_ani, g_confdata[c].max_dnis);
+		openr2_context_set_mflib_interface(g_confdata[c].context, mf_iface);
 		if (!g_confdata[c].context) {
 			fprintf(stderr, "failed to create R2 context when c = %d\n", c);
 			break;
@@ -861,7 +862,8 @@ int main(int argc, char *argv[])
 				tx_mf_state = &g_confdata[c].channels[cnt].dahdi_tx_state;
 			}
 #endif
-			g_confdata[c].channels[cnt].chan = openr2_chan_new(g_confdata[c].context, i, tx_mf_state, NULL);
+			g_confdata[c].channels[cnt].chan = openr2_chan_new(g_confdata[c].context, i);
+			openr2_chan_set_mflib_handles(g_confdata[c].channels[cnt].chan, tx_mf_state, NULL);
 			if (!g_confdata[c].channels[cnt].chan) {
 				fprintf(stderr, "failed to create R2 channel %d: %s\n", i,
 						openr2_context_error_string(openr2_context_get_last_error(g_confdata[c].context)));
