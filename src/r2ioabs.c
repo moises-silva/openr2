@@ -251,9 +251,6 @@ static int zt_wait(openr2_chan_t *r2chan, int *flags, int wait)
 	if (zapflags & ZT_IOMUX_WRITE) {
 		*flags |= OR2_IO_WRITE;
 	}
-	if (zapflags & ZT_IOMUX_SIGEVENT) {
-		*flags |= OR2_IO_OOB_EVENT;
-	}
 	return 0;
 }
 
@@ -265,7 +262,7 @@ static int zt_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 		return -1;
 	}
 	*event = OR2_OOB_EVENT_NONE;
-	res = ioctl(fd, ZT_GETEVENT, &zapevent);	
+	res = ioctl(fd, ZT_GETEVENT, &zapevent);
 	if (res) {
 		return -1;
 	}

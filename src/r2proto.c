@@ -2100,13 +2100,10 @@ static void handle_backward_mf_silence(openr2_chan_t *r2chan, int tone)
 
 static int timediff(struct timeval *t1, struct timeval *t2)
 {
-	int secdiff = 0;
 	int msdiff = 0;
 	if (t1->tv_sec == t2->tv_sec) {
 		return ((t1->tv_usec - t2->tv_usec)/1000);
 	}
-	secdiff = t1->tv_sec - t2->tv_sec;	
-	secdiff--;
 	msdiff  = (t1->tv_usec) ? (t1->tv_usec/1000)          : 0;
 	msdiff += (t2->tv_usec) ? (1000 - (t2->tv_usec/1000)) : 0;
 	return msdiff;
