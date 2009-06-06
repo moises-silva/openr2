@@ -1102,15 +1102,7 @@ handlecas:
 		if (cas == R2(r2chan, CLEAR_FORWARD)) {
 			CAS_LOG_RX(CLEAR_FORWARD);
 			r2chan->r2_state = OR2_CLEAR_FWD_RXD;
-			if (TIMER(r2chan).r2_metering_pulse) {
-				/* if the variant may have metering pulses, this clear forward could be not really
-				   a clear forward but a metering pulse, lets put the timer. If the CAS signal does not
-				   come back to ANSWER then is really a clear back */
-				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
-						r2_metering_pulse, "r2_metering_pulse_fwd");
-			} else {
-				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
-			}
+			report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 		} else {
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
@@ -1252,8 +1244,7 @@ handlecas:
 		break;
 
 	case OR2_CLEAR_BACK_RXD:
-	case OR2_CLEAR_FWD_RXD:
-		/* we got clear back or clear fwd but we have not taken action for it yet, then, the only
+		/* we got clear back but we have not transmitted clear fwd yet, then, the only
 		   reason for CAS change is a possible metering pulse, if we are not detecting a metering
 		   pulse then is a protocol error */
 		if (TIMER(r2chan).r2_metering_pulse && cas == R2(r2chan, ANSWER)) {
