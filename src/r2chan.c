@@ -356,21 +356,26 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 		}	
 		/* if there is no interesting events, do nothing */
 		if (!interesting_events) {
-			return -1;
+			return 0;
 		}
 		/* if there is a signaling eventset, probably CAS bits just changed */
 		if (OR2_HW_IO_MUX_SIG_EVENT & interesting_events) {
 			res = ioctl(r2chan->fd, OR2_HW_OP_GET_EVENT, &events);
-			if ( !res && events ) {
+			if (!res && events) {
 				openr2_chan_handle_zap_event(r2chan, events);
 			}
 			continue;
 		}
 		if (OR2_HW_IO_MUX_READ & interesting_events) {
 			res = read(r2chan->fd, read_buf, sizeof(read_buf));
-			if (-1 == res) {
+			if (-1 == res && errno == ELAST) {
+				/* ELAST is dahdi specific error meaning there is an event in the queue
+				 * that should be handled first, continue  to get back to IOMUX
+				 * */
+				continue;
+			} else if (-1 == res) {
 				myerrno = errno;
-				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel\n");
+				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel %d: %s\n", r2chan->number, strerror(myerrno));
 				EMI(r2chan)->on_os_error(r2chan, myerrno);
 				return -1;
 			}
@@ -405,8 +410,15 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = write(r2chan->fd, read_buf, res);
-			if (wrote != res) {
-				EMI(r2chan)->on_os_error(r2chan, errno);
+			if (wrote == -1 && errno == ELAST) {
+				continue;
+			} else if (wrote == -1) {
+				myerrno = errno;
+				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write DTMF to channel %d: %s\n", r2chan->number, strerror(myerrno));
+				EMI(r2chan)->on_os_error(r2chan, myerrno);
+			} else if (wrote != res){
+				openr2_log(r2chan, OR2_LOG_ERROR, "Just wrote %d bytes to channel %d when %d were requested\n", 
+						wrote, r2chan->number, res);
 			}
 			continue;
 		} else if (OR2_HW_IO_MUX_WRITE & interesting_events) {
@@ -428,12 +440,19 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = write(r2chan->fd, read_buf, res);
-			if (wrote != res) {
-				EMI(r2chan)->on_os_error(r2chan, errno);
+			if (wrote == -1 && errno == ELAST) {
+				continue;
+			} else if (wrote == -1) {
+				myerrno = errno;
+				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write MF tone to channel %d: %s\n", r2chan->number, strerror(myerrno));
+				EMI(r2chan)->on_os_error(r2chan, myerrno);
+			} else if (wrote != res){
+				openr2_log(r2chan, OR2_LOG_ERROR, "Just wrote %d bytes to channel %d when %d were requested\n", 
+						wrote, r2chan->number, res);
 			}
 			continue;
 		}
-	}	
+	}
 	return 0;
 }
 

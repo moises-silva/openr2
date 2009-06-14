@@ -935,8 +935,8 @@ static void report_call_end(openr2_chan_t *r2chan)
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Call ended\n");
 	openr2_proto_set_idle(r2chan);
-	EMI(r2chan)->on_call_end(r2chan);
 	fix_rx_signal(r2chan);
+	EMI(r2chan)->on_call_end(r2chan);
 }
 
 static void r2_metering_pulse(openr2_chan_t *r2chan)
@@ -2312,7 +2312,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	r2chan->caller_category = category2tone(r2chan, category);
 	if (!r2chan->r2context->dial_with_dtmf) {
 		r2chan->r2_state = OR2_SEIZE_TXD;
-		r2chan->mf_group = OR2_MF_DTMF_FWD_INIT;
+		r2chan->mf_group = OR2_MF_FWD_INIT;
 	} else {
 		r2chan->r2_state = OR2_SEIZE_IN_DTMF_TXD;
 		r2chan->mf_group = OR2_MF_DTMF_FWD_INIT;
