@@ -2,5 +2,5 @@
 autoheader
 libtoolize --force
 aclocal
-automake
+automake -a
 autoconf
