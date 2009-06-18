@@ -1236,6 +1236,19 @@ handlecas:
 			CAS_LOG_RX(IDLE);
 			report_call_end(r2chan);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
+			/* we requested the disconnection, we dont report call end to the user since the channel
+			 * is still NOT available to be used, we need still to wait for IDLE
+			 * */
+			r2chan->r2_state = OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD;
+		} else {
+			CAS_LOG_RX(INVALID);
+			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
+		}
+		break;
+
+	case OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD:
+		if (cas == R2(r2chan, IDLE)) {
+			CAS_LOG_RX(IDLE);
 			report_call_end(r2chan);
 		} else {
 			CAS_LOG_RX(INVALID);
@@ -2256,7 +2269,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	   it was in some other state */
 	openr2_proto_handle_cas(r2chan);
 	if (r2chan->cas_read != r2chan->r2context->cas_signals[OR2_CAS_IDLE]) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Trying to dial out in a non-idle channel\n");
+		openr2_log(r2chan, OR2_LOG_ERROR, "Trying to dial out in a non-idle channel (cas=0x%02X)\n", r2chan->cas_read);
 		return -1;
 	}
 	/* make sure both ANI and DNIS are numeric */
@@ -2401,6 +2414,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 	OR2_CHAN_STACK;
 	/* cannot drop a call when there is none to drop */
 	if (r2chan->call_state == OR2_CALL_IDLE) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot disconnect call when we dont have a call to disconnect\n");
 		return -1;
 	}
 	if (r2chan->direction == OR2_DIR_BACKWARD) {

@@ -293,6 +293,9 @@ typedef enum {
 	/* callee is asking us to end the call immediately */
 	OR2_FORCED_RELEASE_RXD = 308,
 
+	/* we sent clear forward and then got clear back */
+	OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD = 309,
+
 	/* Blocked line */
 	OR2_BLOCKED = 400,
 
