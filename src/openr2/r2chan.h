@@ -67,9 +67,25 @@ void openr2_chan_disable_call_files(openr2_chan_t *r2chan);
 int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan);
 const char *openr2_chan_get_dnis(openr2_chan_t *r2chan);
 const char *openr2_chan_get_ani(openr2_chan_t *r2chan);
+
+/*! \brief set the channel CAS in the idle state */
 int openr2_chan_set_idle(openr2_chan_t *r2chan);
+
+/*! \brief set the channel CAS in the blocked state */
 int openr2_chan_set_blocked(openr2_chan_t *r2chan);
-int openr2_chan_handle_cas(openr2_chan_t *r2chan);
+
+/*! \brief check for out of band events and process them if any change occured (CAS signaling and hardware Alarms) */
+int openr2_chan_process_oob_events(openr2_chan_t *r2chan);
+
+/*! \brief check for CAS signaling changes and process them if any change occured */
+int openr2_chan_process_cas_signaling(openr2_chan_t *r2chan);
+
+/*! \brief check for MF signaling changes and process them if any change occured */
+int openr2_chan_process_mf_signaling(openr2_chan_t *r2chan);
+
+/*! \brief check for any signaling change and process them if any change occured */
+int openr2_chan_process_signaling(openr2_chan_t *r2chan);
+
 const char *openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan);
 const char *openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan);
 const char *openr2_chan_get_call_state_string(openr2_chan_t *r2chan);

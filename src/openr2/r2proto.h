@@ -34,6 +34,9 @@ extern "C" {
 #define OR2_DEFAULT_DTMF_ON 50
 #define OR2_DEFAULT_DTMF_OFF 100
 
+#define OR2_STOP_DNIS_REQUEST 0
+#define OR2_CONTINUE_DNIS_REQUEST 1
+
 /* 
    This are known as Multi Frequency signals ( MF signals). the same 15 inter-register signals 
    are used for the distinct groups with distinct meanings for each group.

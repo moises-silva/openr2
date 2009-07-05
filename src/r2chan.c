@@ -223,6 +223,7 @@ static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_
 	return 0;
 }
 
+/*! \brief must be called with chan lock held */
 static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 {
 	struct timeval nowtv;
@@ -259,8 +260,12 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 	}
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_chan_process_event(openr2_chan_t *r2chan)
+/*! \brief simple mask to determine what the user wants to process */
+#define OR2_CHAN_PROCESS_OOB (1 << 0)
+#define OR2_CHAN_PROCESS_MF (1 << 1)
+
+/*! \brief main processing of signaling to check for incoming events, respond to them and dispatch user events */
+static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 {
 	OR2_CHAN_STACK;
 	int interesting_events, res, tone_result, wrote;
@@ -274,33 +279,38 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 	openr2_chan_handle_timers(r2chan);
 	while(1) {
 
-		/* we're always interested in CAS and ALARM events */
-		interesting_events = OR2_IO_OOB_EVENT;
+		/* check for CAS and ALARM events only if requested */
+		interesting_events = (processing_mask & OR2_CHAN_PROCESS_OOB) ? OR2_IO_OOB_EVENT : 0;
 
-		/* we also want to be notified about read-ready if we have read enabled */
-		if (r2chan->read_enabled) {
-			/* XXX read enabled is NOT enough, we should also check if the MF engine is turned on
-			   or the channel is answered XXX*/
+		/* we also want to be notified about read-ready if we have read enabled and the user requested MF processing */
+		if (r2chan->read_enabled && (processing_mask & OR2_CHAN_PROCESS_MF)) {
+			/* XXX read enabled is NOT enough, we should also check if the MF engine is turned on or the channel is answered XXX*/
 			interesting_events |= OR2_IO_READ;
 		}
 
 		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
-		if (r2chan->dialing_dtmf) {
+		if (!(processing_mask & OR2_CHAN_PROCESS_MF)) {
+			/* mf should be ignored, therefore OR2_IO_WRITE must not be enabled regardless of other flags */
+		} else if (r2chan->dialing_dtmf) {
 			interesting_events |= OR2_IO_WRITE;
 		} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
 	            MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
 			interesting_events |= OR2_IO_WRITE;
 		}
+
+		/* ask the I/O layer to poll for the requested events immediately, no blocking */
 		res = openr2_io_wait(r2chan, &interesting_events, 0);
 		if (res) {
 			retcode = -1;
 			goto done;
-		}	
+		}
+
 		/* if there is no interesting events, do nothing */
 		if (!interesting_events) {
 			retcode = 0;
 			goto done;
 		}
+
 		/* if there is an OOB event, probably CAS bits just changed */
 		if (OR2_IO_OOB_EVENT & interesting_events) {
 			res = openr2_io_get_oob_event(r2chan, &event);
@@ -335,8 +345,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 			continue;
 		}
 
-		/* we only write tones here. Speech write is responsibility of the user, he should call
-		   openr2_chan_write for that */
+		/* we only write MF or DTMF tones here. Speech write is responsibility of the user, she should call openr2_chan_write for that */
 		if (r2chan->dialing_dtmf && (OR2_IO_WRITE & interesting_events)) {
 			res = DTMF(r2chan)->dtmf_tx(r2chan->dtmf_write_handle, tone_buf, r2chan->io_buf_size);
 			if (res <= 0) {
@@ -382,6 +391,34 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_process_mf_signaling(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_MF);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_process_oob_events(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_OOB);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_process_cas_signaling(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_proto_handle_cas(r2chan);
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_process_signaling(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_MF | OR2_CHAN_PROCESS_OOB);
 }
 
 int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, const char *name)
@@ -573,17 +610,6 @@ int openr2_chan_set_blocked(openr2_chan_t *r2chan)
 	int retcode = 0;
 	openr2_chan_lock(r2chan);
 	retcode = openr2_proto_set_blocked(r2chan);
-	openr2_chan_unlock(r2chan);
-	return retcode;
-}
-
-OR2_EXPORT_SYMBOL
-int openr2_chan_handle_cas(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	int retcode = 0;
-	openr2_chan_lock(r2chan);
-	retcode = openr2_proto_handle_cas(r2chan);
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }

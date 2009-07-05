@@ -671,7 +671,7 @@ void *wait_call(void *data)
 	variant = openr2_context_get_variant(confdata->context);
 	printf("channel %d, variant = %s\n", channo, openr2_proto_get_variant_string(variant));
 	openr2_chan_set_idle(r2chan);
-	openr2_chan_handle_cas(r2chan);
+	openr2_chan_process_cas_signaling(r2chan);
 	while (1) {
 		FD_ZERO(&chanread);
 		FD_ZERO(&chanexcept);
@@ -707,7 +707,7 @@ void *wait_call(void *data)
 			break;
 		}
 		if (FD_ISSET(chanfd, &chanread) || FD_ISSET(chanfd, &chanexcept)) {
-			openr2_chan_process_event(r2chan);
+			openr2_chan_process_signaling(r2chan);
 		}
 	}
 	return (void *)0;
@@ -724,7 +724,7 @@ void *make_call(void *data)
 	chanfd = (int)(long)openr2_chan_get_fd(r2chan);
 	/* handle current state of ABCD bits, either blocked or idle */
 	openr2_chan_set_idle(r2chan);
-	openr2_chan_handle_cas(r2chan);
+	openr2_chan_process_cas_signaling(r2chan);
 	while (1) {
 		FD_ZERO(&chanread);
 		FD_ZERO(&chanexcept);
@@ -744,7 +744,7 @@ void *make_call(void *data)
 			break;
 		}
 		if (FD_ISSET(chanfd, &chanread) || FD_ISSET(chanfd, &chanexcept)) {
-			openr2_chan_process_event(r2chan);
+			openr2_chan_process_signaling(r2chan);
 		}
 	}
 	return (void *)0;
