@@ -224,7 +224,7 @@ static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_
 }
 
 /*! \brief must be called with chan lock held */
-static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
+static int openr2_chan_handle_timers(openr2_chan_t *r2chan)
 {
 	struct timeval nowtv;
 	openr2_sched_timer_t to_dispatch[OR2_MAX_SCHED_TIMERS];
@@ -233,7 +233,7 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 	res = gettimeofday(&nowtv, NULL);
 	if (res == -1) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Yikes! gettimeofday failed, me may miss events!!\n");
-		return;
+		return -1;
 	}
 	i = 0;
 
@@ -258,6 +258,17 @@ static void openr2_chan_handle_timers(openr2_chan_t *r2chan)
 		openr2_log(r2chan, OR2_LOG_DEBUG, "calling timer %d (%s) callback\n", to_dispatch[t].id, to_dispatch[t].name);
 		to_dispatch[t].callback(r2chan);
 	}
+	return 0;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_chan_run_schedule(openr2_chan_t *r2chan)
+{
+	int ret = 0;
+	openr2_chan_lock(r2chan);
+	ret = openr2_chan_handle_timers(r2chan);
+	openr2_chan_unlock(r2chan);
+	return ret;
 }
 
 /*! \brief simple mask to determine what the user wants to process */
