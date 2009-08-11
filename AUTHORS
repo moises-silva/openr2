@@ -19,3 +19,7 @@ Steve Underwood
 <steveu@coppice.org>
 - I Borrowed code from his SpanDSP LGPL library for the MF Detector and generator (basically r2engine.c and r2engine.h)
 
+Tzafrir Cohen
+<tzafrir.cohen@xorcom.com>
+- Debian package
+
