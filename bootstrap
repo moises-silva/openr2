@@ -1,6 +1,6 @@
 #!/bin/bash
 autoheader
-libtoolize --force
+libtoolize --force --copy
 aclocal
-automake -a
+automake -f --copy --add-missing
 autoconf
