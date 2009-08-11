@@ -63,11 +63,10 @@ int openr2_chan_answer_call(openr2_chan_t *r2chan);
 int openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode);
 
 /*! \brief Disconnects the call or acnowledges a disconnect on the channel with the given reason
- * the reason is ignored if its an acknowledge of hangup
- */
+     the reason is ignored if its an acknowledge of hangup */
 int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
 
-/*! \brief Disconnects the call or acnowledges a disconnect on the channel with the given reason */
+/*! \brief Makes a call with the given ani, dnid and category */
 int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category);
 
 /*! \brief Return the direction of the call in the given channel */
