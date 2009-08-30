@@ -1,3 +1,188 @@
+2009-08-30 19:46  moises.silva
+
+	* src/r2proto.c: put openr2 version and revision in call files
+
+2009-08-30 19:39  moises.silva
+
+	* TODO, src/r2proto.c: updated TODO and fixed possible bug causing
+	  race conditions between call end and line status
+
+2009-08-11 18:45  moises.silva
+
+	* INSTALL, compile, config.guess, config.sub, ltmain.sh: commited
+	  automake and libtool crap
+
+2009-08-11 18:44  moises.silva
+
+	* compile, config.guess, config.sub, ltmain.sh: deleted gnu crap
+	  files, will be replaced in next commit
+
+2009-08-11 18:43  moises.silva
+
+	* bootstrap: updated boostrap script to copy gnu libtool and
+	  automake crap files
+
+2009-08-11 18:42  moises.silva
+
+	* AUTHORS: added Tzafrir debian contribution to the AUTHORS file
+
+2009-08-11 16:30  alexandre.alencar
+
+	* r2test.conf.5: fix manpage warnings
+
+2009-08-11 14:45  alexandre.alencar
+
+	* debian: remove debian directory as it will go to debian pkg-voip
+	  team
+
+2009-07-09 15:38  moises.silva
+
+	* TODO: update TODO
+
+2009-07-06 20:21  moy
+
+	* src/r2proto.c: merge revision 206 from trunk (increase
+	  mf_fwd_safety timeout to fix international calls with Telmex and
+	  may be other telcos)
+
+2009-06-18 04:44  moy
+
+	* src/openr2/r2proto-pvt.h, src/r2proto.c: fix bug where call end
+	  event was reported when getting clear backward after clear
+	  forward without waiting for idle
+
+2009-06-17 18:50  moises.silva
+
+	* Makefile.in, aclocal.m4, bootstrap, compile, config.guess,
+	  config.sub, configure, ltmain.sh, src/Makefile.in: updated gnu
+	  build crap
+
+2009-06-17 18:47  moises.silva
+
+	* config.guess, config.sub, ltmain.sh: deleted config.guess,
+	  ltmain.sh and config.sub in order to replace them later
+
+2009-06-14 03:49  moises.silva
+
+	* src/r2chan.c, src/r2proto.c: properly check and handle ELAST
+	  return code from read/write operations on zaptel/dahdi devices
+
+2009-06-06 02:54  moy
+
+	* src/r2proto.c: removed experimental code for forward metering
+	  pulses, did not work and there is no point on keeping it
+
+2009-04-18 03:30  moy
+
+	* src/r2proto.c: fixed Argentina variant tones, restricted ANI and
+	  no more ANI available
+
+2009-04-18 02:51  moy
+
+	* src/r2proto.c: experimental code to detect metering pulse when
+	  receiving clear forward
+
+2009-04-13 18:15  alexandre.alencar
+
+	* debian/changelog, debian/control, debian/files,
+	  debian/libopenr2-1-dev.dirs, debian/libopenr2-1-dev.install,
+	  debian/libopenr2-1.dirs, debian/libopenr2-1.docs,
+	  debian/libopenr2-1.install, debian/libopenr2-1.postinst,
+	  debian/libopenr2-1.shlibs, debian/libopenr2-1.substvars,
+	  debian/libopenr2-dev.dirs, debian/libopenr2-dev.install,
+	  debian/libopenr2.dirs, debian/libopenr2.docs,
+	  debian/libopenr2.install, debian/libopenr2.postinst,
+	  debian/libopenr2.shlibs, debian/libopenr2.substvars,
+	  debian/watch: adjust debian package to adhere debian guidelines
+
+2009-04-10 18:58  moy
+
+	* src/openr2/r2proto-pvt.h: clarify in the comments that the DTMF
+	  R2 variant supported is for the telco CANTV
+
+2009-04-10 18:34  moy
+
+	* src/openr2/r2context-pvt.h, src/openr2/r2proto-pvt.h,
+	  src/r2proto.c: fix DTMF R2 issue where the R2 state was not reset
+	  to IDLE when the other end clears the call
+
+2009-04-08 05:58  moy
+
+	* src/openr2/r2proto-pvt.h, src/r2proto.c: created new R2 CAS bit
+	  patterns and names for DTMF R2
+
+2009-04-08 05:24  moy
+
+	* src/openr2/r2proto-pvt.h, src/r2chan.c, src/r2proto.c: added
+	  proper naming for DTMF R2 states and improved handling of such
+	  states
+
+2009-04-01 12:22  moy
+
+	* doc/r2proto.conf, src/Makefile.am, src/Makefile.in,
+	  src/openr2/queue.h, src/openr2/r2chan-pvt.h, src/openr2/r2chan.h,
+	  src/openr2/r2context-pvt.h, src/openr2/r2context.h,
+	  src/openr2/r2engine.h, src/openr2/r2hwcompat.h,
+	  src/openr2/r2utils-pvt.h, src/queue.c, src/r2chan.c,
+	  src/r2context.c, src/r2engine.c, src/r2proto.c: more DTMF R2
+	  changes, included the DTMF generator
+
+2009-03-31 06:38  moy
+
+	* src/r2chan.c, src/r2proto.c: more DTMF/R2 changes
+
+2009-03-31 05:30  moy
+
+	* src/Makefile.am, src/Makefile.in, src/openr2/r2chan-pvt.h,
+	  src/openr2/r2context-pvt.h, src/openr2/r2context.h,
+	  src/openr2/r2proto-pvt.h, src/openr2/r2proto.h, src/r2chan.c,
+	  src/r2context.c, src/r2proto.c: testing first DTMF R2 code
+
+2009-03-27 05:17  moy
+
+	* src/openr2/r2chan-pvt.h, src/r2chan.c, src/r2proto.c: improved
+	  and fixed timer callback handling
+
+2009-03-27 04:42  moy
+
+	* src/r2chan.c: increment the timer index properly
+
+2009-03-27 03:00  moy
+
+	* src/r2chan.c: fixed bug with timer scheduling, now separate
+	  dispatching in 3 steps: collect, cancel, dispatch
+
+2009-03-17 22:15  alexandre.alencar
+
+	* libopenr2.spec: fixed some typos for rpm spec file
+
+2009-03-16 16:27  alexandre.alencar
+
+	* ChangeLog, debian/changelog, debian/files, libopenr2.spec: update
+	  package versions to 1.2.0
+
+2009-03-16 03:32  moy
+
+	* src/openr2/r2utils.h: changed OR2_LIB_AGE to be 1
+
+2009-03-16 02:24  moy
+
+	* bootstrap, configure, configure.in, doc/r2proto.conf,
+	  src/Makefile.am, src/Makefile.in, src/openr2/r2chan.h,
+	  src/openr2/r2context-pvt.h, src/openr2/r2context.h,
+	  src/openr2/r2hwcompat.h, src/openr2/r2log.h,
+	  src/openr2/r2proto-pvt.h, src/openr2/r2proto.h,
+	  src/openr2/r2utils.h, src/r2chan.c, src/r2context.c,
+	  src/r2proto.c, src/r2test.c: Added
+	  openr2_chan_accept_call_with_mode and OR2_LIB_* macros for users
+	  to detect version on compile time
+
+2009-03-12 15:33  moises.silva
+
+	* src/r2proto.c: change schedule time for mf backward timeout to be
+	  done when setting the backward tone and not when getting the
+	  forward tone
+
 2009-03-03 03:36  moy
 
 	* src/r2context.c: make double answer to accept just enable >= 0
