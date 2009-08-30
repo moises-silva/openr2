@@ -795,7 +795,8 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		currtime = time(NULL);
 		if (openr2_ctime_r(&currtime, timestr)) {
 			timestr[strlen(timestr)-1] = 0; /* remove end of line */
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d\n", timestr, r2chan->number);
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d [openr2 version %s, revision %s]\n", 
+					timestr, r2chan->number, openr2_get_version(), openr2_get_revision());
 		} else {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get call starting time\n");
 		}
