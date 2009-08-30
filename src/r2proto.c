@@ -730,8 +730,8 @@ static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t
 	/* mute anything we may have */
 	MFI(r2chan)->mf_select_tone(r2chan->mf_write_handle, 0);
 	openr2_proto_set_idle(r2chan);
-	EMI(r2chan)->on_protocol_error(r2chan, reason);
 	fix_rx_signal(r2chan);
+	EMI(r2chan)->on_protocol_error(r2chan, reason);
 }
 
 static void open_logfile(openr2_chan_t *r2chan, int backward)
