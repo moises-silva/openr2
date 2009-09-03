@@ -379,6 +379,7 @@ typedef struct {
 	openr2_mf_tone_t international_subscriber;
 	openr2_mf_tone_t international_priority_subscriber;
 	openr2_mf_tone_t collect_call;
+	openr2_mf_tone_t test_equipment;
 } openr2_mf_g2_tones_t;
 
 const char *openr2_proto_get_rx_cas_string(struct openr2_chan_s *r2chan);
