@@ -557,7 +557,7 @@ int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, i
 	if (dtmf_off) {
 		*dtmf_off = r2context->dtmf_off;
 	}	
-	return r2context->dtmf_on;
+	return r2context->dial_with_dtmf;
 }
 
 OR2_EXPORT_SYMBOL
