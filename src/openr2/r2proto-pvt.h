@@ -148,8 +148,9 @@ typedef enum {
 	OR2_MF_GII,
 	OR2_MF_GIII,
 
-	OR2_MF_DTMF_FWD_INIT
-	/* possible DTMF forward groups */
+	/* possible DTMF groups */
+	OR2_MF_DTMF_FWD_INIT,
+	OR2_MF_DTMF_BACK_INIT
 } openr2_mf_group_t;
 
 /* possible backward MF states */
@@ -209,8 +210,12 @@ typedef enum {
 	/* Backward still not supported :-( */
 
 	/* Forward DTMF states */
+
 	/* We're dialing DTMF */
-	OR2_MF_DIALING_DTMF = 500
+	OR2_MF_DIALING_DTMF = 500,
+
+	/* We're detecting DTMF */
+	OR2_MF_DETECTING_DTMF = 501
 } openr2_mf_state_t;
 
 /* R2 state machine */

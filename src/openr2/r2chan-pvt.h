@@ -180,14 +180,19 @@ typedef struct openr2_chan_s {
 	/* MF tone detection handle */
 	void *mf_read_handle;
 
-	/* DTMF tone generation handle */
+	/* DTMF rx and tx handle */
 	void *dtmf_write_handle;
+	void *dtmf_read_handle;
 
-	/* whether or not we are in the middle of dialing DTMF */
+	/* whether or not we are in the middle of dialing or detecting DTMF */
 	int dialing_dtmf;
+	int detecting_dtmf;
 
 	/* default DTMF tone generation handle */
 	openr2_dtmf_tx_state_t default_dtmf_write_handle;
+
+	/* default DTMF tone reception handle */
+	openr2_dtmf_rx_state_t default_dtmf_read_handle;
 
 	/* default MF tone generation handle */
 	openr2_mf_tx_state_t default_mf_write_handle;

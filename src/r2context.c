@@ -182,7 +182,13 @@ static openr2_dtmf_interface_t default_dtmf_engine = {
 	.dtmf_tx_init = (openr2_dtmf_tx_init_func)openr2_dtmf_tx_init,
 	.dtmf_tx_set_timing = (openr2_dtmf_tx_set_timing_func)openr2_dtmf_tx_set_timing,
 	.dtmf_tx_put = (openr2_dtmf_tx_put_func)openr2_dtmf_tx_put,
-	.dtmf_tx = (openr2_dtmf_tx_func)openr2_dtmf_tx
+	.dtmf_tx = (openr2_dtmf_tx_func)openr2_dtmf_tx,
+
+	.dtmf_rx_init = (openr2_dtmf_rx_init_func)openr2_dtmf_rx_init,
+	.dtmf_rx_set_parms = (openr2_dtmf_rx_set_parms_func)openr2_dtmf_rx_parms,
+	.dtmf_rx_get = (openr2_dtmf_rx_get_func)openr2_dtmf_rx_get,
+	.dtmf_rx_status = (openr2_dtmf_rx_status_func)openr2_dtmf_rx_status,
+	.dtmf_rx = (openr2_dtmf_rx_func)openr2_dtmf_rx
 };
 
 OR2_EXPORT_SYMBOL
@@ -307,6 +313,8 @@ int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_i
 		r2context->dtmfeng = &default_dtmf_engine;
 		return 0;
 	}
+
+	/* check dtmf transmitter implementation */
 	if (!dtmf_interface->dtmf_tx_init) {
 		return -1;
 	}
@@ -319,6 +327,25 @@ int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_i
 	if (!dtmf_interface->dtmf_tx) {
 		return -1;
 	}
+
+	/* check dtmf transmitter implementation */
+	if (!dtmf_interface->dtmf_rx_init) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_rx_set_parms) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_rx_get) {
+		return -1;
+	}
+	if (!dtmf_interface->dtmf_rx_status) {
+		return -1;
+	}
+
+	if (!dtmf_interface->dtmf_rx) {
+		return -1;
+	}
+
 	r2context->dtmfeng = dtmf_interface;
 	return 0;
 }

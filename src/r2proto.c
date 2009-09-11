@@ -54,6 +54,8 @@
 
 #define TIMER(r2chan) (r2chan)->r2context->timers
 
+#define USE_DTMFR2(r2chan) (r2chan)->r2context->dial_with_dtmf
+
 /* Note that we compare >= because even if max_dnis is zero
    we could get 1 digit, want it or not :-) */
 #define DNIS_COMPLETE(r2chan) ((r2chan)->dnis_len >= (r2chan)->r2context->max_dnis)
@@ -782,6 +784,11 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		}
 	}
 }
+static void on_dtmf_received(void *user_data, const char *digits, int len)
+{
+	openr2_chan_t *r2chan = user_data;
+	openr2_log(r2chan, OR2_LOG_NOTICE, "Got digits %s\n", digits);
+}
 
 static void handle_incoming_call(openr2_chan_t *r2chan)
 {
@@ -789,28 +796,38 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	if (r2chan->call_files) {
 		open_logfile(r2chan, 1);
 	}
-	/* we have received the line seize, we expect the first MF tone. 
-	   let's init our MF engine, if we fail initing the MF engine
-	   there is no point sending the seize ack, lets ignore the
-	   call, the other end should timeout anyway */
-	if (!MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0)) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF writer\n");
-		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
-		return;
-	}
-	if (!MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1)) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF reader\n");
-		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
-		return;
-	}
-	if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
-		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
-		return;
+	if (!USE_DTMFR2(r2chan)) {
+		/* we have received the line seize, we expect the first MF tone. 
+		   let's init our MF engine, if we fail initing the MF engine
+		   there is no point sending the seize ack, lets ignore the
+		   call, the other end should timeout anyway */
+		if (!MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF writer\n");
+			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+			return;
+		}
+		if (!MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF reader\n");
+			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+			return;
+		}
+		if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
+			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+			return;
+		}
+		r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
+		r2chan->mf_group = OR2_MF_BACK_INIT;
+	} else {
+		if (!DTMF(r2chan)->dtmf_rx_init(r2chan->dtmf_read_handle, on_dtmf_received, r2chan)) {
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
+			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+			return;
+		}
+		r2chan->mf_group = OR2_MF_DTMF_BACK_INIT;
+		r2chan->mf_state = OR2_MF_DETECTING_DTMF;
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
-	r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
-	r2chan->mf_group = OR2_MF_BACK_INIT;
 	r2chan->direction = OR2_DIR_BACKWARD;
 	/* notify the user that a new call is starting to arrive */
 	EMI(r2chan)->on_call_init(r2chan);
