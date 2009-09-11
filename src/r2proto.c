@@ -144,6 +144,7 @@ static void r2config_mexico(openr2_context_t *r2context)
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_1;
 	r2context->mf_gc_tones.request_change_to_g2 = OR2_MF_TONE_3;
 	r2context->mf_gc_tones.request_next_dnis_digit_and_change_to_ga = OR2_MF_TONE_5;
+	r2context->mf_gc_tones.network_congestion = OR2_MF_TONE_4;
 	
 	/* Mexico has no signal when running out of DNIS, 
 	   timeout is used instead*/
@@ -411,6 +412,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gc_tones.request_next_ani_digit = OR2_MF_TONE_INVALID;
 	r2context->mf_gc_tones.request_change_to_g2 = OR2_MF_TONE_INVALID;
 	r2context->mf_gc_tones.request_next_dnis_digit_and_change_to_ga = OR2_MF_TONE_INVALID;
+	r2context->mf_gc_tones.network_congestion = OR2_MF_TONE_INVALID;
 
 	/* Group I tones. Attend requests of Group A  */
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_15;
@@ -2078,6 +2080,9 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga) {
 		r2chan->mf_group = OR2_MF_GI;
 		mf_send_dnis(r2chan, 1);
+	} else if (tone == GC_TONE(r2chan).network_congestion) {
+		r2chan->r2_state = OR2_CLEAR_BACK_TONE_RXD;
+		report_call_disconnection(r2chan, OR2_CAUSE_NETWORK_CONGESTION);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
