@@ -365,6 +365,8 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	/* this was 10000 but someone from mx reported that Telmex needs more time in international calls */
 	r2context->timers.mf_fwd_safety = 30000;
 
+	/* Added to work around bug */
+	r2context->timers.r2_clear_fwd_safety = 3000;
 	r2context->timers.r2_seize = 8000;
 	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
@@ -2401,11 +2403,19 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 	prepare_mf_tone(r2chan, tone);
 }
 
+static void clear_fwd_safety_expired(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	openr2_log(r2chan, OR2_LOG_ERROR, "We sent clear forward but never got clear back!, going to idle anyways ...\n");
+	handle_protocol_error(r2chan, OR2_FWD_SAFETY_TIMEOUT);
+}
+
 static int send_clear_forward(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	r2chan->r2_state = OR2_CLEAR_FWD_TXD;
 	turn_off_mf_engine(r2chan);
+	r2chan->timer_ids.r2_clear_fwd_safety = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_clear_fwd_safety, clear_fwd_safety_expired, "r2_clear_fwd_safety");
 	return set_cas_signal(r2chan, OR2_CAS_CLEAR_FORWARD);
 }
 

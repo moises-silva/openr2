@@ -49,14 +49,15 @@ typedef struct {
 	int id;
 } openr2_sched_timer_t;
 
+/* ID container for scheduled timers */
 typedef struct openr2_chan_timer_ids_s {
 	/* Forward safety timer id */
 	int mf_fwd_safety;
 
-	/* Seize timer id */
+	/* Seize timer */
 	int r2_seize;
 
-	/* Answer timer id */
+	/* Answer timer */
 	int r2_answer;
 
 	/* metering pulse timer */
@@ -74,6 +75,9 @@ typedef struct openr2_chan_timer_ids_s {
 	/* small delay before answering to give some time
 	   to the other end to detect our tone off condition */
 	int r2_answer_delay;
+
+	/* How much time to wait for Clear back after sending Clear Forward */
+	int r2_clear_fwd_safety;
 
 	/* CAS persistence check */
 	int cas_persistence_check;

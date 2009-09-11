@@ -46,6 +46,8 @@ typedef struct {
 	int mf_back_resume_cycle;
 	/* Safety FORWARD timer */
 	int mf_fwd_safety;
+	/* How much time to wait for Clear back after sending Clear Forward */
+	int r2_clear_fwd_safety;
 	/* How much time do we wait for a response to our seize signal */
 	int r2_seize;
 	/* How much to wait for an answer once the call has been accepted */
