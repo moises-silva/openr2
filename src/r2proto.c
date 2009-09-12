@@ -831,7 +831,9 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		}
 		r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
 		r2chan->mf_group = OR2_MF_BACK_INIT;
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Initialized R2 MF detector\n");
 	} else {
+		/* DTMF R2, init the DTMF detector to get DNIS */
 		if (!DTMF(r2chan)->dtmf_rx_init(r2chan->dtmf_read_handle, on_dtmf_received, r2chan)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
 			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
@@ -840,6 +842,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		r2chan->mf_group = OR2_MF_DTMF_BACK_INIT;
 		r2chan->mf_state = OR2_MF_DETECTING_DTMF;
 		r2chan->detecting_dtmf = 1;
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Initialized R2 DTMF detector\n");
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
 	r2chan->direction = OR2_DIR_BACKWARD;
