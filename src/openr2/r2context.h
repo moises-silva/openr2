@@ -227,6 +227,8 @@ int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
 int openr2_context_get_double_answer(openr2_context_t *r2context);
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
+void openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable);
+int openr2_context_get_dtmf_detection(openr2_context_t *r2context);
 void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off);
 int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off);
 int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface);

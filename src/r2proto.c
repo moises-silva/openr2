@@ -54,7 +54,8 @@
 
 #define TIMER(r2chan) (r2chan)->r2context->timers
 
-#define USE_DTMFR2(r2chan) (r2chan)->r2context->dial_with_dtmf
+#define DIAL_DTMF(r2chan) (r2chan)->r2context->dial_with_dtmf
+#define DETECT_DTMF(r2chan) (r2chan)->r2context->detect_dtmf
 
 /* Note that we compare >= because even if max_dnis is zero
    we could get 1 digit, want it or not :-) */
@@ -812,7 +813,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	if (r2chan->call_files) {
 		open_logfile(r2chan, 1);
 	}
-	if (!USE_DTMFR2(r2chan)) {
+	if (!DETECT_DTMF(r2chan)) {
 		/* we have received the line seize, we expect the first MF tone. 
 		   let's init our MF engine, if we fail initing the MF engine
 		   there is no point sending the seize ack, lets ignore the
@@ -824,11 +825,6 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		}
 		if (!MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to init MF reader\n");
-			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
-			return;
-		}
-		if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
-			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
 			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 			return;
 		}
@@ -845,6 +841,11 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
 	r2chan->direction = OR2_DIR_BACKWARD;
+	if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
+		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+		return;
+	}
 	/* notify the user that a new call is starting to arrive */
 	EMI(r2chan)->on_call_init(r2chan);
 }
@@ -1134,7 +1135,7 @@ handlecas:
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_seize);
 			r2chan->r2_state = OR2_SEIZE_ACK_RXD;
 			/* check if this is DTMF R2 */
-			if (!r2chan->r2context->dial_with_dtmf) {
+			if (!DIAL_DTMF(r2chan)) {
 				/* Handle seize ack for MFC R2 
 				 * When the other side send us the seize ack, MF tones
 				 * can start, we start transmitting DNIS 
@@ -1200,7 +1201,7 @@ handlecas:
 		/* In MFC-R2 This state means we're during call setup (ANI/DNIS transmission) and the ACCEPT signal
 		   has not been received, which requires some special handling, read below for more info ...
 		   For DTMF R2 this is normal, during seize ack we just wait answer (or may be also disconnection?)  */
-		if (!r2chan->r2context->dial_with_dtmf && cas == R2(r2chan, ANSWER)) {
+		if (!DIAL_DTMF(r2chan) && cas == R2(r2chan, ANSWER)) {
 			openr2_log(r2chan, OR2_LOG_DEBUG, "Answer before accept detected!\n");
 			/* sometimes, since CAS signaling is faster than MF detectors we
 			   may receive the ANSWER signal before actually receiving the
@@ -2325,7 +2326,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	r2chan->call_state = OR2_CALL_DIALING;
 	r2chan->direction = OR2_DIR_FORWARD;
 	r2chan->caller_category = category2tone(r2chan, category);
-	if (!r2chan->r2context->dial_with_dtmf) {
+	if (!DIAL_DTMF(r2chan)) {
 		r2chan->mf_group = OR2_MF_FWD_INIT;
 	} else {
 		if (!DTMF(r2chan)->dtmf_tx_init(r2chan->dtmf_write_handle)) {
@@ -2449,7 +2450,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 		 * DTMF call clear down is simply going to IDLE (which happens to be the same as clear forward)
 		 * however for the sake of clarity we send clear forward and wait 100ms before reporting call end
 		 */
-		if (r2chan->r2context->dial_with_dtmf) {
+		if (DIAL_DTMF(r2chan)) {
 			/* TODO: is it worth to configure this timer? */
 			openr2_chan_add_timer(r2chan, 100, dtmf_r2_set_call_down, "dtmf_r2_set_call_down");
 		} 
