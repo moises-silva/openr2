@@ -384,11 +384,8 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 				EMI(r2chan)->on_os_error(r2chan, myerrno);
 				return -1;
 			}
-			if (r2chan->detecting_dtmf) {
-				res = DTMF(r2chan)->dtmf_rx(r2chan->dtmf_write_handle, tone_buf, r2chan->zap_buf_size);
-			} 
-			/* if the MF detector is enabled, we are supposed to detect tones */
-			else if (r2chan->mf_state != OR2_MF_OFF_STATE) {
+			/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
+			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
 				/* assuming ALAW codec */
 				for (i = 0; i < res; i++) {
 					tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
@@ -396,10 +393,16 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 #ifdef OR2_MF_DEBUG	
 				write(r2chan->mf_read_fd, tone_buf, res*2);
 #endif
-				tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
-				if ( tone_result != -1 ) {
-					openr2_proto_handle_mf_tone(r2chan, tone_result);
-				} 
+				if (r2chan->detecting_dtmf) {
+					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_write_handle, tone_buf, res);
+					// check here the dtmf detection status and after n reads without detection
+					// call openr2_proto_handle_dtmf_detection_end
+				} else {
+					tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
+					if ( tone_result != -1 ) {
+						openr2_proto_handle_mf_tone(r2chan, tone_result);
+					} 
+				}
 			} else if (r2chan->answered) {
 				EMI(r2chan)->on_call_read(r2chan, read_buf, res);
 			}

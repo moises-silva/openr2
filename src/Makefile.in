@@ -41,7 +41,8 @@ host_triplet = @host@
 @WANT_OR2_TRACE_STACKS_TRUE@am__append_1 = -DOR2_TRACE_STACKS
 @HAVE_SVNVERSION_TRUE@am__append_2 = -DREVISION=\"$(shell svnversion -n .)\"
 @HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@am__append_3 = -fvisibility=hidden
-@WANT_R2TEST_TRUE@bin_PROGRAMS = r2test$(EXEEXT)
+@WANT_R2TEST_TRUE@bin_PROGRAMS = r2test$(EXEEXT) \
+@WANT_R2TEST_TRUE@	r2dtmf_detect$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(nobase_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -70,6 +71,10 @@ am_libopenr2_la_OBJECTS = libopenr2_la-r2chan.lo \
 libopenr2_la_OBJECTS = $(am_libopenr2_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am__r2dtmf_detect_SOURCES_DIST = r2dtmf_detect.c
+@WANT_R2TEST_TRUE@am_r2dtmf_detect_OBJECTS = r2dtmf_detect.$(OBJEXT)
+r2dtmf_detect_OBJECTS = $(am_r2dtmf_detect_OBJECTS)
+@WANT_R2TEST_TRUE@r2dtmf_detect_DEPENDENCIES = libopenr2.la
 am__r2test_SOURCES_DIST = r2test.c
 @WANT_R2TEST_TRUE@am_r2test_OBJECTS = r2test-r2test.$(OBJEXT)
 r2test_OBJECTS = $(am_r2test_OBJECTS)
@@ -85,8 +90,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libopenr2_la_SOURCES) $(r2test_SOURCES)
-DIST_SOURCES = $(libopenr2_la_SOURCES) $(am__r2test_SOURCES_DIST)
+SOURCES = $(libopenr2_la_SOURCES) $(r2dtmf_detect_SOURCES) \
+	$(r2test_SOURCES)
+DIST_SOURCES = $(libopenr2_la_SOURCES) \
+	$(am__r2dtmf_detect_SOURCES_DIST) $(am__r2test_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 nobase_includeHEADERS_INSTALL = $(install_sh_DATA)
 HEADERS = $(include_HEADERS) $(nobase_include_HEADERS)
@@ -122,7 +129,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GREP = @GREP@
 HAVE_ATTR_VISIBILITY_HIDDEN_FALSE = @HAVE_ATTR_VISIBILITY_HIDDEN_FALSE@
 HAVE_ATTR_VISIBILITY_HIDDEN_TRUE = @HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@
 HAVE_SVNVERSION_FALSE = @HAVE_SVNVERSION_FALSE@
@@ -159,9 +165,12 @@ WANT_OR2_TRACE_STACKS_FALSE = @WANT_OR2_TRACE_STACKS_FALSE@
 WANT_OR2_TRACE_STACKS_TRUE = @WANT_OR2_TRACE_STACKS_TRUE@
 WANT_R2TEST_FALSE = @WANT_R2TEST_FALSE@
 WANT_R2TEST_TRUE = @WANT_R2TEST_TRUE@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -178,30 +187,23 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 svnversioncommand = @svnversioncommand@
@@ -225,6 +227,9 @@ libopenr2_la_LDFLAGS = -lm -lpthread -version-info @OPENR2_LT_CURRENT@:@OPENR2_L
 @WANT_R2TEST_TRUE@r2test_SOURCES = r2test.c 
 @WANT_R2TEST_TRUE@r2test_LDADD = -lpthread libopenr2.la
 @WANT_R2TEST_TRUE@r2test_CFLAGS = $(AM_CFLAGS)
+@WANT_R2TEST_TRUE@r2dtmf_detect_SOURCES = r2dtmf_detect.c 
+@WANT_R2TEST_TRUE@r2dtmf_detect_LDADD = -lpthread libopenr2.la
+@WANT_R2TEST_TRUE@r2dtmf_detect_test_CFLAGS = $(AM_CFLAGS)
 INCLUDES = -Iopenr2
 all: all-am
 
@@ -316,6 +321,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+r2dtmf_detect$(EXEEXT): $(r2dtmf_detect_OBJECTS) $(r2dtmf_detect_DEPENDENCIES) 
+	@rm -f r2dtmf_detect$(EXEEXT)
+	$(LINK) $(r2dtmf_detect_LDFLAGS) $(r2dtmf_detect_OBJECTS) $(r2dtmf_detect_LDADD) $(LIBS)
 r2test$(EXEEXT): $(r2test_OBJECTS) $(r2test_DEPENDENCIES) 
 	@rm -f r2test$(EXEEXT)
 	$(LINK) $(r2test_LDFLAGS) $(r2test_OBJECTS) $(r2test_LDADD) $(LIBS)
@@ -333,6 +341,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2proto.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r2dtmf_detect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r2test-r2test.Po@am__quote@
 
 .c.o:

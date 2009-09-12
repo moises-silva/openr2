@@ -285,6 +285,7 @@ static void turn_off_mf_engine(openr2_chan_t *r2chan)
 
 	/* this is not needed for MFC R2 mf engine, but does not hurt either */
 	r2chan->dialing_dtmf = 0;
+	r2chan->detecting_dtmf = 0;
 
 	/* set the MF state to OFF */
 	r2chan->mf_state = OR2_MF_OFF_STATE;
@@ -838,6 +839,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		}
 		r2chan->mf_group = OR2_MF_DTMF_BACK_INIT;
 		r2chan->mf_state = OR2_MF_DETECTING_DTMF;
+		r2chan->detecting_dtmf = 1;
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
 	r2chan->direction = OR2_DIR_BACKWARD;

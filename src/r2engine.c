@@ -33,6 +33,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <math.h>
+#include "openr2/r2utils-pvt.h"
 #include "openr2/r2engine.h"
 #include "openr2/fast_convert.h"
 
@@ -2798,6 +2799,7 @@ int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
     return len;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
 {
     float row_energy[4];
@@ -2979,6 +2981,7 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
     return 0;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s)
 {
     if (s->in_digit)
@@ -2988,6 +2991,7 @@ int openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s)
     return 0;
 }
 
+OR2_EXPORT_SYMBOL
 size_t openr2_dtmf_rx_get(openr2_dtmf_rx_state_t *s, char *buf, int max)
 {
     if (max > s->current_digits)
@@ -3002,6 +3006,7 @@ size_t openr2_dtmf_rx_get(openr2_dtmf_rx_state_t *s, char *buf, int max)
     return  max;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_dtmf_rx_parms(openr2_dtmf_rx_state_t *s,
                                  int filter_dialtone,
                                  int twist,
@@ -3030,6 +3035,7 @@ void openr2_dtmf_rx_parms(openr2_dtmf_rx_state_t *s,
 }
 /*- End of function --------------------------------------------------------*/
 
+OR2_EXPORT_SYMBOL
 openr2_dtmf_rx_state_t * openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
                                       openr2_digits_rx_callback_t callback,
                                       void *user_data)
