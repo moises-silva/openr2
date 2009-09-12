@@ -784,10 +784,26 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		}
 	}
 }
+
 static void on_dtmf_received(void *user_data, const char *digits, int len)
 {
+	const char *digit = NULL;
 	openr2_chan_t *r2chan = user_data;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Got digits %s\n", digits);
+	if (!digits) {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Wow! DTMF detector gave us null digits of len %d\n", len);
+		return;
+	}
+	openr2_log(r2chan, OR2_LOG_NOTICE, "Got digits %s of len %d\n", digits, len);
+	/* since we always read in 20ms chunks I dont think we can get more than 1 digit in a single chunk, may be even 2 chunks or more
+	   are required to detect a single dtmf digit, but lets assume more than one can be received and use memcpy to save the digits */
+	digit = digits;
+	/* check both len and digits to be more bug-safe from the DTMF detector implementation */
+	while (len && *digit) {
+		r2chan->dnis[r2chan->dnis_len++] = *digit;
+		r2chan->dnis[r2chan->dnis_len] = '\0';
+		digit++;
+		len--;
+	}
 }
 
 static void handle_incoming_call(openr2_chan_t *r2chan)
@@ -1577,9 +1593,13 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 	OR2_CHAN_STACK;
 	int rc;
 	if (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Getting DNIS digit %c\n", tone);
-		r2chan->dnis[r2chan->dnis_len++] = tone;
-		r2chan->dnis[r2chan->dnis_len] = '\0';
+		if (r2chan->dnis_len == STR_LEN(r2chan->dnis)){
+			openr2_log(r2chan, OR2_LOG_WARNING, "Dropping DNIS digit %c, exceeded max DNIS length of %d\n", tone, STR_LEN(r2chan->dnis));
+		} else {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Getting DNIS digit %c\n", tone);
+			r2chan->dnis[r2chan->dnis_len++] = tone;
+			r2chan->dnis[r2chan->dnis_len] = '\0';
+		}
 		openr2_log(r2chan, OR2_LOG_DEBUG, "DNIS so far: %s, expected length: %d\n", r2chan->dnis, r2chan->r2context->max_dnis);
 		rc = EMI(r2chan)->on_dnis_digit_received(r2chan, tone);
 		if (DNIS_COMPLETE(r2chan) || !rc) {
