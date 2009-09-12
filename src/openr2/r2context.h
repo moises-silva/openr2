@@ -169,8 +169,6 @@ typedef int (*openr2_dtmf_tx_func)(void *dtmf_write_handle, int16_t amp[], int m
 /* DTMF receiver part of the openr2_dtmf_interface_t */
 typedef void (*openr2_digits_rx_callback_t)(void *user_data, const char *digits, int len);
 typedef void *(*openr2_dtmf_rx_init_func)(void *dtmf_read_handle, openr2_digits_rx_callback_t callback, void *user_data);
-typedef void (*openr2_dtmf_rx_set_parms_func)(void *dtmf_read_handle, int filter_dialtone, int twist, int reverse_twist, int threshold);
-typedef size_t (*openr2_dtmf_rx_get_func)(void *dtmf_read_handle, char *digits, int max);
 typedef int (*openr2_dtmf_rx_status_func)(void *dtmf_read_handle);
 typedef int (*openr2_dtmf_rx_func)(void *dtmf_read_handle, const int16_t amp[], int samples);
 
@@ -183,8 +181,6 @@ typedef struct {
 
 	/* DTMF Detector */
 	openr2_dtmf_rx_init_func dtmf_rx_init;
-	openr2_dtmf_rx_set_parms_func dtmf_rx_set_parms;
-	openr2_dtmf_rx_get_func dtmf_rx_get;
 	openr2_dtmf_rx_status_func dtmf_rx_status;
 	openr2_dtmf_rx_func dtmf_rx;
 } openr2_dtmf_interface_t;

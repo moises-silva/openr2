@@ -35,7 +35,6 @@
 #include <math.h>
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2engine.h"
-#include "openr2/fast_convert.h"
 
 #if !defined(M_PI)
 /* C99 systems may not define M_PI */
@@ -47,10 +46,7 @@
 #define FALSE 0
 #define TRUE (!FALSE)
 #define SAMPLE_RATE 8000
-
-/* This is based on A-law, but u-law is only 0.03dB different */
 #define DBM0_MAX_SINE_POWER     (3.14f)
-#define DBM0_MAX_POWER              (3.14f + 3.02f)
 
 /* Direct Digital Synthesis required for tone generation */
 static int32_t dds_phase_ratef(float frequency);
@@ -67,7 +63,6 @@ static void make_goertzel_descriptor(openr2_goertzel_descriptor_t *t, float freq
 static openr2_goertzel_state_t *goertzel_init(openr2_goertzel_state_t *s, openr2_goertzel_descriptor_t *t);
 static void goertzel_reset(openr2_goertzel_state_t *s);
 static float goertzel_result(openr2_goertzel_state_t *s);
-#define goertzel_preadjust_amp(amp) ((float) amp)
 
 typedef struct
 {
@@ -439,14 +434,6 @@ static void goertzel_reset(openr2_goertzel_state_t *s)
     s->v2 =
     s->v3 = 0.0;
     s->current_sample = 0;
-}
-
-static inline void goertzel_samplex(openr2_goertzel_state_t *s, float amp)
-{
-    float v1;
-    v1 = s->v2;
-    s->v2 = s->v3;
-    s->v3 = s->fac*s->v2 - v1 + amp;
 }
 
 static float goertzel_result(openr2_goertzel_state_t *s)
@@ -2666,18 +2653,22 @@ static float dds_modf(uint32_t *phase_acc, int32_t phase_rate, float scale, int3
 
 /******* DTMF routines ********/
 
+/* Tx specs */
 #define DEFAULT_DTMF_TX_LEVEL       -10
 #define DEFAULT_DTMF_TX_ON_TIME     50
 #define DEFAULT_DTMF_TX_OFF_TIME    55
 
-#define DTMF_THRESHOLD              171032462.0f    /* -42dBm0 [((DTMF_SAMPLES_PER_BLOCK*32768.0/1.4142)*10^((-42 - DBM0_MAX_SINE_POWER)/20.0))^2 => 171032462.0] */
-#define DTMF_NORMAL_TWIST           6.309f          /* 8dB [10^(8/10) => 6.309] */
-#define DTMF_REVERSE_TWIST          2.512f          /* 4dB */
-#define DTMF_RELATIVE_PEAK_ROW      6.309f          /* 8dB */
-#define DTMF_RELATIVE_PEAK_COL      6.309f          /* 8dB */
-#define DTMF_TO_TOTAL_ENERGY        83.868f         /* -0.85dB [DTMF_SAMPLES_PER_BLOCK*10^(-0.85/10.0)] */
-#define DTMF_POWER_OFFSET           110.395f        /* 10*log(32768.0*32768.0*DTMF_SAMPLES_PER_BLOCK) */
-#define DTMF_SAMPLES_PER_BLOCK      102
+/* Rx specs */
+#define DTMF_THRESHOLD              8.0e7f
+#define DTMF_NORMAL_TWIST           6.3f    /* 8dB */
+#define DTMF_REVERSE_TWIST          2.5f    /* 4dB */
+#define DTMF_RELATIVE_PEAK_ROW      6.3f    /* 8dB */
+#define DTMF_RELATIVE_PEAK_COL      6.3f    /* 8dB */
+#define DTMF_TO_TOTAL_ENERGY        42.0f
+#define DTMF_POWER_OFFSET           90.30f
+
+/* This is based on A-law, but u-law is only 0.03dB different */
+#define DBM0_MAX_POWER          (3.14f + 3.02f)
 
 static const float dtmf_row[] =
 {
@@ -2688,10 +2679,9 @@ static const float dtmf_col[] =
     1209.0f, 1336.0f, 1477.0f, 1633.0f
 };
 
+static const char dtmf_positions[] = "123A" "456B" "789C" "*0#D";
 static openr2_goertzel_descriptor_t dtmf_detect_row[4];
 static openr2_goertzel_descriptor_t dtmf_detect_col[4];
-
-static const char dtmf_positions[] = "123A" "456B" "789C" "*0#D";
 
 static int dtmf_tx_inited = FALSE;
 static openr2_tone_gen_descriptor_t dtmf_digit_tones[16];
@@ -2722,12 +2712,14 @@ static void dtmf_tx_initialise(void)
     dtmf_tx_inited = TRUE;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist)
 {
     s->low_level = dds_scaling_dbm0f((float) level);
     s->high_level = dds_scaling_dbm0f((float) (level + twist));
 }
 
+OR2_EXPORT_SYMBOL
 openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
 {
     if (s == NULL)
@@ -2745,12 +2737,14 @@ openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
     return s;
 }
 
+OR2_EXPORT_SYMBOL
 void openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time)
 {
     s->on_time = ((on_time >= 0)  ?  on_time  :  DEFAULT_DTMF_TX_ON_TIME)*SAMPLE_RATE/1000;
     s->off_time = ((off_time >= 0)  ?  off_time  :  DEFAULT_DTMF_TX_OFF_TIME)*SAMPLE_RATE/1000;
 }
 
+OR2_EXPORT_SYMBOL
 size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len)
 {
     size_t space;
@@ -2770,6 +2764,7 @@ size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len
     return -1;
 }
 
+OR2_EXPORT_SYMBOL
 int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
 {
     int len;
@@ -2800,11 +2795,56 @@ int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
 }
 
 OR2_EXPORT_SYMBOL
+openr2_dtmf_rx_state_t *openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
+                              openr2_digits_rx_callback_t callback,
+                              void *user_data)
+{
+    int i;
+    static int initialised = FALSE;
+
+    if (s == NULL)
+    {
+        if ((s = (openr2_dtmf_rx_state_t *) malloc(sizeof (*s))) == NULL)
+            return  NULL;
+    }
+    s->digits_callback = callback;
+    s->digits_callback_data = user_data;
+    s->realtime_callback = NULL;
+    s->realtime_callback_data = NULL;
+    s->filter_dialtone = FALSE;
+    s->normal_twist = DTMF_NORMAL_TWIST;
+    s->reverse_twist = DTMF_REVERSE_TWIST;
+
+    s->in_digit = 0;
+    s->last_hit = 0;
+
+    if (!initialised)
+    {
+        for (i = 0;  i < 4;  i++)
+        {
+            make_goertzel_descriptor(&dtmf_detect_row[i], dtmf_row[i], 102);
+            make_goertzel_descriptor(&dtmf_detect_col[i], dtmf_col[i], 102);
+        }
+        initialised = TRUE;
+    }
+    for (i = 0;  i < 4;  i++)
+    {
+        goertzel_init(&s->row_out[i], &dtmf_detect_row[i]);
+        goertzel_init(&s->col_out[i], &dtmf_detect_col[i]);
+    }
+    s->energy = 0.0f;
+    s->current_sample = 0;
+    s->lost_digits = 0;
+    s->current_digits = 0;
+    s->digits[0] = '\0';
+    return s;
+}
+
+OR2_EXPORT_SYMBOL
 int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
 {
     float row_energy[4];
     float col_energy[4];
-    float xamp;
     float famp;
     float v1;
     int i;
@@ -2819,18 +2859,17 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
     for (sample = 0;  sample < samples;  sample = limit)
     {
         /* The block length is optimised to meet the DTMF specs. */
-        if ((samples - sample) >= (DTMF_SAMPLES_PER_BLOCK - s->current_sample))
-            limit = sample + (DTMF_SAMPLES_PER_BLOCK - s->current_sample);
+        if ((samples - sample) >= (102 - s->current_sample))
+            limit = sample + (102 - s->current_sample);
         else
             limit = samples;
         /* The following unrolled loop takes only 35% (rough estimate) of the 
            time of a rolled loop on the machine on which it was developed */
         for (j = sample;  j < limit;  j++)
         {
-            xamp = amp[j];
+            famp = amp[j];
             if (s->filter_dialtone)
             {
-                famp = xamp;
                 /* Sharp notches applied at 350Hz and 440Hz - the two common dialtone frequencies.
                    These are rather high Q, to achieve the required narrowness, without using lots of
                    sections. */
@@ -2843,21 +2882,44 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
                 famp = v1 - 1.8819938f*s->z440[0] + s->z440[1];
                 s->z440[1] = s->z440[0];
                 s->z440[0] = v1;
-                xamp = famp;
             }
-            xamp = goertzel_preadjust_amp(xamp);
-            s->energy += xamp*xamp;
-            goertzel_samplex(&s->row_out[0], xamp);
-            goertzel_samplex(&s->col_out[0], xamp);
-            goertzel_samplex(&s->row_out[1], xamp);
-            goertzel_samplex(&s->col_out[1], xamp);
-            goertzel_samplex(&s->row_out[2], xamp);
-            goertzel_samplex(&s->col_out[2], xamp);
-            goertzel_samplex(&s->row_out[3], xamp);
-            goertzel_samplex(&s->col_out[3], xamp);
+            s->energy += famp*famp;
+            /* With GCC 2.95, the following unrolled code seems to take about 35%
+               (rough estimate) as long as a neat little 0-3 loop */
+            v1 = s->row_out[0].v2;
+            s->row_out[0].v2 = s->row_out[0].v3;
+            s->row_out[0].v3 = s->row_out[0].fac*s->row_out[0].v2 - v1 + famp;
+
+            v1 = s->col_out[0].v2;
+            s->col_out[0].v2 = s->col_out[0].v3;
+            s->col_out[0].v3 = s->col_out[0].fac*s->col_out[0].v2 - v1 + famp;
+
+            v1 = s->row_out[1].v2;
+            s->row_out[1].v2 = s->row_out[1].v3;
+            s->row_out[1].v3 = s->row_out[1].fac*s->row_out[1].v2 - v1 + famp;
+
+            v1 = s->col_out[1].v2;
+            s->col_out[1].v2 = s->col_out[1].v3;
+            s->col_out[1].v3 = s->col_out[1].fac*s->col_out[1].v2 - v1 + famp;
+
+            v1 = s->row_out[2].v2;
+            s->row_out[2].v2 = s->row_out[2].v3;
+            s->row_out[2].v3 = s->row_out[2].fac*s->row_out[2].v2 - v1 + famp;
+
+            v1 = s->col_out[2].v2;
+            s->col_out[2].v2 = s->col_out[2].v3;
+            s->col_out[2].v3 = s->col_out[2].fac*s->col_out[2].v2 - v1 + famp;
+
+            v1 = s->row_out[3].v2;
+            s->row_out[3].v2 = s->row_out[3].v3;
+            s->row_out[3].v3 = s->row_out[3].fac*s->row_out[3].v2 - v1 + famp;
+
+            v1 = s->col_out[3].v2;
+            s->col_out[3].v2 = s->col_out[3].v3;
+            s->col_out[3].v3 = s->col_out[3].fac*s->col_out[3].v2 - v1 + famp;
         }
         s->current_sample += (limit - sample);
-        if (s->current_sample < DTMF_SAMPLES_PER_BLOCK)
+        if (s->current_sample < 102)
             continue;
 
         /* We are at the end of a DTMF detection block */
@@ -2866,6 +2928,7 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
         best_row = 0;
         col_energy[0] = goertzel_result(&s->col_out[0]);
         best_col = 0;
+
         for (i = 1;  i < 4;  i++)
         {
             row_energy[i] = goertzel_result(&s->row_out[i]);
@@ -2877,9 +2940,9 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
         }
         hit = 0;
         /* Basic signal level test and the twist test */
-        if (row_energy[best_row] >= s->threshold
+        if (row_energy[best_row] >= DTMF_THRESHOLD
             &&
-            col_energy[best_col] >= s->threshold
+            col_energy[best_col] >= DTMF_THRESHOLD
             &&
             col_energy[best_col] < row_energy[best_row]*s->reverse_twist
             &&
@@ -2941,7 +3004,7 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
                     /* Avoid reporting multiple no digit conditions on flaky hits */
                     if (s->in_digit  ||  hit)
                     {
-                        i = (s->in_digit  &&  !hit)  ?  -99  :  lfastrintf(log10f(s->energy)*10.0f - DTMF_POWER_OFFSET + DBM0_MAX_POWER);
+                        i = (s->in_digit  &&  !hit)  ?  -99  :  rintf(log10f(s->energy)*10.0f - 20.08f - DTMF_POWER_OFFSET + DBM0_MAX_POWER);
                         s->realtime_callback(s->realtime_callback_data, hit, i, 0);
                     }
                 }
@@ -2969,6 +3032,12 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
             }
         }
         s->last_hit = hit;
+        /* Reinitialise the detector for the next block */
+        for (i = 0;  i < 4;  i++)
+        {
+            goertzel_reset(&s->row_out[i]);
+            goertzel_reset(&s->col_out[i]);
+        }
         s->energy = 0.0f;
         s->current_sample = 0;
     }
@@ -2989,96 +3058,5 @@ int openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s)
     if (s->last_hit)
         return 'x';
     return 0;
-}
-
-OR2_EXPORT_SYMBOL
-size_t openr2_dtmf_rx_get(openr2_dtmf_rx_state_t *s, char *buf, int max)
-{
-    if (max > s->current_digits)
-        max = s->current_digits;
-    if (max > 0)
-    {
-        memcpy(buf, s->digits, max);
-        memmove(s->digits, s->digits + max, s->current_digits - max);
-        s->current_digits -= max;
-    }
-    buf[max] = '\0';
-    return  max;
-}
-
-OR2_EXPORT_SYMBOL
-void openr2_dtmf_rx_parms(openr2_dtmf_rx_state_t *s,
-                                 int filter_dialtone,
-                                 int twist,
-                                 int reverse_twist,
-                                 int threshold)
-{
-    float x;
-
-    if (filter_dialtone >= 0)
-    {
-        s->z350[0] = 0.0f;
-        s->z350[1] = 0.0f;
-        s->z440[0] = 0.0f;
-        s->z440[1] = 0.0f;
-        s->filter_dialtone = filter_dialtone;
-    }
-    if (twist >= 0)
-        s->normal_twist = powf(10.0f, twist/10.0f);
-    if (reverse_twist >= 0)
-        s->reverse_twist = powf(10.0f, reverse_twist/10.0f);
-    if (threshold > -99)
-    {
-        x = (DTMF_SAMPLES_PER_BLOCK*32768.0f/1.4142f)*powf(10.0f, (threshold - DBM0_MAX_SINE_POWER)/20.0f);
-        s->threshold = x*x;
-    }
-}
-/*- End of function --------------------------------------------------------*/
-
-OR2_EXPORT_SYMBOL
-openr2_dtmf_rx_state_t * openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
-                                      openr2_digits_rx_callback_t callback,
-                                      void *user_data)
-{
-    int i;
-    static int initialised = FALSE;
-
-    if (s == NULL)
-    {
-        if ((s = (openr2_dtmf_rx_state_t *) malloc(sizeof (*s))) == NULL)
-            return  NULL;
-    }
-    s->digits_callback = callback;
-    s->digits_callback_data = user_data;
-    s->realtime_callback = NULL;
-    s->realtime_callback_data = NULL;
-    s->filter_dialtone = FALSE;
-    s->normal_twist = DTMF_NORMAL_TWIST;
-    s->reverse_twist = DTMF_REVERSE_TWIST;
-    s->threshold = DTMF_THRESHOLD;
-
-    s->in_digit = 0;
-    s->last_hit = 0;
-
-    if (!initialised)
-    {
-        for (i = 0;  i < 4;  i++)
-        {
-            make_goertzel_descriptor(&dtmf_detect_row[i], dtmf_row[i], DTMF_SAMPLES_PER_BLOCK);
-            make_goertzel_descriptor(&dtmf_detect_col[i], dtmf_col[i], DTMF_SAMPLES_PER_BLOCK);
-        }
-        initialised = TRUE;
-    }
-    for (i = 0;  i < 4;  i++)
-    {
-        goertzel_init(&s->row_out[i], &dtmf_detect_row[i]);
-        goertzel_init(&s->col_out[i], &dtmf_detect_col[i]);
-    }
-    s->energy = 0.0f;
-    s->current_sample = 0;
-    s->lost_digits = 0;
-    s->current_digits = 0;
-    s->digits[0] = '\0';
-    return s;
 }
 
