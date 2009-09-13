@@ -61,6 +61,10 @@
    we could get 1 digit, want it or not :-) */
 #define DNIS_COMPLETE(r2chan) ((r2chan)->dnis_len >= (r2chan)->r2context->max_dnis)
 
+#define OFFER_CALL(r2chan) \
+(r2chan)->call_state = OR2_CALL_OFFERED; \
+EMI((r2chan))->on_call_offered((r2chan), (r2chan)->caller_ani_is_restricted ? NULL : (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan)))
+
 static void r2config_argentina(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -1374,8 +1378,13 @@ int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 		openr2_log(r2chan, OR2_LOG_WARNING, "Cannot accept call if the call has not been offered!\n");
 		return -1;
 	}
-	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
-	prepare_mf_tone(r2chan, get_tone_from_mode(r2chan, mode));		
+	if (!DETECT_DTMF(r2chan)) {
+		r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
+		prepare_mf_tone(r2chan, get_tone_from_mode(r2chan, mode));		
+	} else {
+		/* do nothing for DTMF R2, just report completion of call accepted */
+		EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
+	}
 	return 0;
 }
 
@@ -1497,9 +1506,9 @@ static void bypass_change_to_g2(openr2_chan_t *r2chan)
 	   bypassing the use of group B and II tones */
 	int accept_tone = GA_TONE(r2chan).address_complete_charge_setup;
 	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
-	r2chan->call_state = OR2_CALL_OFFERED;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "By-passing B/II signals, accept the call with signal 0x%X\n", accept_tone);
 	prepare_mf_tone(r2chan, accept_tone);
+	r2chan->call_state = OR2_CALL_OFFERED;
 	EMI(r2chan)->on_call_offered(r2chan, r2chan->caller_ani_is_restricted ? NULL : r2chan->ani, r2chan->dnis, tone2category(r2chan));
 }
 
@@ -1975,40 +1984,40 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 	OR2_CHAN_STACK;
 	openr2_mf_state_t previous_mf_state;
 	openr2_call_state_t previous_call_state;
-        if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
-                /* they answered before we even detected they accepted,
-                   lets just call on_call_accepted and immediately
-                   on_call_answered */
+	if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
+		/* they answered before we even detected they accepted,
+		   lets just call on_call_accepted and immediately
+		   on_call_answered */
 
-                /* first accepted */
+		/* first accepted */
 		previous_mf_state = r2chan->mf_state;
 		previous_call_state = r2chan->call_state;
-                r2chan->r2_state = OR2_ACCEPT_RXD;
-                EMI(r2chan)->on_call_accepted(r2chan, mode);
+		r2chan->r2_state = OR2_ACCEPT_RXD;
+		EMI(r2chan)->on_call_accepted(r2chan, mode);
 
 		/* if the on_call_accepted callback calls some openr2 API
 		   it can change the state and we no longer want to continue answering */
 		if (r2chan->r2_state != OR2_ACCEPT_RXD 
-		    || r2chan->mf_state != previous_mf_state
-		    || r2chan->call_state != previous_call_state) {
+			|| r2chan->mf_state != previous_mf_state
+			|| r2chan->call_state != previous_call_state) {
 			openr2_log(r2chan, OR2_LOG_NOTICE, "Not proceeding with ANSWERED callback\n");
 			return;
 		}
-                /* now answered */
-                openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
-                r2chan->r2_state = OR2_ANSWER_RXD;
-                r2chan->call_state = OR2_CALL_ANSWERED;
+		/* now answered */
+		openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
+		r2chan->r2_state = OR2_ANSWER_RXD;
+		r2chan->call_state = OR2_CALL_ANSWERED;
 		turn_off_mf_engine(r2chan);
-                r2chan->answered = 1;
-                EMI(r2chan)->on_call_answered(r2chan);
-        } else {
-                /* They have accepted the call. We do nothing but
-                   wait for answer. */
-                r2chan->r2_state = OR2_ACCEPT_RXD;
-                r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
-				                                    r2_answer_timeout_expired, "r2_answer");
-                EMI(r2chan)->on_call_accepted(r2chan, mode);
-        }
+		r2chan->answered = 1;
+		EMI(r2chan)->on_call_answered(r2chan);
+	} else {
+		/* They have accepted the call. We do nothing but
+		   wait for answer. */
+		r2chan->r2_state = OR2_ACCEPT_RXD;
+		r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
+											r2_answer_timeout_expired, "r2_answer");
+		EMI(r2chan)->on_call_accepted(r2chan, mode);
+	}
 }
 
 static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
@@ -2352,9 +2361,14 @@ void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	turn_off_mf_engine(r2chan);
-	/* we will not get bit notification of call accepted for DTMF R2, report progress now */
-	openr2_log(r2chan, OR2_LOG_DEBUG, "DTMF R2 call is done generating DTMF, forcing accept signal\n");
-	EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
+	if (r2chan->direction == OR2_DIR_FORWARD) {
+		/* we will not get bit notification of call accepted for DTMF R2, report progress now */
+		openr2_log(r2chan, OR2_LOG_DEBUG, "DTMF R2 call is done generating DTMF, forcing accept signal\n");
+		EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
+	} else {
+		/* incoming DTMF dnis is done, offer the call */
+		OFFER_CALL(r2chan);
+	}
 }
 
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)

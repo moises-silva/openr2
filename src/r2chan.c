@@ -394,9 +394,16 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 				write(r2chan->mf_read_fd, tone_buf, res*2);
 #endif
 				if (r2chan->detecting_dtmf) {
-					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_write_handle, tone_buf, res);
-					// check here the dtmf detection status and after n reads without detection
-					// call openr2_proto_handle_dtmf_detection_end
+					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
+					res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
+					if (!res) {
+						r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
+						if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
+							openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF detection\n");
+							openr2_proto_handle_dtmf_end(r2chan);
+							continue;
+						}
+					}
 				} else {
 					tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
 					if ( tone_result != -1 ) {
