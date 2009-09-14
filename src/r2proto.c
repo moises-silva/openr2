@@ -501,6 +501,9 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 	case OR2_MF_DIALING_DTMF:
 		return "Dialing DTMF";
 
+	case OR2_MF_DETECTING_DTMF:
+		return "Detecting DTMF";
+
 	default:
 		return "*Unknown*";
 	}
@@ -565,6 +568,9 @@ static const char *mfgroup2str(openr2_mf_group_t mf_group)
 
 	case OR2_MF_DTMF_FWD_INIT:
 		return "Forward DTMF init";
+
+	case OR2_MF_DTMF_BACK_INIT:
+		return "Backward DTMF init";
 
 	default:
 		return "*Unknown*";
@@ -1508,8 +1514,7 @@ static void bypass_change_to_g2(openr2_chan_t *r2chan)
 	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
 	openr2_log(r2chan, OR2_LOG_DEBUG, "By-passing B/II signals, accept the call with signal 0x%X\n", accept_tone);
 	prepare_mf_tone(r2chan, accept_tone);
-	r2chan->call_state = OR2_CALL_OFFERED;
-	EMI(r2chan)->on_call_offered(r2chan, r2chan->caller_ani_is_restricted ? NULL : r2chan->ani, r2chan->dnis, tone2category(r2chan));
+	OFFER_CALL(r2chan);
 }
 
 static void request_change_to_g2(openr2_chan_t *r2chan)
@@ -1790,8 +1795,7 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 			/* we cannot do anything by ourselves. The user has
 			   to decide what to do. Let's inform him/her that
 			   a new call is ready to be accepted or rejected */
-			r2chan->call_state = OR2_CALL_OFFERED;
-			EMI(r2chan)->on_call_offered(r2chan, r2chan->caller_ani_is_restricted ? NULL : r2chan->ani, r2chan->dnis, tone2category(r2chan));
+			OFFER_CALL(r2chan);
 			break;
 		default:
 			handle_protocol_error(r2chan, OR2_INVALID_MF_STATE);
