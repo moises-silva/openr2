@@ -85,6 +85,10 @@ typedef struct openr2_chan_timer_ids_s {
 	int dtmf_start_dial;
 } openr2_chan_timer_ids_t;
 
+typedef enum r2chan_flags_e {
+	OR2_CHAN_CALL_DNIS_CALLBACK = (1 << 0)
+} r2chan_flags_t;
+
 /* R2 channel. Hold the states of the R2 signaling, zap device etc.
    The R2 variant will be inherited from the R2 context 
    this channel belongs to */
@@ -238,6 +242,9 @@ typedef struct openr2_chan_s {
 	int call_files;
 	long call_count;
 	FILE *logfile;
+
+	/* generic flags */
+	int32_t flags;
 
 	/* linking */
 	struct openr2_chan_s *next;

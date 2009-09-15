@@ -36,6 +36,10 @@ extern "C" {
 #define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
 #define STR_LEN(string) ((sizeof(string)/sizeof(string[0]))-1)
 
+#define openr2_set_flag(r2chan, flag) (r2chan)->flags |= flag
+#define openr2_clear_flag(r2chan, flag) (r2chan)->flags &= ~flag
+#define openr2_test_flag(r2chan, flag) (r2chan)->flags & flag
+
 #define OR2_EXPORT_SYMBOL __attribute__((visibility("default")))
 
 #define openr2_timercmp(a, b, CMP)                                           \

@@ -54,8 +54,9 @@
 
 #define TIMER(r2chan) (r2chan)->r2context->timers
 
-#define DIAL_DTMF(r2chan) (r2chan)->r2context->dial_with_dtmf
-#define DETECT_DTMF(r2chan) (r2chan)->r2context->detect_dtmf
+#define DIAL_DTMF(r2chan) ((r2chan)->r2context->dial_with_dtmf)
+#define DETECT_DTMF(r2chan) ((r2chan)->r2context->detect_dtmf)
+#define IS_DTMF_R2(r2chan) ((r2chan)->r2context->dial_with_dtmf || (r2chan)->r2context->detect_dtmf)
 
 /* Note that we compare >= because even if max_dnis is zero
    we could get 1 digit, want it or not :-) */
@@ -651,6 +652,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->category_sent = 0;
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
+	openr2_set_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
 	if (r2chan->logfile) {
 		rc = fclose(r2chan->logfile);
 		r2chan->logfile = NULL;
@@ -800,21 +802,33 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 static void on_dtmf_received(void *user_data, const char *digits, int len)
 {
 	const char *digit = NULL;
+	int rc = 0;
 	openr2_chan_t *r2chan = user_data;
 	if (!digits) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Wow! DTMF detector gave us null digits of len %d\n", len);
 		return;
 	}
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Got digits %s of len %d\n", digits, len);
+	/* got a digit, reset silence counter */
+	r2chan->dtmf_silence_samples = 0; 
+	if (!openr2_test_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK)) {
+		openr2_log(r2chan, OR2_LOG_DEBUG, "Ignoring DNIS DTMF digits %s of len %d per user request\n", digits, len);
+		return;
+	}
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Got digits %s of len %d\n", digits, len);
 	/* since we always read in 20ms chunks I dont think we can get more than 1 digit in a single chunk, may be even 2 chunks or more
 	   are required to detect a single dtmf digit, but lets assume more than one can be received and use memcpy to save the digits */
 	digit = digits;
 	/* check both len and digits to be more bug-safe from the DTMF detector implementation */
 	while (len && *digit) {
-		r2chan->dnis[r2chan->dnis_len++] = *digit;
-		r2chan->dnis[r2chan->dnis_len] = '\0';
-		digit++;
-		len--;
+			r2chan->dnis[r2chan->dnis_len++] = *digit;
+			r2chan->dnis[r2chan->dnis_len] = '\0';
+			rc = EMI(r2chan)->on_dnis_digit_received(r2chan, *digit);
+			if (!rc) {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "User requested us to stop getting DNIS!\n");
+				openr2_clear_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
+			}
+			digit++;
+			len--;
 	}
 }
 
@@ -1435,7 +1449,7 @@ static void double_answer_handler(openr2_chan_t *r2chan)
 static int openr2_proto_do_answer(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	if (r2chan->call_state != OR2_CALL_ACCEPTED) {
+	if (!IS_DTMF_R2(r2chan) && r2chan->call_state != OR2_CALL_ACCEPTED) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot answer call if the call is not accepted first\n");
 		return -1;
 	}
@@ -2371,6 +2385,7 @@ void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 		EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
 	} else {
 		/* incoming DTMF dnis is done, offer the call */
+		r2chan->caller_category = GII_TONE(r2chan).national_subscriber; /* fake caller category */
 		OFFER_CALL(r2chan);
 	}
 }
@@ -2442,7 +2457,8 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 		return -1;
 	}
 	if (r2chan->direction == OR2_DIR_BACKWARD) {
-		if (r2chan->call_state == OR2_CALL_OFFERED) {
+		/* only send disconnect MF if not in DTMF mode */
+		if (r2chan->call_state == OR2_CALL_OFFERED && !DETECT_DTMF(r2chan)) {
 			/* if the call has been offered we need to give a reason 
 			   to disconnect using a MF tone. That should make the other
 			   end send us a clear forward  */
