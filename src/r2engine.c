@@ -3,7 +3,7 @@
  * MFC/R2 call setup library
  *
  * r2engine.h - MFC/R2 tone generation and detection.
- *              DTMF tone generation
+ *              DTMF tone generation and detection.
  *
  * Borrowed and slightly modified from the LGPL SpanDSP library, 
  * Written by Steve Underwood <steveu@coppice.org>
