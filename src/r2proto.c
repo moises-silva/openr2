@@ -816,7 +816,7 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 	}
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Got digits %s of len %d\n", digits, len);
 	/* since we always read in 20ms chunks I dont think we can get more than 1 digit in a single chunk, may be even 2 chunks or more
-	   are required to detect a single dtmf digit, but lets assume more than one can be received and use memcpy to save the digits */
+	   are required to detect a single dtmf digit, but lets assume more than one can be received */
 	digit = digits;
 	/* check both len and digits to be more bug-safe from the DTMF detector implementation */
 	while (len && *digit) {
