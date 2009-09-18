@@ -33,7 +33,7 @@ developing applications that use %{name}.
 
 
 %prep
-%setup -q -n openr2
+%setup -q -n openr2-%{version}
 
 
 %build
