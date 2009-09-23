@@ -17,23 +17,24 @@ set -x
 
 echo "== OpenR2 debugging information for Asterisk ==" > $1
 
-echo "mfcr2 show version: " >> $1
+echo "OpenR2 reported version: " >> $1
+r2test -v >> $1
+
+echo -e "\nmfcr2 show version: " >> $1
 
 asterisk -rx 'mfcr2 show version' >> $1
 
-echo -n "\nmfcr2 show channels:\n" >> $1
+echo -e "\nmfcr2 show channels:\n" >> $1
 
 asterisk -rx 'mfcr2 show channels' > $1.channels.txt
 
 cat $1.channels.txt >> $1
 
-echo -n "\n$dahdi channels status:\n" >> $1
-
-asterisk -rx 'dahdi show chan'
+echo -e "\n$dahdi channels status:\n" >> $1
 
 for chan in `tail +2 $1.channels.txt | awk '{print $1}'`
 do
-	echo "dahdi show channel $chan" >> $1
+	asterisk -rx "dahdi show channel $chan" >> $1
 done
 
 rm $1.channels.txt
