@@ -32,7 +32,7 @@ cat $1.channels.txt >> $1
 
 echo -e "\n$dahdi channels status:\n" >> $1
 
-for chan in `tail +2 $1.channels.txt | awk '{print $1}'`
+for chan in `tail --lines=+2 $1.channels.txt | awk '{print $1}'`
 do
 	asterisk -rx "dahdi show channel $chan" >> $1
 done
