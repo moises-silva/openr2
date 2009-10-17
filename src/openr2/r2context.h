@@ -160,17 +160,29 @@ typedef struct {
 } openr2_transcoder_interface_t;
 
 
-/* DTMF transmitter interface */
+/* DTMF transmitter part of the openr2_dtmf_interface_t */
 typedef void *(*openr2_dtmf_tx_init_func)(void *dtmf_write_handle);
 typedef void (*openr2_dtmf_tx_set_timing_func)(void *dtmf_write_handle, int on_time, int off_time);
 typedef int (*openr2_dtmf_tx_put_func)(void *dtmf_write_handle, const char *digits, int len);
 typedef int (*openr2_dtmf_tx_func)(void *dtmf_write_handle, int16_t amp[], int max_samples);
 
+/* DTMF receiver part of the openr2_dtmf_interface_t */
+typedef void (*openr2_digits_rx_callback_t)(void *user_data, const char *digits, int len);
+typedef void *(*openr2_dtmf_rx_init_func)(void *dtmf_read_handle, openr2_digits_rx_callback_t callback, void *user_data);
+typedef int (*openr2_dtmf_rx_status_func)(void *dtmf_read_handle);
+typedef int (*openr2_dtmf_rx_func)(void *dtmf_read_handle, const int16_t amp[], int samples);
+
 typedef struct {
+	/* DTMF Transmitter */
 	openr2_dtmf_tx_init_func dtmf_tx_init;
 	openr2_dtmf_tx_set_timing_func dtmf_tx_set_timing;
 	openr2_dtmf_tx_put_func dtmf_tx_put;
 	openr2_dtmf_tx_func dtmf_tx;
+
+	/* DTMF Detector */
+	openr2_dtmf_rx_init_func dtmf_rx_init;
+	openr2_dtmf_rx_status_func dtmf_rx_status;
+	openr2_dtmf_rx_func dtmf_rx;
 } openr2_dtmf_interface_t;
 
 /* Library errors */
@@ -211,6 +223,8 @@ int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context);
 void openr2_context_set_double_answer(openr2_context_t *r2context, int enable);
 int openr2_context_get_double_answer(openr2_context_t *r2context);
 int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
+void openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable);
+int openr2_context_get_dtmf_detection(openr2_context_t *r2context);
 void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off);
 int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off);
 int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface);

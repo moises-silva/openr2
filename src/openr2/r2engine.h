@@ -32,6 +32,7 @@
 
 #include <inttypes.h>
 #include "openr2/queue.h"
+#include "openr2/r2context.h" /* just for openr2_digits_rx_callback_t */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -140,6 +141,53 @@ typedef struct
     } queue;
 } openr2_dtmf_tx_state_t;
 
+typedef void (*tone_report_func_t)(void *user_data, int code, int level, int delay);
+/*!
+    DTMF digit detector descriptor.
+*/
+typedef struct
+{
+    /*! Optional callback funcion to deliver received digits. */
+    openr2_digits_rx_callback_t digits_callback;
+    /*! An opaque pointer passed to the callback function. */
+    void *digits_callback_data;
+    /*! Optional callback funcion to deliver real time digit state changes. */
+    tone_report_func_t realtime_callback;
+    /*! An opaque pointer passed to the real time callback function. */
+    void *realtime_callback_data;
+    /*! TRUE if dialtone should be filtered before processing */
+    int filter_dialtone;
+    /*! Maximum acceptable "normal" (lower bigger than higher) twist ratio */
+    float normal_twist;
+    /*! Maximum acceptable "reverse" (higher bigger than lower) twist ratio */
+    float reverse_twist;
+
+    /*! 350Hz filter state for the optional dialtone filter */
+    float z350[2];
+    /*! 440Hz filter state for the optional dialtone filter */
+    float z440[2];
+
+    /*! Tone detector working states for the row tones. */
+    openr2_goertzel_state_t row_out[4];
+    /*! Tone detector working states for the column tones. */
+    openr2_goertzel_state_t col_out[4];
+    /*! The accumlating total energy on the same period over which the Goertzels work. */
+    float energy;
+    /*! The result of the last tone analysis. */
+    uint8_t last_hit;
+    /*! The confirmed digit we are currently receiving */
+    uint8_t in_digit;
+    /*! The current sample number within a processing block. */
+    int current_sample;
+
+    /*! The number of digits which have been lost due to buffer overflows. */
+    int lost_digits;
+    /*! The number of digits currently in the digit buffer. */
+    int current_digits;
+    /*! The received digits buffer. This is a NULL terminated string. */
+    char digits[OR2_MAX_DTMF_DIGITS + 1];
+} openr2_dtmf_rx_state_t;
+
 /* MF Rx routines */
 openr2_mf_rx_state_t *openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd);
 int openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples);
@@ -155,6 +203,11 @@ size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len
 void openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time);
 void openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist);
 openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s);
+
+/* DTMF Rx routines */
+openr2_dtmf_rx_state_t *openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s, openr2_digits_rx_callback_t callback, void *user_data);
+int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples);
+int openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s);
 
 static __inline__ int openr2_top_bit(unsigned int bits)
 {

@@ -25,10 +25,14 @@ libopenr2_la_LDFLAGS = -lm -lpthread -version-info @OPENR2_LT_CURRENT@:@OPENR2_L
 
 
 if WANT_R2TEST
-bin_PROGRAMS = r2test
+bin_PROGRAMS = r2test r2dtmf_detect
 r2test_SOURCES = r2test.c 
 r2test_LDADD = -lpthread libopenr2.la
 r2test_CFLAGS = $(AM_CFLAGS)
+
+r2dtmf_detect_SOURCES = r2dtmf_detect.c 
+r2dtmf_detect_LDADD = -lpthread libopenr2.la
+r2dtmf_detect_test_CFLAGS = $(AM_CFLAGS)
 endif
 
 INCLUDES = -Iopenr2
