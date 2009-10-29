@@ -24,20 +24,28 @@ echo -e "\nmfcr2 show version: " >> $1
 
 asterisk -rx 'mfcr2 show version' >> $1
 
-echo -e "\nmfcr2 show channels:\n" >> $1
-
-asterisk -rx 'mfcr2 show channels' > $1.channels.txt
-
-cat $1.channels.txt >> $1
-
-echo -e "\n$dahdi channels status:\n" >> $1
-
-for chan in `tail --lines=+2 $1.channels.txt | awk '{print $1}'`
+for t in 1 2
 do
-	asterisk -rx "dahdi show channel $chan" >> $1
-done
+	echo "" >> $1
+	echo "== Data Collection $t ==" >> $1
+	echo "" >> $1
 
-rm $1.channels.txt
+	echo -e "\nmfcr2 show channels:\n" >> $1
+	
+	asterisk -rx 'mfcr2 show channels' > $1.channels.txt
+	
+	cat $1.channels.txt >> $1
+	
+	echo -e "\n$dahdi channels status:\n" >> $1
+	
+	for chan in `tail --lines=+2 $1.channels.txt | awk '{print $1}'`
+	do
+		asterisk -rx "dahdi show channel $chan" >> $1
+	done
+	
+	rm $1.channels.txt
+	sleep 2s
+done
 
 set +x
 
