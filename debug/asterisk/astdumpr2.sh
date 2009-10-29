@@ -20,6 +20,10 @@ echo "== OpenR2 debugging information for Asterisk ==" > $1
 echo "OpenR2 reported version: " >> $1
 r2test -v >> $1
 
+echo -e "Asterisk version: " >> $1
+
+asterisk -rx 'core show version' >> $1
+
 echo -e "\nmfcr2 show version: " >> $1
 
 asterisk -rx 'mfcr2 show version' >> $1
