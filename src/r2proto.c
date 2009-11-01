@@ -22,6 +22,7 @@
  *
  * Cleiber Marques da Silva <cleibermarques@hotmail.com>
  * Humberto Figuera <hfiguera@gmail.com>
+ * Afonso Zimmermann <afonso.zimmermann@gmail.com>
  *
  */
 
@@ -418,6 +419,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	/* Group II tones. */
 	r2context->mf_g2_tones.national_subscriber = OR2_MF_TONE_1;
 	r2context->mf_g2_tones.national_priority_subscriber = OR2_MF_TONE_2;
+	r2context->mf_g2_tones.test_equipment = OR2_MF_TONE_3;
 	r2context->mf_g2_tones.international_subscriber = OR2_MF_TONE_7;
 	r2context->mf_g2_tones.international_priority_subscriber = OR2_MF_TONE_9;
 	r2context->mf_g2_tones.collect_call = OR2_MF_TONE_INVALID;
@@ -1466,6 +1468,8 @@ static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
 	} else if (GII_TONE(r2chan).collect_call == r2chan->caller_category) {
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
+	} else if (GII_TONE(r2chan).test_equipment == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
 	} else {
 		return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 	}
@@ -1646,6 +1650,8 @@ static int category2tone(openr2_chan_t *r2chan, openr2_calling_party_category_t 
 		return GII_TONE(r2chan).international_priority_subscriber;
 	case OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL:
 		return GII_TONE(r2chan).collect_call;
+	case OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT:
+		return GII_TONE(r2chan).test_equipment;
 	default:
 		return GII_TONE(r2chan).national_subscriber;;
 	}
@@ -2466,6 +2472,8 @@ const char *openr2_proto_get_category_string(openr2_calling_party_category_t cat
 		return "International Priority Subscriber";
 	case OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL:
 		return "Collect Call";
+	case OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT:
+		return "Test Equipment";
 	default:
 		return "*Unknown*";
 	}
@@ -2484,7 +2492,26 @@ openr2_calling_party_category_t openr2_proto_get_category(const char *category)
 		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
 	} else if (!openr2_strncasecmp(category, "COLLECT_CALL", sizeof("COLLECT_CALL")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
+	} else if (!openr2_strncasecmp(category, "TEST_EQUIPMENT", sizeof("TEST_EQUIPMENT")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
+	}
+
+	/* this was added to allow values returned by openr2_proto_get_category_string to be passed back to openr2_proto_get_category and recover
+	the category value, which makes a lot of sense :-) */
+	if (!openr2_strncasecmp(category, "National Subscriber", sizeof("National Subscriber")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
+	} else if (!openr2_strncasecmp(category, "National Priority Subscriber", sizeof("National Priority Subscriber")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_PRIORITY_SUBSCRIBER;
+	} else if (!openr2_strncasecmp(category, "International Subscriber", sizeof("International Subscriber")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_SUBSCRIBER;
+	} else if (!openr2_strncasecmp(category, "International Priority Subscriber", sizeof("International Priority Subscriber")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_INTERNATIONAL_PRIORITY_SUBSCRIBER;
+	} else if (!openr2_strncasecmp(category, "Collect Call", sizeof("Collect Call")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
+	} else if (!openr2_strncasecmp(category, "Test Equipment", sizeof("Test Equipment")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
 	}	
+
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 }
 

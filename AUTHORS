@@ -1,7 +1,7 @@
 Moises Silva 
 <moy@sangoma.com>
 http://www.moythreads.com/
-- Author and primary developer
+- Author and primary developer.
 
 Alexandre Cavalcante Alencar
 <alexandre.alencar@gmail.com>
@@ -17,9 +17,13 @@ Humberto Figuera
 
 Steve Underwood 
 <steveu@coppice.org>
-- I Borrowed code from his SpanDSP LGPL library for the MF Detector and generator (basically r2engine.c and r2engine.h)
+- I Borrowed code from his SpanDSP LGPL library for the MF Detector and generator (basically r2engine.c and r2engine.h).
 
 Tzafrir Cohen
 <tzafrir.cohen@xorcom.com>
-- Debian package
+- Debian package.
+
+Afonso Zimmermann
+<afonso.zimmermann@gmail.com>
+- Test equipment category fix.
 
