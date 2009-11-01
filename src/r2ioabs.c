@@ -114,8 +114,12 @@ static int zt_read(openr2_chan_t *r2chan, const void *buf, int size)
 	int fd = (long)r2chan->fd;
 	if (-1 == (bytes = read(fd, (void *)buf, size))) {
 		myerrno = errno;
+		if (myerrno == ELAST) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "read from channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
+			return 0;
+		}
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel %d: %s\n", r2chan->number, strerror(myerrno));
 		return -1;
 	}
 	return bytes;
@@ -128,8 +132,12 @@ static int zt_write(openr2_chan_t *r2chan, const void *buf, int size)
 	int fd = (long)r2chan->fd;
 	if (-1 == (bytes = write(fd, buf, size))) {
 		myerrno = errno;
+		if (myerrno == ELAST) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "write to channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
+			return 0;
+		}
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write to channel %d: %s\n", r2chan->number, strerror(myerrno));
 		errno = myerrno;
 	}
 	return bytes;

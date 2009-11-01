@@ -275,6 +275,18 @@ int openr2_chan_run_schedule(openr2_chan_t *r2chan)
 #define OR2_CHAN_PROCESS_OOB (1 << 0)
 #define OR2_CHAN_PROCESS_MF (1 << 1)
 
+#define HANDLE_IO_WRITE_RESULT(wrote) \
+			if (!wrote) { \
+				continue; \
+			} \
+			if (wrote == -1) { \
+				retcode = -1; \
+				goto done; \
+			} \
+			if (wrote != res) { \
+				openr2_log(r2chan, OR2_LOG_ERROR, "Just wrote %d bytes to channel %d when %d bytes were requested\n", wrote, r2chan->number, res); \
+			}
+
 /*! \brief main processing of signaling to check for incoming events, respond to them and dispatch user events */
 static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 {
@@ -337,6 +349,10 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 				retcode = -1;
 				goto done;
 			}
+			if (!res) {
+				/* if nothing was read, continue, may be there is a priority event (ie DAHDI read ELAST) */
+				continue;
+			}
 			/* if the MF detector is enabled, we are supposed to detect tones */
 			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
 				/* assuming ALAW codec */
@@ -368,9 +384,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = openr2_io_write(r2chan, read_buf, res);
-			if (wrote != res) {
-				EMI(r2chan)->on_os_error(r2chan, errno);
-			}
+			HANDLE_IO_WRITE_RESULT(wrote);
 			continue;
 		} else if (OR2_IO_WRITE & interesting_events) {
 			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
@@ -392,9 +406,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = openr2_io_write(r2chan, read_buf, res);
-			if (wrote != res) {
-				EMI(r2chan)->on_os_error(r2chan, errno);
-			}
+			HANDLE_IO_WRITE_RESULT(wrote);
 			continue;
 		}
 
