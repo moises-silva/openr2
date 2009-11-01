@@ -5,7 +5,7 @@ http://www.moythreads.com/
 
 Alexandre Cavalcante Alencar
 <alexandre.alencar@gmail.com>
-- Debian build, documentation, r2test enhancements and testing in Brazil.
+- Debian build, documentation, r2test enhancements, testing in Brazil and longstanding support and help.
 
 Cleiber Marques da Silva
 <cleibermarques@hotmail.com>
@@ -18,4 +18,8 @@ Humberto Figuera
 Steve Underwood 
 <steveu@coppice.org>
 - I Borrowed code from his SpanDSP LGPL library for the MF Detector and generator (basically r2engine.c and r2engine.h)
+
+Tzafrir Cohen
+<tzafrir.cohen@xorcom.com>
+- Debian package
 
