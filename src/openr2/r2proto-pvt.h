@@ -364,6 +364,7 @@ typedef struct {
 	openr2_mf_tone_t request_next_ani_digit;
 	openr2_mf_tone_t request_change_to_g2;
 	openr2_mf_tone_t request_next_dnis_digit_and_change_to_ga;
+	openr2_mf_tone_t network_congestion;
 } openr2_mf_gc_tones_t;
 
 /* names for the GI MF tones */
