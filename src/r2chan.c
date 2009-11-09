@@ -108,6 +108,8 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 
 	/* DTMF and MF tone detection default hooks handles */
 	r2chan->dtmf_write_handle = &r2chan->default_dtmf_write_handle;
+	r2chan->dtmf_read_handle = &r2chan->default_dtmf_read_handle;
+
 	r2chan->mf_write_handle = &r2chan->default_mf_write_handle;
 	r2chan->mf_read_handle = &r2chan->default_mf_read_handle;
 
@@ -148,13 +150,26 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 }
 
 OR2_EXPORT_SYMBOL
-int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_handle)
+int openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle)
 {
+	openr2_chan_lock(r2chan);
+
 	if (!dtmf_write_handle) {
+
+		openr2_chan_unlock(r2chan);
+
 		return -1;
 	}
-	openr2_chan_lock(r2chan);
+	if (!dtmf_read_handle) {
+
+		openr2_chan_unlock(r2chan);
+
+		return -1;
+	}
+
 	r2chan->dtmf_write_handle = dtmf_write_handle;
+	r2chan->dtmf_read_handle = dtmf_read_handle;
+
 	openr2_chan_unlock(r2chan);
 	return 0;
 }
@@ -353,7 +368,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 				/* if nothing was read, continue, may be there is a priority event (ie DAHDI read ELAST) */
 				continue;
 			}
-			/* if the MF detector is enabled, we are supposed to detect tones */
+			/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
 			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
 				/* assuming ALAW codec */
 				for (i = 0; i < res; i++) {
@@ -362,10 +377,23 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 #ifdef OR2_MF_DEBUG	
 				write(r2chan->mf_read_fd, tone_buf, res*2);
 #endif
-				tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
-				if ( tone_result != -1 ) {
-					openr2_proto_handle_mf_tone(r2chan, tone_result);
-				} 
+				if (r2chan->detecting_dtmf) {
+					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
+					res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
+					if (!res) {
+						r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
+						if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
+							openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF detection\n");
+							openr2_proto_handle_dtmf_end(r2chan);
+							continue;
+						}
+					}
+				} else {
+					tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
+					if ( tone_result != -1 ) {
+						openr2_proto_handle_mf_tone(r2chan, tone_result);
+					} 
+				}
 			} else if (r2chan->answered) {
 				EMI(r2chan)->on_call_read(r2chan, read_buf, res);
 			}

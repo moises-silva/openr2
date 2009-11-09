@@ -171,8 +171,8 @@ int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan);
 /*! \brief return the ASCII code for the last received MF signal */
 int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan);
 
-/*! \brief set the opaque handle that will be passed back to the DTMF generation callbacks */
-int openr2_chan_set_dtmf_write_handle(openr2_chan_t *r2chan, void *dtmf_write_handle);
+/*! \brief set the opaque handle that will be passed back to the DTMF callbacks */
+int openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle);
 
 /*! \brief set the opaque handles that will be passed back to the MF generation and detection callbacks */
 int openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle);

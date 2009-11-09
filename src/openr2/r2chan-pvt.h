@@ -35,6 +35,9 @@
 extern "C" {
 #endif
 
+/* getting half second of silence we declare DTMF DNIS string as ended */
+#define OR2_DTMF_MAX_SILENCE_SAMPLES 4000
+
 struct openr2_chan_s;
 struct openr2_context_s;
 
@@ -82,6 +85,10 @@ typedef struct openr2_chan_timer_ids_s {
 	/* DTMF dial startup */
 	int dtmf_start_dial;
 } openr2_chan_timer_ids_t;
+
+typedef enum r2chan_flags_e {
+	OR2_CHAN_CALL_DNIS_CALLBACK = (1 << 0)
+} r2chan_flags_t;
 
 /* R2 channel. Hold the states of the R2 signaling, I/O device etc.
    The R2 variant will be inherited from the R2 context 
@@ -184,14 +191,20 @@ typedef struct openr2_chan_s {
 	/* MF tone detection handle */
 	void *mf_read_handle;
 
-	/* DTMF tone generation handle */
+	/* DTMF rx and tx handle */
 	void *dtmf_write_handle;
+	void *dtmf_read_handle;
 
-	/* whether or not we are in the middle of dialing DTMF */
+	/* whether or not we are in the middle of dialing or detecting DTMF */
 	int dialing_dtmf;
+	int detecting_dtmf;
+	int dtmf_silence_samples;
 
 	/* default DTMF tone generation handle */
 	openr2_dtmf_tx_state_t default_dtmf_write_handle;
+
+	/* default DTMF tone reception handle */
+	openr2_dtmf_rx_state_t default_dtmf_read_handle;
 
 	/* default MF tone generation handle */
 	openr2_mf_tx_state_t default_mf_write_handle;
@@ -233,6 +246,9 @@ typedef struct openr2_chan_s {
 	int call_files;
 	long call_count;
 	FILE *logfile;
+
+	/* generic flags */
+	int32_t flags;
 
 	/* linking */
 	struct openr2_chan_s *next;
