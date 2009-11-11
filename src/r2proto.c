@@ -1024,6 +1024,7 @@ static void persistence_check_expired(openr2_chan_t *r2chan)
 	r2chan->timer_ids.cas_persistence_check = 0;
 	res = openr2_io_get_cas(r2chan, &rawcas);
 	if (res) {
+		myerrno = errno;
 		openr2_log(r2chan, OR2_LOG_ERROR, "Getting CAS bits from I/O device for persistence check failed: %s\n", strerror(myerrno));
 		return;
 	}
