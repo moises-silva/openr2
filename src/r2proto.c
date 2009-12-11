@@ -1218,7 +1218,6 @@ handlecas:
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_answer);
 			r2chan->r2_state = OR2_ANSWER_RXD;
 			r2chan->call_state = OR2_CALL_ANSWERED;
-			turn_off_mf_engine(r2chan);
 			r2chan->answered = 1;
 			EMI(r2chan)->on_call_answered(r2chan);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
@@ -2042,6 +2041,7 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 		r2chan->r2_state = OR2_ACCEPT_RXD;
 		r2chan->timer_ids.r2_answer = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_answer, 
 											r2_answer_timeout_expired, "r2_answer");
+		turn_off_mf_engine(r2chan);
 		EMI(r2chan)->on_call_accepted(r2chan, mode);
 	}
 }
