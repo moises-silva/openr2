@@ -123,6 +123,23 @@ static void r2config_itu(openr2_context_t *r2context)
 	return;
 }
 
+static void r2config_india(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_2;
+	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_4;
+	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_9;
+	r2context->mf_ga_tones.request_dnis_minus_3 = OR2_MF_TONE_8;
+
+
+	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_2;
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7;
+
+	/* for DNIS timeout recovery */
+	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
+}
+
 static void r2config_mexico(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -260,6 +277,13 @@ static openr2_variant_entry_t r2variants[] =
 		.name = "ITU",
 		.country = "International Telecommunication Union",
 		.config = r2config_itu
+	},
+	/* ITU */
+	{
+		.id = OR2_VAR_INDIA,
+		.name = "IN",
+		.country = "India",
+		.config = r2config_india
 	},
 	/* MEXICO */ 
 	{
