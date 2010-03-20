@@ -173,8 +173,18 @@ static void r2config_colombia(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 
-	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
-	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	/*
+	 * The CAS protocols reference manual from Natural Microsystems
+	 * says next ANI digit ( and in fact even DNIS is 1 )
+	 * however field testing in Barranquilla with Metrotel (now part of Telefonica)
+	 * shows ITU compliant tones are used, no need to change them, however
+	 * is important to change the accept_call_with_charge tone, not
+	 * sure about the others though.
+	 *
+	 * r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
+	 * r2context->mf_ga_tones.request_category = OR2_MF_TONE_6; 
+	 *
+	 * */
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
