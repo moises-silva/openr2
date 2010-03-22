@@ -1,111 +1,53 @@
-2009-09-28 02:14  moises.silva
+2010-03-20 05:27  moy
 
-	* misc/mfdetectors.c: added mfdetectors.c file
+	* src/r2proto.c: fix the colombian variant to work with
+	  metrotel/telefonica
 
-2009-09-18 13:36  alexandre.alencar
+2010-03-20 03:54  moises.silva
 
-	* libopenr2.spec: fix the RPM SPEC source path name
+	* src/r2proto.c: log outgoing call details
 
-2009-09-18 04:20  moy
+2010-02-19 19:24  moises.silva
 
-	* CREDITS: fixed CREDITS file
+	* doc/asterisk/ve, doc/asterisk/ve/README: added venezuela
+	  configuration - contributed by korihor
 
-2009-09-18 04:05  moy
+2010-01-23 03:08  moises.silva
 
-	* src/r2proto.c: fix comment in r2proto.c
+	* src/r2proto.c: fix to handle a slightly different behavior in the
+	  mexican variant, it may work for other variants too
 
-2009-09-18 04:00  moy
+2009-12-03 18:35  moises.silva
 
-	* misc/dtmf_detect.c, src/r2dtmf_detect.c: add copyright headers to
-	  new files
+	* src/r2proto.c: fixed bug in DTMF R2 - Just report call end if
+	  clear forward was received already on disconnect
 
-2009-09-17 17:43  moises.silva
+2009-10-29 20:44  alexandre.alencar
 
-	* src/r2engine.c: clarify comments in r2engine.c
+	* debug/asterisk/astdumpr2.sh: add asterisk version info
 
-2009-09-16 03:34  moy
+2009-10-29 20:27  alexandre.alencar
 
-	* src/r2proto.c: create a special disconnection code branch for
-	  dtmf r2
+	* debug/asterisk/astdumpr2.sh: Just a simple addition to make the
+	  data collection interval automatic
 
-2009-09-15 16:04  moises.silva
+2009-10-17 02:42  moises.silva
 
-	* Makefile.in, configure, configure.in, src/Makefile.in: bumped
-	  openr2 interface revision since the new dtmf support breaks
-	  binary compat
+	* CREDITS: be more explicit in the CREDITS file
 
-2009-09-15 04:53  moy
+2009-10-17 02:38  moises.silva
 
-	* src/openr2/r2chan-pvt.h, src/openr2/r2utils-pvt.h, src/r2proto.c:
-	  more dtmf r2 interface fixes. fake calling category, stop
-	  collecting dnis on user signal etc
+	* ChangeLog: updated ChangeLog
 
-2009-09-14 19:08  moises.silva
+2009-10-17 01:54  moises.silva
 
-	* CREDITS: added CREDITS file
-
-2009-09-14 14:39  moises.silva
-
-	* src/r2proto.c: added DTMF state strings and some code cleanup
-
-2009-09-13 01:30  moises.silva
-
-	* src/openr2/r2chan-pvt.h, src/r2chan.c, src/r2proto.c: completed
-	  incoming DTMF call cycle, needs testing
-
-2009-09-13 00:48  moy
-
-	* src/r2dtmf_detect.c: added missing test program source code
-	  r2dtmd_detect.c
-
-2009-09-12 21:27  moy
-
-	* src/r2proto.c: added more logging for dtmf/mf detectors
-
-2009-09-12 21:08  moy
-
-	* src/openr2/fast_convert.h, src/openr2/r2context.h,
-	  src/openr2/r2engine.h, src/r2context.c, src/r2engine.c: fixed
-	  DTMF detection
-
-2009-09-12 17:23  moy
-
-	* misc, misc/dtmf_detect.c: added misc code directory
-
-2009-09-12 17:17  moy
-
-	* audio, audio/dtmf, audio/dtmf/dtmf_3000.raw: added audio dtmf
-	  sample for number 3000
-
-2009-09-12 17:14  moy
-
-	* Makefile.in, configure, src/Makefile.am, src/Makefile.in,
-	  src/r2chan.c, src/r2engine.c, src/r2proto.c: added dtmf detection
-	  test program
-
-2009-09-12 04:05  moy
-
-	* src/openr2/r2context-pvt.h, src/openr2/r2context.h,
-	  src/r2context.c, src/r2proto.c: added dtmf detection
-	  enable/disable and status apis
-
-2009-09-12 03:10  moises.silva
-
-	* src/openr2/r2utils-pvt.h, src/r2proto.c: save DTMF digits as DNIS
-
-2009-09-11 05:25  moy
-
-	* src/openr2/fast_convert.h, src/openr2/r2chan-pvt.h,
-	  src/openr2/r2chan.h, src/openr2/r2context.h,
+	* CREDITS, audio, configure, configure.in, misc, src/Makefile.am,
+	  src/Makefile.in, src/openr2/r2chan-pvt.h, src/openr2/r2chan.h,
+	  src/openr2/r2context-pvt.h, src/openr2/r2context.h,
 	  src/openr2/r2engine.h, src/openr2/r2proto-pvt.h,
-	  src/openr2/r2utils.h, src/r2chan.c, src/r2context.c,
-	  src/r2engine.c, src/r2proto.c: added DTMF detection code, not
-	  tested yet, but compiles
-
-2009-09-10 03:56  moy
-
-	* src/openr2/r2proto-pvt.h, src/r2context.c, src/r2proto.c: added
-	  dialing dtmf support for meridian
+	  src/openr2/r2utils-pvt.h, src/openr2/r2utils.h, src/r2chan.c,
+	  src/r2context.c, src/r2dtmf_detect.c, src/r2engine.c,
+	  src/r2proto.c: merged 224:255 from release-1-dtmf branch
 
 2009-09-24 20:00  moises.silva
 
