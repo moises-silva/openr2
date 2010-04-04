@@ -2457,11 +2457,17 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 
 	if (r2chan->direction == OR2_DIR_BACKWARD) {
 		if (DETECT_DTMF(r2chan)) {
-			/* this is a normal clear backward */
-			if (send_clear_backward(r2chan)) {
-				openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, "
-						"cannot disconnect call nicely!, may be try again?\n");
-				return -1;
+			if (r2chan->r2_state == OR2_CLEAR_FWD_RXD) {
+				/* this is the same than non-DTMF calls, but we handle it
+				 * here to avoid touching non-DTMF code and keep it separate */
+				report_call_end(r2chan);
+			} else {
+				/* this is a normal clear backward (for which we will wait a clear forward) */
+				if (send_clear_backward(r2chan)) {
+					openr2_log(r2chan, OR2_LOG_ERROR, "Failed to send Clear Backward!, "
+							"cannot disconnect call nicely!, may be try again?\n");
+					return -1;
+				}
 			}
 		} else if (r2chan->call_state == OR2_CALL_OFFERED ) {
 			/* if the call has been offered we need to give a reason 
