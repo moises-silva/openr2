@@ -1946,6 +1946,21 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 {
 	/* TODO: Handle sending of previous ANI digits */
 	OR2_CHAN_STACK;
+
+	/* before trying to send, check if we already said we dont have more ANI */
+	if (r2chan->mf_state == OR2_MF_ANI_END_TXD) {
+		/* this means probably that they are asking for something else, most likely DNIS
+		   if the ANI tone is the same as DNIS, then change to GA again to continue
+		   with DNIS */
+		if (GA_TONE(r2chan).request_next_dnis_digit == GA_TONE(r2chan).request_next_ani_digit ||
+		    GA_TONE(r2chan).request_next_dnis_digit == GC_TONE(r2chan).request_next_ani_digit) {
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Assuming DNIS request (next ani tone == next dnis tone), switching to Group I\n");
+			r2chan->mf_group = OR2_MF_GI;
+			mf_send_dnis(r2chan, 1);
+			return;
+		}
+	}
+
 	/* if the pointer to ANI is null, that means the caller ANI is restricted */
 	if (NULL == r2chan->ani_ptr) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending Restricted ANI\n");
