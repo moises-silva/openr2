@@ -1,0 +1,70 @@
+Sample Configurations for Venezuela
+================================
+
+Here we provide sample working configurations for named Venenzuela telco companies.
+If you get you installation working with another telco not in this list or with
+different params, please send me your config to moy@sangoma.com
+
+All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
+you need to choose only one sample per link.
+
+
+Sample Configuration for CANTV, Movilnet, Movistar, and Digitel (contributed by Humberto Figuera <hfiguera@gmail.com>)
+=================================
+Note: In the case of outgoing calls to CANTV and Movistar, DTMF/R2 protocol is used, 
+and it also has some variants here in Venezuela. If you find a link like this and you can not make calls, 
+please contact me to hfiguera@gmail.com, I can help.
+=================================
+
+; Sample for CANTV
+signalling=mfcr2
+mfcr2_variant=ve
+mfcr2_get_ani_first=yes
+mfcr2_immediate_accept=yes
+mfcr2_max_ani=10
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_logdir=cantv
+mfcr2_logging=all
+mfcr2_mfback_timeout=-1
+
+
+; Sample for Movilnet
+signalling=mfcr2
+mfcr2_variant=ve
+mfcr2_get_ani_first=yes
+mfcr2_immediate_accept=yes
+mfcr2_max_ani=10
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_logdir=movilnet
+mfcr2_logging=all
+mfcr2_mfback_timeout=-1
+
+
+; Sample for Movistar
+signalling=mfcr2
+mfcr2_variant=ve
+mfcr2_get_ani_first=yes
+mfcr2_immediate_accept=yes
+mfcr2_max_ani=10
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_logdir=movistar
+mfcr2_logging=all
+mfcr2_mfback_timeout=-1
+
+
+; Sample for Digitel
+signalling=mfcr2
+mfcr2_variant=ve
+mfcr2_get_ani_first=yes
+mfcr2_immediate_accept=yes
+mfcr2_max_ani=10
+mfcr2_max_dnis=4
+mfcr2_category=national_subscriber
+mfcr2_logdir=digitel
+mfcr2_logging=all
+mfcr2_mfback_timeout=-1
+
+

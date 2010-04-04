@@ -172,8 +172,18 @@ static void r2config_colombia(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 
-	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
-	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	/*
+	 * The CAS protocols reference manual from Natural Microsystems
+	 * says next ANI digit ( and in fact even DNIS is 1 )
+	 * however field testing in Barranquilla with Metrotel (now part of Telefonica)
+	 * shows ITU compliant tones are used, no need to change them, however
+	 * is important to change the accept_call_with_charge tone, not
+	 * sure about the others though.
+	 *
+	 * r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_1;
+	 * r2context->mf_ga_tones.request_category = OR2_MF_TONE_6; 
+	 *
+	 * */
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
@@ -627,11 +637,10 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 	}
 }
 
+static void close_logfile(openr2_chan_t *r2chan);
 static void openr2_proto_init(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	int rc = 0;
-	int myerrno = 0;
 	/* cancel any event we could be waiting for */
 	openr2_chan_cancel_all_timers(r2chan);
 
@@ -655,15 +664,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
 	openr2_set_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
-	if (r2chan->logfile) {
-		rc = fclose(r2chan->logfile);
-		r2chan->logfile = NULL;
-		if (rc) {
-			myerrno = errno;
-			EMI(r2chan)->on_os_error(r2chan, myerrno);
-			openr2_log(r2chan, OR2_LOG_ERROR, "Closing log file failed: %s\n", strerror(myerrno));
-		}
-	}
+	close_logfile(r2chan);
 }
 
 int openr2_proto_set_idle(openr2_chan_t *r2chan)
@@ -732,6 +733,26 @@ static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t
 	EMI(r2chan)->on_protocol_error(r2chan, reason);
 }
 
+static void close_logfile(openr2_chan_t *r2chan)
+{
+	int rc = 0;
+	int myerrno = 0;
+	/* No Op if call files not enabled */
+	if (!r2chan->call_files) {
+		return;
+	}
+	if (!r2chan->logfile) {
+		return;
+	}
+	rc = fclose(r2chan->logfile);
+	r2chan->logfile = NULL;
+	if (rc) {
+		myerrno = errno;
+		EMI(r2chan)->on_os_error(r2chan, myerrno);
+		openr2_log(r2chan, OR2_LOG_ERROR, "Closing log file failed: %s\n", strerror(myerrno));
+	}
+}
+
 static void open_logfile(openr2_chan_t *r2chan, int backward)
 {
 	time_t currtime;
@@ -742,6 +763,12 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 	int res = 0;
 	char *cres = NULL;
 	int myerrno = 0;
+
+	/* No Op if call files not enabled */
+	if (!r2chan->call_files) {
+		return;
+	}
+
 	if (!r2chan->r2context->logdir) {
 		cres = getcwd(currdir, sizeof(currdir));
 		if (!cres) {
@@ -837,9 +864,9 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 static void handle_incoming_call(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	if (r2chan->call_files) {
-		open_logfile(r2chan, 1);
-	}
+
+	open_logfile(r2chan, 1);
+
 	if (!DETECT_DTMF(r2chan)) {
 		/* we have received the line seize, we expect the first MF tone. 
 		   let's init our MF engine, if we fail initing the MF engine
@@ -2304,21 +2331,24 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	OR2_CHAN_STACK;
 	const char *digit;
 	int copy_ani = 1, copy_dnis = 1;
-	openr2_log(r2chan, OR2_LOG_DEBUG, "Attempting to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
+
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Requested to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
 			dnis, openr2_proto_get_category_string(category));
+
 	/* we can dial only if we're in IDLE */
 	if (r2chan->call_state != OR2_CALL_IDLE) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Call state should be IDLE but is '%s'\n", openr2_proto_get_call_state_string(r2chan));
 		return -1;
 	}
-	/* try to handle last minute changes if any. 
-	   This will detect IDLE lines if the last time the user checked
-	   it was in some other state */
+
+	/* try to handle last minute changes if any.  This will detect IDLE lines 
+	 * if the last time the user checked it was in some other state */
 	openr2_proto_handle_cas(r2chan);
 	if (r2chan->cas_read != r2chan->r2context->cas_signals[OR2_CAS_IDLE]) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Trying to dial out in a non-idle channel (cas=0x%02X)\n", r2chan->cas_read);
 		return -1;
 	}
+
 	/* make sure both ANI and DNIS are numeric */
 	if (ani) {
 		digit = ani;
@@ -2344,13 +2374,18 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		}
 		digit++;
 	}
-	if (r2chan->call_files) {
-		open_logfile(r2chan, 0);
-	}
+
+	/* open the log for the new call, but dont forget to close it if the call attempt fails here */
+	open_logfile(r2chan, 0);
+
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Outgoing call proceeding: ANI=%s, DNIS=%s, Category=%s\n", 
+			ani ? ani : "(restricted)", dnis, openr2_proto_get_category_string(category));
 	if (set_cas_signal(r2chan, OR2_CAS_SEIZE)) {
 		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to seize line!, cannot make a call!\n");
+		close_logfile(r2chan);
 		return -1;
 	}
+
 	r2chan->r2_state = OR2_SEIZE_TXD;
 	/* cannot wait forever for seize ack, put a timer */
 	r2chan->timer_ids.r2_seize = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize, seize_timeout_expired, "r2_seize");
