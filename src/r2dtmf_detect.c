@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "openr2.h"
+#include "openr2/openr2.h"
 #include "openr2/r2engine.h"
 
 #define FORMAT_INVALID 0 

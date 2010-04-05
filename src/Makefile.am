@@ -18,7 +18,6 @@ nobase_include_HEADERS = openr2/r2chan.h \
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c \
 		       r2engine.c queue.c \
-		       openr2.h \
 		       openr2/queue.h \
 		       openr2/r2chan-pvt.h \
 		       openr2/r2context-pvt.h \
