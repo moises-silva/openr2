@@ -31,9 +31,9 @@ This definition will be read fine
 Defines the call category of subscriber. Defaults to \fINATIONAL_SUBSCRIBER\fR
 .TP 
 \fBloglevel\fR=\fI<all,error,warning,debug,notice,cas,mf,stack,nothing>\fR
-Defines the log level for debugging purpouses. Defaults to \fIall\fR
+Defines the log level for debugging purposes. Defaults to \fIall\fR
 
-\fBerror, warning, debug, notice\fR These options are self\-descriptive
+\fBerror, warning, debug, notice\fR These options are self-descriptive
 
 \fBcas\fR is for logging ABCD CAS tx and rx
 
@@ -41,12 +41,12 @@ Defines the log level for debugging purpouses. Defaults to \fIall\fR
 
 \fBstack\fR is for very verbose output of the channel and context call stack,
 only useful if you are debugging a crash or want to learn how the library works.
-The stack logging will be only enabled if the openr2 library was compiled with
+The stack logging will be only enabled if the OpenR2 library was compiled with
 \-DOR2_TRACE_STACKS
 
 \fBall\fR is a special value to log all the activity
 
-\fBnothing\fR is a clean\-up value, in case you want to not log any activity
+\fBnothing\fR is a clean-up value, in case you want to not log any activity
 for a channel or group of channels
 
 You can mix up values, like: \fBloglevel\fR=\fIerror,debug,mf\fR to log just
@@ -54,7 +54,7 @@ You can mix up values, like: \fBloglevel\fR=\fIerror,debug,mf\fR to log just
 
 .TP 
 \fBcallfile\fR=\fI<yes|no>\fR
-Call files useful to debug signaling isssues are dumped in the current directory
+Call files useful to debug signaling issues are dumped in the current directory
 if this parameter is enabled. Defaults to \fIno\fR
 
 .TP 
@@ -71,11 +71,11 @@ How much DNIS to expect. Defaults to 4
 
 .TP 
 \fBgetanifirst\fR=<yes|no>
-Wheter or not we want to request ANI first. Defaults to \fIno\fR
+Whether or not we want to request ANI first. Defaults to \fIno\fR
 
 .TP 
 \fBusedahdimf\fR=\fI<yes|no>\fR
-Whether to use the built\-in openr2 MF tone generation or DAHDI MF tone
+Whether to use the built-in OpenR2 MF tone generation or DAHDI MF tone
 generation. DAHDI is faster since it does not require to copy user space
 buffers to the kernel, however this option will only be available when the
 configure script detects DAHDI support for MF R2 tone generation.
@@ -90,7 +90,7 @@ detector causes small false positives. Defaults to \fI0\fR
 
 .TP 
 \fBmfbacktimeout\fR
-MF backward timeout in milliseconds to use openr2 default just specify any
+MF backward timeout in milliseconds to use OpenR2 default just specify any
 negative number or comment this line. Defaults to \fI\-1\fR
 
 .TP 
@@ -100,7 +100,7 @@ Value in milliseconds for the metering pulse timeout, any negative value means
 
 .TP 
 \fBcollectcalls\fR=\fI<yes|no>\fR
-Whether to accept collect calls (se also \fBdoubleanswer\fR). Defaults to \fIno\fR
+Whether to accept collect calls (see also \fBdoubleanswer\fR). Defaults to \fIno\fR
 
 .TP 
 \fBdoubleanswer\fR=\fI<yes|no>\fR
@@ -117,11 +117,11 @@ incoming call. Defaults to \fIno\fR
 .B advancedprotocolfile
 This option is for advanced users only! Define a file that contains hacks to
 R2 protocol. This allow advanced users to fine tune the library or make test
-with specific scenarios to inclide in the library in the future.
+with specific scenarios to include in the library in the future.
 
 .TP
 \fBplayaudio\fR=\fI<yes|no>\fR
-This feature allows you to play an alaw audio file for inconming/outgoing calls.
+This feature allows you to play an alaw audio file for incoming/outgoing calls.
 Defaults to \fIno\fR
 
 .TP
@@ -143,7 +143,7 @@ channel=17\-31
 
 .TP 
 .B dnid
-Defines the destinity number. Only used if .B caller = yes
+Defines the destination number. Only used if .B caller = yes
 
 .TP 
 .B cid

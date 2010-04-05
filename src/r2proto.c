@@ -846,7 +846,7 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 		return;
 	}
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Got digits %s of len %d\n", digits, len);
-	/* since we always read in 20ms chunks I dont think we can get more than 1 digit in a single chunk, may be even 2 chunks or more
+	/* since we always read in 20ms chunks I don't think we can get more than 1 digit in a single chunk, may be even 2 chunks or more
 	   are required to detect a single dtmf digit, but lets assume more than one can be received */
 	digit = digits;
 	/* check both len and digits to be more bug-safe from the DTMF detector implementation */
@@ -1337,7 +1337,7 @@ handlecas:
 			CAS_LOG_RX(IDLE);
 			report_call_end(r2chan);
 		} else if (check_backward_disconnection(r2chan, cas, &out_disconnect_cause, &out_r2_state)) {
-			/* we requested the disconnection, we dont report call end to the user since the channel
+			/* we requested the disconnection, we don't report call end to the user since the channel
 			 * is still NOT available to be used, we need still to wait for IDLE
 			 * */
 			r2chan->r2_state = OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD;
@@ -1417,7 +1417,7 @@ static int get_tone_from_mode(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 	case OR2_CALL_SPECIAL:
 		return GB_TONE(r2chan).special_info_tone;
 	default:
-		openr2_log(r2chan, OR2_LOG_WARNING, "Unkown call mode (%d), defaulting to %s\n", get_string_from_mode(OR2_CALL_NO_CHARGE));
+		openr2_log(r2chan, OR2_LOG_WARNING, "Unknown call mode (%d), defaulting to %s\n", get_string_from_mode(OR2_CALL_NO_CHARGE));
 		return GB_TONE(r2chan).accept_call_no_charge;
 	}
 }
@@ -1984,7 +1984,7 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 	/* TODO: Handle sending of previous ANI digits */
 	OR2_CHAN_STACK;
 
-	/* before trying to send, check if we already said we dont have more ANI */
+	/* before trying to send, check if we already said we don't have more ANI */
 	if (r2chan->mf_state == OR2_MF_ANI_END_TXD) {
 		/* this means probably that they are asking for something else, most likely DNIS
 		   if the ANI tone is the same as DNIS, then change to GA again to continue
@@ -2388,7 +2388,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 		digit++;
 	}
 
-	/* open the log for the new call, but dont forget to close it if the call attempt fails here */
+	/* open the log for the new call, but don't forget to close it if the call attempt fails here */
 	open_logfile(r2chan, 0);
 
 	openr2_log(r2chan, OR2_LOG_DEBUG, "Outgoing call proceeding: ANI=%s, DNIS=%s, Category=%s\n", 
@@ -2514,7 +2514,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 	OR2_CHAN_STACK;
 	/* cannot drop a call when there is none to drop */
 	if (r2chan->call_state == OR2_CALL_IDLE) {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot disconnect call when we dont have a call to disconnect\n");
+		openr2_log(r2chan, OR2_LOG_ERROR, "Cannot disconnect call when we don't have a call to disconnect\n");
 		return -1;
 	}
 
