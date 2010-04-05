@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "r2utils-pvt.h"
+#include "openr2/r2utils-pvt.h"
 
 static pthread_mutex_t localtime_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ctime_lock = PTHREAD_MUTEX_INITIALIZER;

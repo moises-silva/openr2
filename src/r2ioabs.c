@@ -24,12 +24,12 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <string.h>
-#include "r2zapcompat.h"
-#include "r2log-pvt.h"
-#include "r2chan-pvt.h"
-#include "r2context-pvt.h"
-#include "r2utils-pvt.h"
-#include "r2ioabs.h"
+#include "openr2/r2zapcompat.h"
+#include "openr2/r2log-pvt.h"
+#include "openr2/r2chan-pvt.h"
+#include "openr2/r2context-pvt.h"
+#include "openr2/r2utils-pvt.h"
+#include "openr2/r2ioabs.h"
 
 #ifndef OR2_ZAP_UNAVAILABLE
 static openr2_io_fd_t zt_open(openr2_context_t *r2context, int channo)

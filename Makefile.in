@@ -36,7 +36,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
+DIST_COMMON = README $(am__configure_deps) $(dist_man5_MANS) \
+	$(dist_man8_MANS) $(dist_sysconf_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING COPYING.LESSER \
 	ChangeLog INSTALL NEWS TODO compile config.guess config.sub \
@@ -64,15 +65,15 @@ am__installdirs = "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)" \
 	"$(DESTDIR)$(sysconfdir)"
 man8dir = $(mandir)/man8
 NROFF = nroff
-MANS = $(man5_MANS) $(man8_MANS)
+MANS = $(dist_man5_MANS) $(dist_man8_MANS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-sysconfDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(sysconf_DATA)
+dist_sysconfDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(dist_sysconf_DATA)
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
@@ -116,6 +117,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+GREP = @GREP@
 HAVE_ATTR_VISIBILITY_HIDDEN_FALSE = @HAVE_ATTR_VISIBILITY_HIDDEN_FALSE@
 HAVE_ATTR_VISIBILITY_HIDDEN_TRUE = @HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@
 HAVE_SVNVERSION_FALSE = @HAVE_SVNVERSION_FALSE@
@@ -152,12 +154,9 @@ WANT_OR2_TRACE_STACKS_FALSE = @WANT_OR2_TRACE_STACKS_FALSE@
 WANT_OR2_TRACE_STACKS_TRUE = @WANT_OR2_TRACE_STACKS_TRUE@
 WANT_R2TEST_FALSE = @WANT_R2TEST_FALSE@
 WANT_R2TEST_TRUE = @WANT_R2TEST_TRUE@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -174,32 +173,39 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 svnversioncommand = @svnversioncommand@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = src
-man8_MANS = r2test.8 
-man5_MANS = r2test.conf.5
-sysconf_DATA = doc/r2proto.conf doc/r2test.conf
+dist_man8_MANS = r2test.8 
+dist_man5_MANS = r2test.conf.5
+dist_sysconf_DATA = doc/r2proto.conf doc/r2test.conf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -354,19 +360,19 @@ uninstall-man8:
 	  echo " rm -f '$(DESTDIR)$(man8dir)/$$inst'"; \
 	  rm -f "$(DESTDIR)$(man8dir)/$$inst"; \
 	done
-install-sysconfDATA: $(sysconf_DATA)
+install-dist_sysconfDATA: $(dist_sysconf_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(sysconfdir)" || $(mkdir_p) "$(DESTDIR)$(sysconfdir)"
-	@list='$(sysconf_DATA)'; for p in $$list; do \
+	@list='$(dist_sysconf_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(sysconfDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(sysconfdir)/$$f'"; \
-	  $(sysconfDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(sysconfdir)/$$f"; \
+	  echo " $(dist_sysconfDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(sysconfdir)/$$f'"; \
+	  $(dist_sysconfDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(sysconfdir)/$$f"; \
 	done
 
-uninstall-sysconfDATA:
+uninstall-dist_sysconfDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(sysconf_DATA)'; for p in $$list; do \
+	@list='$(dist_sysconf_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(sysconfdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(sysconfdir)/$$f"; \
@@ -507,6 +513,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
+	$(mkdir_p) $(distdir)/doc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -699,7 +706,7 @@ info-am:
 
 install-data-am: install-man
 
-install-exec-am: install-sysconfDATA
+install-exec-am: install-dist_sysconfDATA
 
 install-info: install-info-recursive
 
@@ -725,7 +732,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-man uninstall-sysconfDATA
+uninstall-am: uninstall-dist_sysconfDATA uninstall-info-am \
+	uninstall-man
 
 uninstall-info: uninstall-info-recursive
 
@@ -738,16 +746,16 @@ uninstall-man: uninstall-man5 uninstall-man8
 	distclean-generic distclean-hdr distclean-libtool \
 	distclean-recursive distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-man5 install-man8 install-strip install-sysconfDATA \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am uninstall-info-am \
-	uninstall-man uninstall-man5 uninstall-man8 \
-	uninstall-sysconfDATA
+	install install-am install-data install-data-am \
+	install-dist_sysconfDATA install-exec install-exec-am \
+	install-info install-info-am install-man install-man5 \
+	install-man8 install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive \
+	mostlyclean mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am uninstall-dist_sysconfDATA \
+	uninstall-info-am uninstall-man uninstall-man5 uninstall-man8
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
