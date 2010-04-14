@@ -888,7 +888,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	} else {
 		/* DTMF R2, init the DTMF detector to get DNIS */
 		if (!DTMF(r2chan)->dtmf_rx_init(r2chan->dtmf_read_handle, on_dtmf_received, r2chan)) {
-			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
+			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF detector, cannot accept call!!\n");
 			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 			return;
 		}
