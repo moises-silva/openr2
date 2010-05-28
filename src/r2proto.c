@@ -2407,7 +2407,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	r2chan->direction = OR2_DIR_FORWARD;
 	r2chan->caller_category = category2tone(r2chan, category);
 	if (!DIAL_DTMF(r2chan)) {
-		r2chan->mf_group = OR2_MF_DTMF_FWD_INIT;
+		r2chan->mf_group = OR2_MF_FWD_INIT;
 	} else {
 		if (!DTMF(r2chan)->dtmf_tx_init(r2chan->dtmf_write_handle)) {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to initialize DTMF transmitter, cannot make call!!\n");
