@@ -34,9 +34,6 @@
 extern "C" {
 #endif
 
-/* getting half second of silence we declare DTMF DNIS string as ended */
-#define OR2_DTMF_MAX_SILENCE_SAMPLES 4000
-
 struct openr2_chan_s;
 struct openr2_context_s;
 
@@ -83,6 +80,9 @@ typedef struct openr2_chan_timer_ids_s {
 
 	/* DTMF dial startup */
 	int dtmf_start_dial;
+
+	/* DTMF detection end */
+	int dtmf_detection_end;
 } openr2_chan_timer_ids_t;
 
 typedef enum r2chan_flags_e {
@@ -194,7 +194,7 @@ typedef struct openr2_chan_s {
 	/* whether or not we are in the middle of dialing or detecting DTMF */
 	int dialing_dtmf;
 	int detecting_dtmf;
-	int dtmf_silence_samples;
+	int dtmf_detection_expired;
 
 	/* default DTMF tone generation handle */
 	openr2_dtmf_tx_state_t default_dtmf_write_handle;

@@ -26,9 +26,9 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-#define OR2_LIB_INTERFACE 3
+#define OR2_LIB_INTERFACE 4
 #define OR2_LIB_REVISION 0
-#define OR2_LIB_AGE 0
+#define OR2_LIB_AGE 1
 const char *openr2_get_version(void);
 const char *openr2_get_revision(void);
 int openr2_strncasecmp(const char *s1, const char *s2, size_t n);

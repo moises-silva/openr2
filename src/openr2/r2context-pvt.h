@@ -60,6 +60,8 @@ typedef struct {
 	int cas_persistence_check;
 	/* safety timer before starting to dial DTMF */
 	int dtmf_start_dial;
+	/* safety timer to decide when to stop detecting DTMF DNIS */
+	int dtmf_detection_end;
 } openr2_timers_t;
 
 

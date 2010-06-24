@@ -670,6 +670,24 @@ int openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
 }
 
 OR2_EXPORT_SYMBOL
+void openr2_context_set_dtmf_detection_end_timeout(openr2_context_t *r2context, int ms)
+{
+	OR2_CONTEXT_STACK;
+	/* ignore any timeout less than 0 */
+	if (ms < 0) {
+		return;
+	}
+	r2context->timers.dtmf_detection_end = ms;
+}
+
+OR2_EXPORT_SYMBOL
+int openr2_context_get_dtmf_detection_end_timeout(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	return r2context->timers.dtmf_detection_end;
+}
+
+OR2_EXPORT_SYMBOL
 void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms)
 {
 	OR2_CONTEXT_STACK;
@@ -812,6 +830,7 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 		LOADTIMER(timers.r2_answer_delay)
 		LOADTIMER(timers.cas_persistence_check)
 		LOADTIMER(timers.dtmf_start_dial)
+		LOADTIMER(timers.dtmf_detection_end)
 
 		/* misc settings */
 		LOADSETTING(mf_threshold)

@@ -375,6 +375,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 
 	/* DTMF start dialing timer */
 	r2context->timers.dtmf_start_dial = 500;
+	r2context->timers.dtmf_detection_end = 5000;
 
 	/* Max ANI and DNIS */
 	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? OR2_MAX_DNIS - 1 : max_dnis;
@@ -665,6 +666,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->category_sent = 0;
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
+	r2chan->dtmf_detection_expired = 0;
 	openr2_set_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
 	close_logfile(r2chan);
 }
@@ -830,6 +832,12 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 	}
 }
 
+static void dtmf_detection_expired(openr2_chan_t *r2chan)
+{
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Stopping DTMF detection due to timer expiration\n");
+	r2chan->dtmf_detection_expired = 1;
+}
+
 static void on_dtmf_received(void *user_data, const char *digits, int len)
 {
 	const char *digit = NULL;
@@ -839,8 +847,9 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 		openr2_log(r2chan, OR2_LOG_ERROR, "Wow! DTMF detector gave us null digits of len %d\n", len);
 		return;
 	}
-	/* got a digit, reset silence counter */
-	r2chan->dtmf_silence_samples = 0; 
+	/* got a digit, reset dtmf end timer */
+	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.dtmf_detection_end);
+
 	if (!openr2_test_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK)) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Ignoring DNIS DTMF digits %s of len %d per user request\n", digits, len);
 		return;
@@ -854,13 +863,21 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 		r2chan->dnis[r2chan->dnis_len++] = *digit;
 		r2chan->dnis[r2chan->dnis_len] = '\0';
 		rc = EMI(r2chan)->on_dnis_digit_received(r2chan, *digit);
-		if (!rc) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "User requested us to stop getting DNIS!\n");
+		if (DNIS_COMPLETE(r2chan) || !rc) {
+			if (!rc) {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "User requested us to stop getting DNIS!\n");
+			} else {
+				openr2_log(r2chan, OR2_LOG_DEBUG, "Done getting DNIS!\n");
+			}
 			openr2_clear_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
+			r2chan->dtmf_detection_expired = 1;
+			return;
 		}
 		digit++;
 		len--;
 	}
+	r2chan->timer_ids.dtmf_detection_end = openr2_chan_add_timer(r2chan, TIMER(r2chan).dtmf_detection_end, 
+								dtmf_detection_expired, "dtmf_detection_end");
 }
 
 static void handle_incoming_call(openr2_chan_t *r2chan)
@@ -897,6 +914,8 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		r2chan->mf_group = OR2_MF_DTMF_BACK_INIT;
 		r2chan->mf_state = OR2_MF_DETECTING_DTMF;
 		r2chan->detecting_dtmf = 1;
+		r2chan->timer_ids.dtmf_detection_end = openr2_chan_add_timer(r2chan, TIMER(r2chan).dtmf_detection_end, 
+									dtmf_detection_expired, "dtmf_detection_end");
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Initialized R2 DTMF detector\n");
 	}
 	r2chan->r2_state = OR2_SEIZE_ACK_TXD;
@@ -946,7 +965,7 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 			if (r2chan->direction == OR2_DIR_BACKWARD) {
 				/* schedule a new timer that will handle the timeout for our backward request */
 				r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
-				mf_back_cycle_timeout_expired, "mf_back_cycle");
+									mf_back_cycle_timeout_expired, "mf_back_cycle");
 			}
 		}	
 		r2chan->mf_write_tone = tone;
