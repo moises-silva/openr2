@@ -397,7 +397,7 @@ int openr2_chan_process_event(openr2_chan_t *r2chan)
 					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
 					res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
 					if (!res) {
-						if (r2chan->dtmf_detection_expired) {
+						if (r2chan->dtmf_detection_done) {
 							openr2_log(r2chan, OR2_LOG_DEBUG, "Done with DTMF detection\n");
 							openr2_proto_handle_dtmf_end(r2chan);
 							continue;

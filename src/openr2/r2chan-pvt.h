@@ -194,7 +194,7 @@ typedef struct openr2_chan_s {
 	/* whether or not we are in the middle of dialing or detecting DTMF */
 	int dialing_dtmf;
 	int detecting_dtmf;
-	int dtmf_detection_expired;
+	int dtmf_detection_done;
 
 	/* default DTMF tone generation handle */
 	openr2_dtmf_tx_state_t default_dtmf_write_handle;
