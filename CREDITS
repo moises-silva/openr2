@@ -1,16 +1,18 @@
-The following is a (incomplete as usual) list of companies or individuals who have contributed to OpenR2 with sponsorship and/or donations.
+The following is an incomplete, as usual, list of companies or individuals who have contributed to OpenR2 with sponsorship and/or donations.
 
-Neocenter - Donated the first Sangoma board to develop and test openr2 and signaling in telecommunications network book. 
-            Special thanks to Octavio, Pop and Alejandro Apan.
+Neocenter, Mexico - Donated the first Sangoma board to develop and test openr2 and signaling in telecommunications networks book. 
+           Special thanks to Octavio, Pop and Alejandro Apan.
 
-Cuallisoft (Camaleon Firewall) - Donated the first server ever where openr2 was developed and tested.
+Cuallisoft (Camaleon Firewall), Mexico - Donated the first server ever where openr2 was developed and tested.
 
-Sangoma Technologies - First company providing significant moral and financial contribution to the project. Thanks Doug :-)
+Sangoma Technologies, Canada - First company providing significant moral and financial contribution to the project. Thanks Doug :-)
 
-Digium (Thanks to Mark Spencer for the boards) - Donated Digium boards to test openr2 and for creating Asterisk and 
-                                                 allowing my code to be part of Asterisk.
+Digium, USA (Thanks to Mark Spencer for the boards) - Donated Digium boards to test openr2 and for creating Asterisk and 
+                                                      allowing my code to be part of Asterisk.
 
-Telecomunicaciones Abiertas de Mexico (Thanks to Carlos Chavez) - Sponsored development and maintenance of the code.
+Telecomunicaciones Abiertas de Mexico, Mexico (Thanks to Carlos Chavez) - Sponsored development and maintenance of the code.
 
-e-contact - Sponsored the development of DTMF R2.
+e-contact, Chile - Sponsored the development of DTMF R2.
+
+Abastecedora de Conectividad (AbaNet), Mexico - Sponsored DTMF R2 improvements to openr2 and Asterisk.
 
