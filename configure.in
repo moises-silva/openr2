@@ -35,6 +35,16 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_LANG([C])
 
+if test "${build}" == "${host}"
+then
+    case "${host}" in
+    x86_64-*)
+        # X86_64 Linux machines may have both 64 bit and 32 bit libraries. We need to choose the right set
+        AX_CHECK_REAL_FILE([${prefix}/lib64], libdir='$(exec_prefix)/lib64')
+        ;;
+    esac
+fi
+
 AC_CHECK_LIB([m],[cosf], [], [AC_MSG_FAILURE([library libm is required but not present])])
 AC_CHECK_HEADER([math.h],[],[AC_MSG_FAILURE([header math.h is required but not present])])
 AC_CHECK_HEADER([pthread.h],[],[AC_MSG_FAILURE([header pthread.h is required but not present])])

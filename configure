@@ -19932,6 +19932,16 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+if test "${build}" == "${host}"
+then
+    case "${host}" in
+    x86_64-*)
+        # X86_64 Linux machines may have both 64 bit and 32 bit libraries. We need to choose the right set
+        AX_CHECK_REAL_FILE(${prefix}/lib64, libdir='$(exec_prefix)/lib64')
+        ;;
+    esac
+fi
+
 
 { echo "$as_me:$LINENO: checking for cosf in -lm" >&5
 echo $ECHO_N "checking for cosf in -lm... $ECHO_C" >&6; }
