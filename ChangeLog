@@ -1,3 +1,61 @@
+2010-07-29 03:25  moy
+
+	* Makefile.in, config, config/ax_check_real_file.m4, configure,
+	  configure.in, src/Makefile.in: added missing macro for testing 64
+	  bit library dir
+
+2010-07-29 03:19  moy
+
+	* configure, configure.in: updated configure.in to test for 64 bit
+	  library directory
+
+2010-07-29 03:04  moy
+
+	* config.guess, config.sub: updated config.guess and config.sub
+
+2010-07-29 02:49  moy
+
+	* src/r2log.c: fix build issue on Linux/Sparc
+
+2010-07-29 02:44  moy
+
+	* CREDITS: updated credits
+
+2010-06-25 22:59  moy
+
+	* src/openr2/r2chan-pvt.h, src/r2chan.c, src/r2proto.c: dtmf
+	  detection member named more properly
+
+2010-06-24 06:35  moy
+
+	* configure, configure.in, ltmain.sh, src/openr2/r2chan-pvt.h,
+	  src/openr2/r2context-pvt.h, src/openr2/r2context.h,
+	  src/openr2/r2utils.h, src/r2chan.c, src/r2context.c,
+	  src/r2proto.c: add dtmf end timeout settings
+
+2010-04-05 16:55  moises.silva
+
+	* config.h.in, src/Makefile.am, src/Makefile.in,
+	  src/r2dtmf_detect.c: fix include path in r2dtmf_detect
+
+2010-04-05 15:52  moises.silva
+
+	* r2test.8, r2test.conf.5, src/r2proto.c: fix typos
+
+2010-04-05 15:51  moises.silva
+
+	* aclocal.m4, configure, configure.in: fix autoreconf complains
+
+2010-04-05 15:49  moises.silva
+
+	* Makefile.am, Makefile.in, ltmain.sh, src/Makefile.am,
+	  src/Makefile.in, src/r2dtmf_detect.c, src/r2utils.c: fix make
+	  distcheck
+
+2010-03-22 02:57  moises.silva
+
+	* ChangeLog: updated changelog in preparation for 1.3.0 release
+
 2010-03-20 05:27  moy
 
 	* src/r2proto.c: fix the colombian variant to work with
