@@ -1,5 +1,5 @@
 Name:           libopenr2
-Version:        1.2.0
+Version:        1.3.1
 Release:        1%{?dist}
 Summary:        MFC/R2 call setup library
 Packager:       Alexandre Cavalcante Alencar <alexandre.alencar@gmail.com>
@@ -81,6 +81,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Sep 06 2010 Alexandre Alencar <alexandre.alencar@gmail.com>
+- Updated package version number
+- Updated to OpenR2 source package 1.3.1
+
 * Mon Mar 16 2009 Alexandre Alencar <alexandre.alencar@gmail.com>
 - Updated package version number
 - Updated to OpenR2 source package 1.2.0
