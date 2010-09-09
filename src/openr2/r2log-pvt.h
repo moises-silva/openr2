@@ -35,16 +35,16 @@ struct openr2_context_s;
 
 #ifdef OR2_TRACE_STACKS
 #define OR2_CHAN_STACK openr2_log(r2chan, OR2_LOG_STACK_TRACE, "%s()\n", __PRETTY_FUNCTION__);
-#define OR2_CONTEXT_STACK openr2_log2(r2context, OR2_LOG_STACK_TRACE, "%s()\n", __PRETTY_FUNCTION__);
+#define OR2_CONTEXT_STACK openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_STACK_TRACE, "%s()\n", __PRETTY_FUNCTION__);
 #else
 #define OR2_CHAN_STACK 
 #define OR2_CONTEXT_STACK 
 #endif
 
 void openr2_log_channel_default(struct openr2_chan_s *r2chan, openr2_log_level_t level, const char *fmt, va_list ap);
-void openr2_log_context_default(struct openr2_context_s *r2context, openr2_log_level_t level, const char *fmt, va_list ap);
+void openr2_log_context_default(struct openr2_context_s *r2context, const char *file, const char *function, unsigned long line, openr2_log_level_t level, const char *fmt, va_list ap);
 void openr2_log(struct openr2_chan_s *r2chan, openr2_log_level_t level, const char *fmt, ...);
-void openr2_log2(struct openr2_context_s *r2context, openr2_log_level_t level, const char *fmt, ...);
+void openr2_log2(struct openr2_context_s *r2context, const char *file, const char *function, const unsigned long line, openr2_log_level_t level, const char *fmt, ...);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

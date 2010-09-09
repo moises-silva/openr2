@@ -39,7 +39,7 @@ static openr2_io_fd_t zt_open(openr2_context_t *r2context, int channo)
 	chanfd = open(OR2_ZAP_FILE_NAME, O_RDWR | O_NONBLOCK);
 	if (-1 == chanfd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open zap control device (%s)\n", strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to open zap control device (%s)\n", strerror(errno));
 		return NULL;
 	}
 
@@ -47,7 +47,7 @@ static openr2_io_fd_t zt_open(openr2_context_t *r2context, int channo)
 	res = ioctl(chanfd, ZT_SPECIFY, &channo);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to choose channel %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to choose channel %d (%s)\n", channo, strerror(errno));
 		close(chanfd);
 		return NULL;
 	}
@@ -156,7 +156,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_CHANNO, &channo);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get channel number from descriptor %d (%s)\n", chanfd, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to get channel number from descriptor %d (%s)\n", chanfd, strerror(errno));
 		return -1;
 	}
 
@@ -164,13 +164,13 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_GET_PARAMS, &chan_params);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get signaling information for channel %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to get signaling information for channel %d (%s)\n", channo, strerror(errno));
 		return -1;
 	}
 
 	if (ZT_SIG_CAS != chan_params.sigtype) {
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_SIGNALING;
-		openr2_log2(r2context, OR2_LOG_ERROR, "chan %d does not has CAS signaling\n", channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "chan %d does not has CAS signaling\n", channo);
 		return -1;
 	}
 
@@ -178,7 +178,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_GET_BUFINFO, &chan_buffers);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to retrieve buffer information for chan %d (%s)\n", 
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to retrieve buffer information for chan %d (%s)\n", 
 			    channo, strerror(errno));
 		return -1;
 	}
@@ -189,7 +189,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_SET_BUFINFO, &chan_buffers);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set buffer information for chan %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to set buffer information for chan %d (%s)\n", channo, strerror(errno));
 		return -1;
 	}
 
@@ -201,7 +201,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_SETGAINS, &chan_gains);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set gains on channel %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to set gains on channel %d (%s)\n", channo, strerror(errno));
 		return -1;
 	}
 
@@ -209,7 +209,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_SETLAW, &zapval);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to set ALAW codec on channel %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to set ALAW codec on channel %d (%s)\n", channo, strerror(errno));
 		return -1;
 	}
 
@@ -217,7 +217,7 @@ static int zt_setup(openr2_chan_t *r2chan)
 	res = ioctl(chanfd, ZT_ECHOCANCEL, &zapval);
 	if (res) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to put echo-cancel off on channel %d (%s)\n", channo, strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to put echo-cancel off on channel %d (%s)\n", channo, strerror(errno));
 		return -1;
 	}
 	return 0;
@@ -322,7 +322,7 @@ openr2_io_interface_t *openr2_io_get_zt_interface()
 openr2_io_fd_t openr2_io_open(openr2_context_t *r2context, int channo)
 {
 	if (!r2context->io) {
-		openr2_log2(r2context, OR2_LOG_ERROR, "Cannot create I/O channel without an I/O interface available.\n"); 
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Cannot create I/O channel without an I/O interface available.\n"); 
 		return NULL;
 	}
 	return r2context->io->open(r2context, channo);

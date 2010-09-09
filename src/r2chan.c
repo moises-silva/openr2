@@ -66,7 +66,7 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	r2chan = calloc(1, sizeof(*r2chan));
 	if (!r2chan) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to allocate memory for r2chan %d\n", channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to allocate memory for r2chan %d\n", channo);
 		return NULL;
 	}
 #ifdef OR2_MF_DEBUG
@@ -76,7 +76,7 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	r2chan->mf_write_fd = open(logfile, O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	if (-1 == r2chan->mf_read_fd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open MF-tx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to open MF-tx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
 		free(r2chan);
 		return NULL;
 	}
@@ -85,7 +85,7 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	r2chan->mf_read_fd = open(logfile, O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	if (-1 == r2chan->mf_read_fd) {
 		r2context->last_error = OR2_LIBERR_SYSCALL_FAILED;
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open MF-rx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to open MF-rx debug file %s for chan %d: %s\n", logfile, strerror(errno), channo);
 		close(r2chan->mf_write_fd);
 		free(r2chan);
 		return NULL;
@@ -178,7 +178,7 @@ OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo)
 {
 	if (channo <=0 ) {
-		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
@@ -189,7 +189,7 @@ OR2_EXPORT_SYMBOL
 openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo)
 {
 	if (channo <=0 ) {
-		openr2_log2(r2context, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}

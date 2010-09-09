@@ -55,7 +55,7 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level,
 	vprintf(fmt, ap);
 }
 
-void openr2_log_context_default(openr2_context_t *r2context, openr2_log_level_t level, const char *fmt, va_list ap)
+void openr2_log_context_default(openr2_context_t *r2context, const char *file, const char *function, unsigned long line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	printf("[%s] Context -- ", openr2_log_get_level_string(level));
 	if (r2context->configured_from_file) {
@@ -106,14 +106,14 @@ void openr2_log(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt
 	}	
 }
 
-void openr2_log2(openr2_context_t *r2context, openr2_log_level_t level, const char *fmt, ...)
+void openr2_log2(struct openr2_context_s *r2context, const char *file, const char *function, const unsigned long line, openr2_log_level_t level, const char *fmt, ...)
 {
 	va_list ap;
 	/* Avoid infinite recursion: Don't call openr2_context_get_log_level 
 	   because that will call openr2_log2 */
 	if (level & r2context->loglevel) {
 		va_start(ap, fmt);
-		r2context->evmanager->on_context_log(r2context, level, fmt, ap);
+		r2context->evmanager->on_context_log(r2context, file, function, line, level, fmt, ap);
 		va_end(ap);
 	}	
 }

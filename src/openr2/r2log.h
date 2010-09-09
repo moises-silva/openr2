@@ -40,6 +40,9 @@ typedef enum {
 	OR2_LOG_EX_DEBUG    = ( OR2_LOG_ALL + 1 )
 } openr2_log_level_t;	
 
+/* must be used on each openr2_log2() call */
+#define OR2_CONTEXT_LOG __FILE__, __FUNCTION__, __LINE__
+
 const char *openr2_log_get_level_string(openr2_log_level_t level);
 openr2_log_level_t openr2_log_get_level(const char *levelstr);
 

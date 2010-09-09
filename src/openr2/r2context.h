@@ -82,7 +82,7 @@ typedef void (*openr2_handle_line_idle_func)(openr2_chan_t *r2chan);
 typedef void (*openr2_handle_billing_pulse_received_func)(openr2_chan_t *r2chan);
 typedef int (*openr2_handle_dnis_digit_received_func)(openr2_chan_t *r2chan, char digit);
 typedef void (*openr2_handle_ani_digit_received_func)(openr2_chan_t *r2chan, char digit);
-typedef void (*openr2_handle_context_logging_func)(openr2_context_t *r2context, openr2_log_level_t level, const char *fmt, va_list ap);
+typedef void (*openr2_handle_context_logging_func)(openr2_context_t *r2context, const char *file, const char *function, unsigned long line, openr2_log_level_t level, const char *fmt, va_list ap);
 typedef struct {
 	/* A new call has just started. We will start to 
 	   receive the ANI and DNIS */

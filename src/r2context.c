@@ -378,7 +378,7 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 
 	res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to get next context event time: %s\n", strerror(errno));
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to get next context event time: %s\n", strerror(errno));
 
 		pthread_mutex_unlock(&r2context->timers_lock);
 		return -1;
@@ -737,47 +737,47 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 	case OR2_IO_CUSTOM:
 		/* sanity check for all members */
 		if (!io_interface) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "I/O interface cannot be null!\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "I/O interface cannot be null!\n");
 			return -1;
 		}
 		if (!io_interface->open) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: open\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: open\n");
 			return -1;
 		}
 		if (!io_interface->close) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: close\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: close\n");
 			return -1;
 		}
 		if (!io_interface->set_cas) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: set_cas\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: set_cas\n");
 			return -1;
 		}
 		if (!io_interface->get_cas) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: get_cas\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: get_cas\n");
 			return -1;
 		}
 		if (!io_interface->flush_write_buffers) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: flush_write_buffers\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: flush_write_buffers\n");
 			return -1;
 		}
 		if (!io_interface->write) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: write\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: write\n");
 			return -1;
 		}
 		if (!io_interface->read) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: read\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: read\n");
 			return -1;
 		}
 		if (!io_interface->setup) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: setup\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: setup\n");
 			return -1;
 		}
 		if (!io_interface->wait) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: wait\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: wait\n");
 			return -1;
 		}
 		if (!io_interface->get_oob_event) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unspecified I/O interface method: get_oob_event\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unspecified I/O interface method: get_oob_event\n");
 			return -1;
 		}
 		r2context->io = io_interface;
@@ -787,7 +787,7 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 		/* check that zaptel interface is available */
 		internal_io_interface = openr2_io_get_zt_interface();
 		if (!internal_io_interface) {
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable Zaptel or DAHDI I/O interface.\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unavailable Zaptel or DAHDI I/O interface.\n");
 			return -1;
 		}
 		r2context->io_type = io_type;
@@ -800,7 +800,7 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 			/* if not available, bail out with error since we don't have any other built-in interface yet,
 			   but we should check for openr2_io_get_oz_interface to get openzap interface or openr2_io_get_wp_interface
 			   for wanpipe interface */
-			openr2_log2(r2context, OR2_LOG_ERROR, "Unavailable default I/O interface.\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unavailable default I/O interface.\n");
 			return -1;
 		}
 		r2context->io_type = io_type;
@@ -810,19 +810,19 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 	default:
 		break;
 	}
-	openr2_log2(r2context, OR2_LOG_ERROR, "Invalid I/O type %d\n", io_type);
+	openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Invalid I/O type %d\n", io_type);
 	return -1;
 }
 
 #define LOADTONE(mytone) \
 	else if (1 == sscanf(line, #mytone "=%c", (char *)&intvalue)) { \
-		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for tone %s\n", intvalue, #mytone); \
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Found value %d for tone %s\n", intvalue, #mytone); \
 		if (strchr("1234567890BCDEF", intvalue)) { \
-			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing tone %s from %02X to %02X\n", \
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Changing tone %s from %02X to %02X\n", \
 			#mytone, r2context->mytone, intvalue); \
 			r2context->mytone = intvalue; \
 		} else { \
-			openr2_log2(r2context, OR2_LOG_DEBUG, "Disabling tone %s, its value was %02X\n", \
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Disabling tone %s, its value was %02X\n", \
 			#mytone, r2context->mytone); \
 			r2context->mytone = OR2_MF_TONE_INVALID; \
 		} \
@@ -830,9 +830,9 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 
 #define LOADTIMER(mytimer) \
 	else if (1 == sscanf(line, #mytimer "=%d", &intvalue)) { \
-		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for timer %s\n", intvalue, #mytimer); \
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Found value %d for timer %s\n", intvalue, #mytimer); \
 		if (intvalue >= 0) { \
-			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing timer %s from %d to %d\n", \
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Changing timer %s from %d to %d\n", \
 			#mytimer, r2context->mytimer, intvalue); \
 			r2context->mytimer = intvalue; \
 		} \
@@ -840,9 +840,9 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 
 #define LOADSETTING(mysetting) \
 	else if (1 == sscanf(line, #mysetting "=%d", &intvalue)) { \
-		openr2_log2(r2context, OR2_LOG_DEBUG, "Found value %d for setting %s\n", intvalue, #mysetting); \
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Found value %d for setting %s\n", intvalue, #mysetting); \
 		if (intvalue >= 0) { \
-			openr2_log2(r2context, OR2_LOG_DEBUG, "Changing setting %s from %d to %d\n", \
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Changing setting %s from %d to %d\n", \
 			#mysetting, r2context->mysetting, intvalue); \
 			r2context->mysetting = intvalue; \
 		} \
@@ -860,10 +860,10 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 	}
 	variant_file = fopen(filename, "r");
 	if (!variant_file) {
-		openr2_log2(r2context, OR2_LOG_ERROR, "Failed to open R2 variant file '%s'\n", filename);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to open R2 variant file '%s'\n", filename);
 		return -1;
 	}
-	openr2_log2(r2context, OR2_LOG_NOTICE, "Reading R2 definitions from protocol file '%s'\n", filename);
+	openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_NOTICE, "Reading R2 definitions from protocol file '%s'\n", filename);
 	while (fgets(line, sizeof(line), variant_file))	{
 
 		if ('#' == line[0] || '\n' == line[0] || ' ' == line[0]) {
