@@ -31,7 +31,7 @@
 #include "openr2/r2chan-pvt.h"
 #include "openr2/r2context-pvt.h"
 
-void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt, va_list ap)
+void openr2_log_channel_default(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
 	struct tm currtime_tm;
@@ -55,7 +55,7 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, openr2_log_level_t level,
 	vprintf(fmt, ap);
 }
 
-void openr2_log_context_default(openr2_context_t *r2context, const char *file, const char *function, unsigned long line, openr2_log_level_t level, const char *fmt, va_list ap)
+void openr2_log_context_default(openr2_context_t *r2context, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	printf("[%s] Context -- ", openr2_log_get_level_string(level));
 	if (r2context->configured_from_file) {
@@ -88,7 +88,7 @@ static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 	vfprintf(r2chan->logfile, fmt, ap);
 }
 
-void openr2_log(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt, ...)
+void openr2_log(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, ...)
 {
 	va_list ap;
 	va_list aplog;
@@ -101,12 +101,12 @@ void openr2_log(openr2_chan_t *r2chan, openr2_log_level_t level, const char *fmt
 	   because that will call openr2_log */
 	if (level & r2chan->loglevel) {
 		va_start(ap, fmt);
-		r2chan->on_channel_log(r2chan, level, fmt, ap);
+		r2chan->on_channel_log(r2chan, file, function, line, level, fmt, ap);
 		va_end(ap);
 	}	
 }
 
-void openr2_log2(struct openr2_context_s *r2context, const char *file, const char *function, const unsigned long line, openr2_log_level_t level, const char *fmt, ...)
+void openr2_log2(struct openr2_context_s *r2context, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, ...)
 {
 	va_list ap;
 	/* Avoid infinite recursion: Don't call openr2_context_get_log_level 

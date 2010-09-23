@@ -61,7 +61,7 @@ static int zt_close(openr2_chan_t *r2chan)
 	if (close(fd)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to close I/O descriptor: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to close I/O descriptor: %s\n", strerror(myerrno));
 		return -1;
 	}
 	return 0;
@@ -74,7 +74,7 @@ static int zt_set_cas(openr2_chan_t *r2chan, int cas)
 	if (ioctl(fd, ZT_SETTXBITS, &cas)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Setting CAS bits failed: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Setting CAS bits failed: %s\n", strerror(myerrno));
 		return -1;
 	}
 	return 0;
@@ -88,7 +88,7 @@ static int zt_flush_write_buffers(openr2_chan_t *r2chan)
 	if (ioctl(fd, ZT_FLUSH, &flush_write)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Flush write buffer failed: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Flush write buffer failed: %s\n", strerror(myerrno));
 		return -1;
 	}
 	return 0;
@@ -101,7 +101,7 @@ static int zt_get_cas(openr2_chan_t *r2chan, int *cas)
 	if (ioctl(fd, ZT_GETRXBITS, cas)) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Getting CAS bits failed: %s\n", strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Getting CAS bits failed: %s\n", strerror(myerrno));
 		return -1;
 	}
 	return 0;
@@ -115,11 +115,11 @@ static int zt_read(openr2_chan_t *r2chan, const void *buf, int size)
 	if (-1 == (bytes = read(fd, (void *)buf, size))) {
 		myerrno = errno;
 		if (myerrno == ELAST) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "read from channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "read from channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
 			return 0;
 		}
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to read from channel %d: %s\n", r2chan->number, strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to read from channel %d: %s\n", r2chan->number, strerror(myerrno));
 		return -1;
 	}
 	return bytes;
@@ -133,11 +133,11 @@ static int zt_write(openr2_chan_t *r2chan, const void *buf, int size)
 	if (-1 == (bytes = write(fd, buf, size))) {
 		myerrno = errno;
 		if (myerrno == ELAST) {
-			openr2_log(r2chan, OR2_LOG_DEBUG, "write to channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "write to channel %d returned ELAST, no handling as error since there must be an event taking priority\n", r2chan->number);
 			return 0;
 		}
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write to channel %d: %s\n", r2chan->number, strerror(myerrno));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to write to channel %d: %s\n", r2chan->number, strerror(myerrno));
 		errno = myerrno;
 	}
 	return bytes;
@@ -245,7 +245,7 @@ static int zt_wait(openr2_chan_t *r2chan, int *flags, int wait)
 	res = ioctl(fd, ZT_IOMUX, &zapflags);
 	if (res) {
 		myerrno = errno;
-		openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get I/O events\n");
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to get I/O events\n");
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		return -1;
 	}
@@ -313,7 +313,7 @@ openr2_io_interface_t *openr2_io_get_zt_interface()
 #endif
 
 #define IO(r2chan) if (!r2chan->r2context->io) {  \
-		openr2_log(r2chan, OR2_LOG_ERROR, \
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, \
 				"%s: Cannot perform I/O operation because no valid I/O interface is available.\n", __FUNCTION__); \
 		return -1; \
 	}  \

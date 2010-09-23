@@ -40,80 +40,80 @@
 static void on_call_init_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call starting at chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call starting at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_call_offered_default(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call ready at chan %d with ANI = %s, DNIS = %s, Category = %s\n", 
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call ready at chan %d with ANI = %s, DNIS = %s, Category = %s\n", 
 			openr2_chan_get_number(r2chan), ani, dnis, openr2_proto_get_category_string(category));
 }
 
 static void on_call_accepted_default(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been accepted at chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call has been accepted at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_call_answered_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been answered at chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call has been answered at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_call_disconnect_default(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call has been disconnected at chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(cause));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call has been disconnected at chan %d: %s\n", openr2_chan_get_number(r2chan), openr2_proto_get_disconnect_string(cause));
 }
 
 static void on_call_end_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "call has end on channel %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call has end on channel %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_call_read_default(openr2_chan_t *r2chan, const unsigned char *buf, int buflen)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "read %d bytes in call at chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "read %d bytes in call at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_os_error_default(openr2_chan_t *r2chan, int oserrorcode)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_ERROR, "OS error at chan %d: %s (%d)\n", openr2_chan_get_number(r2chan), strerror(oserrorcode), oserrorcode);
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "OS error at chan %d: %s (%d)\n", openr2_chan_get_number(r2chan), strerror(oserrorcode), oserrorcode);
 }
 
 static void on_hardware_alarm_default(openr2_chan_t *r2chan, int alarm)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_WARNING, "Zap alarm at chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Zap alarm at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static void on_protocol_error_default(openr2_chan_t *r2chan, openr2_protocol_error_t error)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_ERROR, "Protocol error at chan %d: %s (%d)\n", openr2_proto_get_error(error));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Protocol error at chan %d: %s (%d)\n", openr2_proto_get_error(error));
 }
 
 static void on_line_idle_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end unblocked!\n");
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end unblocked!\n");
 }
 
 static void on_line_blocked_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Far end blocked!\n");
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end blocked!\n");
 }
 
 static int on_dnis_digit_received_default(openr2_chan_t *r2chan, char digit)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_DEBUG, "DNIS digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "DNIS digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 	/* default behavior is to ask for as much dnis as possible */
 	return 1;
 }
@@ -121,13 +121,13 @@ static int on_dnis_digit_received_default(openr2_chan_t *r2chan, char digit)
 static void on_ani_digit_received_default(openr2_chan_t *r2chan, char digit)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_DEBUG, "ANI digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "ANI digit %c received on chan %d\n", digit, openr2_chan_get_number(r2chan));
 }
 
 static void on_billing_pulse_received_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_NOTICE, "Billing pulse received on chan %d\n", openr2_chan_get_number(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Billing pulse received on chan %d\n", openr2_chan_get_number(r2chan));
 }
 
 static int want_generate_default(openr2_mf_tx_state_t *state, int signal)

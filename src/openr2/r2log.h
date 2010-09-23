@@ -43,6 +43,9 @@ typedef enum {
 /* must be used on each openr2_log2() call */
 #define OR2_CONTEXT_LOG __FILE__, __FUNCTION__, __LINE__
 
+/* to be used on openr2_log() */
+#define OR2_CHANNEL_LOG __FILE__, __FUNCTION__, __LINE__
+
 const char *openr2_log_get_level_string(openr2_log_level_t level);
 openr2_log_level_t openr2_log_get_level(const char *levelstr);
 
