@@ -117,6 +117,19 @@ static void r2config_china(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 }
 
+static void r2config_indonesia(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_2;
+	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_8;
+	r2context->mf_ga_tones.request_dnis_minus_2 = OR2_MF_TONE_9;
+	r2context->mf_ga_tones.request_dnis_minus_3 = OR2_MF_TONE_INVALID;
+
+	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_5;
+	return;
+}
+
 static void r2config_itu(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -264,6 +277,13 @@ static openr2_variant_entry_t r2variants[] =
 		.country = "Ecuador",
 		.config = r2config_itu,
 	},	
+	/* Indonesia */
+	{
+		.id = OR2_VAR_INDONESIA,
+		.name = "ID",
+		.country = "Indonesia",
+		.config = r2config_indonesia
+	},
 	/* ITU */
 	{
 		.id = OR2_VAR_ITU,
