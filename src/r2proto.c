@@ -121,6 +121,7 @@ static void r2config_indonesia(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	r2context->mf_ga_tones.request_category = OR2_MF_TONE_6;
+	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_6;
 	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_2;
 	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_8;
 	r2context->mf_ga_tones.request_dnis_minus_2 = OR2_MF_TONE_9;
