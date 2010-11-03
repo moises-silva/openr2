@@ -24,11 +24,11 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "openr2/r2thread.h"
 #include "openr2/r2engine.h"
 #include "openr2/r2log-pvt.h"
 #include "openr2/r2proto-pvt.h"
@@ -258,7 +258,7 @@ openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_inte
 	r2context->evmanager = evmanager;
 	r2context->dtmfeng = &default_dtmf_engine;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
-	pthread_mutex_init(&r2context->timers_lock, NULL);
+	openr2_mutex_create(&r2context->timers_lock);
 	if (openr2_proto_configure_context(r2context, variant, max_ani, max_dnis)) {
 		free(r2context);
 		return NULL;
@@ -374,13 +374,13 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 	openr2_chan_t *current = r2context->chanlist;
 	openr2_chan_t *winner = NULL;
 
-	pthread_mutex_lock(&r2context->timers_lock);
+	openr2_mutex_lock(r2context->timers_lock);
 
 	res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Failed to get next context event time: %s\n", strerror(errno));
 
-		pthread_mutex_unlock(&r2context->timers_lock);
+		openr2_mutex_unlock(r2context->timers_lock);
 		return -1;
 	}
 
@@ -400,7 +400,7 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 			ms = (((winner->sched_timers[0].time.tv_sec - currtime.tv_sec) * 1000) + 
 			     ((winner->sched_timers[0].time.tv_usec - currtime.tv_usec) / 1000));
 
-			pthread_mutex_unlock(&r2context->timers_lock);
+			openr2_mutex_unlock(r2context->timers_lock);
 
 			/* if the time has passed already, return 0 to attend immediately */
 			if (ms < 0) {
@@ -414,7 +414,7 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 		}
 	}
 
-	pthread_mutex_unlock(&r2context->timers_lock);
+	openr2_mutex_unlock(r2context->timers_lock);
 	return -1;
 }
 
@@ -460,7 +460,7 @@ void openr2_context_delete(openr2_context_t *r2context)
 		openr2_chan_delete(current);
 		current = next;
 	}
-	pthread_mutex_destroy(&r2context->timers_lock);
+	openr2_mutex_destroy(&r2context->timers_lock);
 	free(r2context);
 }
 

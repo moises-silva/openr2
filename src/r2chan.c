@@ -25,19 +25,24 @@
 #endif
 
 #include <stdio.h>
-#include <string.h>
-#include <errno.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
 
-/* it seems some of the flags we use to compile (like -std=c99??) may cause some pthread defs to be missing
-   should we get rid of those defs completely instead of defining __USE_UNIX98? */
-#define __USE_UNIX98
-#include <pthread.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#include "openr2/r2thread.h"
 #include "openr2/r2log-pvt.h"
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2proto-pvt.h"
@@ -91,11 +96,16 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 		return NULL;
 	}
 #endif
+
+#if 0
 	/* someday I may get paid to check this return codes :-) */
 	pthread_mutexattr_t chanlockattr;
 	pthread_mutexattr_init(&chanlockattr);
 	pthread_mutexattr_settype(&chanlockattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&r2chan->lock, &chanlockattr);
+#endif
+
+	openr2_mutex_create(&r2chan->lock);
 
 	/* no persistence check has been done */
 	r2chan->cas_persistence_check_signal = -1;
@@ -481,13 +491,13 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 	int res;
 	int i;
 
-	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+	openr2_mutex_lock(r2chan->r2context->timers_lock);
 
 	res = gettimeofday(&tv, NULL);
 	if (-1 == res) {
 		myerrno = errno;
 
-		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+		openr2_mutex_unlock(r2chan->r2context->timers_lock);
 
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to get time of day to schedule timer!!");
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
@@ -495,7 +505,7 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 	}
 	if (r2chan->timers_count == OR2_MAX_SCHED_TIMERS) {
 
-		pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+		openr2_mutex_unlock(r2chan->r2context->timers_lock);
 
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "No more time slots, failed to schedule timer, this is bad!\n");
 		return -1;
@@ -527,7 +537,7 @@ int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callb
 	}
 	r2chan->timers_count++;
 
-	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+	openr2_mutex_unlock(r2chan->r2context->timers_lock);
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_EX_DEBUG, "scheduled timer id %d (%s)\n", newtimer.id, newtimer.name);
 	return newtimer.id;
 }
@@ -542,7 +552,7 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 		return;
 	}
 
-	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+	openr2_mutex_lock(r2chan->r2context->timers_lock);
 
 	for ( ; i < r2chan->timers_count; i++) {
 		if (r2chan->sched_timers[i].id == *timer_id) {
@@ -559,19 +569,19 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 		}
 	}
 
-	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+	openr2_mutex_unlock(r2chan->r2context->timers_lock);
 }
 
 void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan)
 {
-	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+	openr2_mutex_lock(r2chan->r2context->timers_lock);
 
 	r2chan->timers_count = 0;
 	r2chan->timer_id = 1;
 	memset(&r2chan->timer_ids, 0, sizeof(r2chan->timer_ids));
 	memset(r2chan->sched_timers, 0, sizeof(r2chan->sched_timers));
 
-	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+	openr2_mutex_unlock(r2chan->r2context->timers_lock);
 }
 
 OR2_EXPORT_SYMBOL
@@ -845,7 +855,7 @@ int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 	ms = -1;
 
 	openr2_chan_lock(r2chan);	
-	pthread_mutex_lock(&r2chan->r2context->timers_lock);
+	openr2_mutex_lock(r2chan->r2context->timers_lock);
 
 	/* if no timers, return 'infinite' */
 	if (!r2chan->timers_count) {
@@ -872,7 +882,7 @@ int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 
 done:
 
-	pthread_mutex_unlock(&r2chan->r2context->timers_lock);
+	openr2_mutex_unlock(r2chan->r2context->timers_lock);
 	openr2_chan_unlock(r2chan);
 
 	return ms;

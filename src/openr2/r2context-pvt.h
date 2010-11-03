@@ -23,9 +23,9 @@
 #ifndef _OPENR2_CONTEXT_PVT_H_
 #define _OPENR2_CONTEXT_PVT_H_
 
-#include <pthread.h>
 #include <inttypes.h>
 #include <stdarg.h>
+#include "r2thread.h"
 #include "r2log.h"
 #include "r2proto-pvt.h"
 
@@ -162,7 +162,7 @@ typedef struct openr2_context_s {
 	int configured_from_file;
 
 	/* access token to the timers */
-	pthread_mutex_t timers_lock;
+	openr2_mutex_t *timers_lock;
 
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;

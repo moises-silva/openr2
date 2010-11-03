@@ -24,15 +24,15 @@
 #endif
 
 #include <string.h>
-#include <pthread.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "openr2/r2thread.h"
 #include "openr2/r2utils-pvt.h"
 
-static pthread_mutex_t localtime_lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t ctime_lock = PTHREAD_MUTEX_INITIALIZER;
+static openr2_mutex_t *localtime_lock = NULL;
+static openr2_mutex_t *ctime_lock = NULL;
 
 /* VERSION should be always defined */
 OR2_EXPORT_SYMBOL
@@ -88,14 +88,16 @@ struct tm *openr2_localtime_r(const time_t *timep, struct tm *result)
 	if (!result) {
 		return NULL;
 	}
-	pthread_mutex_lock(&localtime_lock);
+	if (!localtime_lock)
+		openr2_mutex_create(&localtime_lock);
+	openr2_mutex_lock(localtime_lock);
 	lib_tp = localtime(timep);
 	if (!lib_tp) {
-		pthread_mutex_unlock(&localtime_lock);
+		openr2_mutex_unlock(localtime_lock);
 		return NULL;
 	}
 	memcpy(result, lib_tp, sizeof(*result));
-	pthread_mutex_unlock(&localtime_lock);
+	openr2_mutex_unlock(localtime_lock);
 	return result;
 }
 
@@ -106,16 +108,18 @@ char *openr2_ctime_r(const time_t *timep, char *buf)
 	if (!buf) {
 		return NULL;
 	}
-	pthread_mutex_lock(&ctime_lock);
+	if (!ctime_lock)
+		openr2_mutex_create(&ctime_lock);
+	openr2_mutex_lock(ctime_lock);
 	lib_buf = ctime(timep);
 	if (!lib_buf) {
-		pthread_mutex_unlock(&ctime_lock);
+		openr2_mutex_unlock(ctime_lock);
 		return NULL;
 	}
 	len = strlen(lib_buf);
 	memcpy(buf, lib_buf, len);
 	buf[len] = 0;
-	pthread_mutex_unlock(&ctime_lock);
+	openr2_mutex_unlock(ctime_lock);
 	return buf;
 }
 

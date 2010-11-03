@@ -24,12 +24,12 @@
 #define _OPENR2_CHAN_PVT_H_
 
 #include <stdio.h>
-#include <pthread.h>
 #include <sys/time.h>
 #include "r2engine.h"
 #include "r2log.h"
 #include "r2chan.h"
 #include "r2proto-pvt.h"
+#include "r2thread.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -96,7 +96,7 @@ typedef enum r2chan_flags_e {
 typedef struct openr2_chan_s {
 
 	/* hold this for operations on the channel */
-	pthread_mutex_t lock;	
+	openr2_mutex_t *lock;	
 
 	/* whether or not we created the FD */
 	int fd_created;
@@ -254,8 +254,8 @@ typedef struct openr2_chan_s {
 	struct openr2_chan_s *next;
 } openr2_chan_t;
 
-#define openr2_chan_lock(r2chan) pthread_mutex_lock(&(r2chan)->lock)
-#define openr2_chan_unlock(r2chan) pthread_mutex_unlock(&(r2chan)->lock)
+#define openr2_chan_lock(r2chan) openr2_mutex_lock(r2chan->lock)
+#define openr2_chan_unlock(r2chan) openr2_mutex_unlock(r2chan->lock)
 #define OR2_INVALID_IO_HANDLE NULL
 int openr2_chan_add_timer(openr2_chan_t *r2chan, int ms, openr2_callback_t callback, const char *name);
 void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id);

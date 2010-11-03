@@ -7,7 +7,7 @@ ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 INCLUDE_DIRECTORIES(. ${CMAKE_CURRENT_BINARY_DIR}/..)
 
 IF(NOT DEFINED WIN32)
-	ADD_DEFINITIONS(-std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes)
+	ADD_DEFINITIONS(-std=c99 -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes) # -pedantic
 ENDIF()
 
 IF(DEFINED WANT_OR2_TRACE_STACKS)
@@ -25,16 +25,16 @@ ENDIF()
 ADD_DEFINITIONS(-D__OR2_COMPILING_LIBRARY__)
 
 SET(SOURCES r2chan.c r2context.c r2log.c r2proto.c r2utils.c
-		       r2engine.c r2ioabs.c queue.c
-		       openr2/queue.h
-		       openr2/r2chan-pvt.h
-		       openr2/r2context-pvt.h
-		       openr2/r2engine.h
-		       openr2/r2zapcompat.h
-		       openr2/r2ioabs.h
-		       openr2/r2log-pvt.h
-		       openr2/r2proto-pvt.h
-		       openr2/r2utils-pvt.h 
+	r2engine.c r2ioabs.c queue.c r2thread.c
+#	openr2/queue.h
+#	openr2/r2chan-pvt.h
+#	openr2/r2context-pvt.h
+#	openr2/r2engine.h
+#	openr2/r2zapcompat.h
+#	openr2/r2ioabs.h
+#	openr2/r2log-pvt.h
+#	openr2/r2proto-pvt.h
+#	openr2/r2utils-pvt.h 
 )
 
 IF(DEFINED WANT_R2TEST)
@@ -62,5 +62,6 @@ INSTALL(FILES
 		openr2/r2utils.h
 		openr2/r2log.h
 		openr2/r2exports.h
+		openr2/r2thread.h
 	DESTINATION include/openr2
 )
