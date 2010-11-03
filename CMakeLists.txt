@@ -1,0 +1,70 @@
+# author: Arnaldo M Pereira <arnaldo@sangoma.com>
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(openr2)
+
+SET(VERSION "1.3.0")
+SET(PACKAGE "openr2")
+SET(PACKAGE_BUGREPORT "")
+SET(PACKAGE_NAME "OpenR2")
+SET(PACKAGE_STRING "OpenR2 ${VERSION}")
+SET(PACKAGE_TARNAME "openr2")
+SET(PACKAGE_VERSION ${VERSION})
+SET(STDC_HEADERS 1)
+SET(SOVERSION 3)
+
+ADD_SUBDIRECTORY(src)
+
+# platform checks
+INCLUDE(CheckIncludeFiles)
+
+CHECK_INCLUDE_FILES(malloc.h HAVE_MALLOC_H)
+CHECK_INCLUDE_FILES("sys/param.h;sys/mount.h" HAVE_SYS_MOUNT_H)
+
+CHECK_INCLUDE_FILES(dlfcn.h HAVE_DLFCN_H)
+
+CHECK_INCLUDE_FILES(inttypes.h HAVE_INTTYPES_H)
+
+FIND_LIBRARY(HAVE_LIBM NAMES m)
+
+# zaptel / dahdi
+CHECK_INCLUDE_FILES(linux/zaptel.h HAVE_LINUX_ZAPTEL_H)
+CHECK_INCLUDE_FILES(zaptel/zaptel.h HAVE_ZAPTEL_ZAPTEL_H)
+CHECK_INCLUDE_FILES(dahdi/user.h HAVE_DAHDI_USER_H)
+
+CHECK_INCLUDE_FILES(memory.h HAVE_MEMORY_H)
+CHECK_INCLUDE_FILES(stdint.h HAVE_STDINT_H)
+CHECK_INCLUDE_FILES(stdlib.h HAVE_STDLIB_H)
+CHECK_INCLUDE_FILES(strings.h HAVE_STRINGS_H)
+CHECK_INCLUDE_FILES(string.h HAVE_STRING_H)
+CHECK_INCLUDE_FILES(sys/stat.h HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILES(sys/types.h HAVE_SYS_TYPES_H)
+CHECK_INCLUDE_FILES(unistd.h HAVE_UNISTD_H)
+
+#cmakedefine NO_MINUS_C_MINUS_O 1
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+IF(DEFINED WANT_R2TEST)
+	MESSAGE(STATUS "r2test program will be compiled")
+ELSE()
+	MESSAGE(STATUS "r2test program will NOT be compiled")
+ENDIF()
+
+IF(DEFINED WANT_OR2_TRACE_STACKS)
+	MESSAGE(STATUS "R2 stacks debugging enabled")
+ELSE()
+	MESSAGE(STATUS "R2 stacks debugging disabled")
+ENDIF()
+
+# TODO
+#AC_PATH_PROGS(svnversioncommand,svnversion)
+#
+#if [test "x$svnversioncommand" = "x"]
+#then
+#	openr2_revision="(release)"
+#else
+#	openr2_revision="svnversion -n"
+#fi
+#
+#AM_CONDITIONAL([HAVE_SVNVERSION], [test "x$svnversioncommand" != "x"])

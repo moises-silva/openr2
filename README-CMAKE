@@ -1,0 +1,14 @@
+To bootstrap using cmake:
+
+	mkdir openr2-build
+	cd openr2-build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr PATH-TO-OPENR2-SOURCE
+
+After that, the software is ready to build. Useful commands:
+
+	make help
+	make VERBOSE=1
+
+Currently, tested on linux.
+
+Arnaldo M Pereira <arnaldo@sangoma.com>
