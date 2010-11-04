@@ -29,12 +29,17 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <string.h>
 #include <time.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include "openr2/r2ioabs.h"
 #include "openr2/r2log-pvt.h"
@@ -223,73 +228,73 @@ static openr2_variant_entry_t r2variants[] =
 {
 	/* ARGENTINA */ 
 	{
-		.id = OR2_VAR_ARGENTINA,
-		.name = "AR",
-		.country = "Argentina",
-		.config = r2config_argentina,
+		/* .id */ OR2_VAR_ARGENTINA,
+		/* .name */ "AR",
+		/* .country */ "Argentina",
+		/* .config */ r2config_argentina,
 	},	
 	/* BRAZIL */ 
 	{
-		.id = OR2_VAR_BRAZIL,
-		.name = "BR",
-		.country = "Brazil",
-		.config = r2config_brazil
+		/* .id */ OR2_VAR_BRAZIL,
+		/* .name */ "BR",
+		/* .country */ "Brazil",
+		/* .config */ r2config_brazil
 	},
 	/* CHINA */ 
 	{
-		.id = OR2_VAR_CHINA,
-		.name = "CN",
-		.country = "China",
-		.config = r2config_china
+		/* .id */ OR2_VAR_CHINA,
+		/* .name */ "CN",
+		/* .country */ "China",
+		/* .config */ r2config_china
 	},	
 	/* CZECH */ 
 	{
-		.id = OR2_VAR_CZECH,
-		.name = "CZ",
-		.country = "Czech Republic",
-		.config = r2config_itu
+		/* .id */ OR2_VAR_CZECH,
+		/* .name */ "CZ",
+		/* .country */ "Czech Republic",
+		/* .config */ r2config_itu
 	},		
 	/* COLOMBIA */ 
 	{
-		.id = OR2_VAR_COLOMBIA,
-		.name = "CO",
-		.country = "Colombia",
-		.config = r2config_colombia
+		/* .id */ OR2_VAR_COLOMBIA,
+		/* .name */ "CO",
+		/* .country */ "Colombia",
+		/* .config */ r2config_colombia
 	},		
 	/* ECUADOR */ 
 	{
-		.id = OR2_VAR_ECUADOR,
-		.name = "EC",
-		.country = "Ecuador",
-		.config = r2config_itu,
+		/* .id */ OR2_VAR_ECUADOR,
+		/* .name */ "EC",
+		/* .country */ "Ecuador",
+		/* .config */ r2config_itu,
 	},	
 	/* ITU */
 	{
-		.id = OR2_VAR_ITU,
-		.name = "ITU",
-		.country = "International Telecommunication Union",
-		.config = r2config_itu
+		/* .id */ OR2_VAR_ITU,
+		/* .name */ "ITU",
+		/* .country */ "International Telecommunication Union",
+		/* .config */ r2config_itu
 	},
 	/* MEXICO */ 
 	{
-		.id = OR2_VAR_MEXICO,
-		.name = "MX",
-		.country = "Mexico",
-		.config = r2config_mexico
+		/* .id */ OR2_VAR_MEXICO,
+		/* .name */ "MX",
+		/* .country */ "Mexico",
+		/* .config */ r2config_mexico
 	},
 	/* PHILIPPINES */ 
 	{
-		.id = OR2_VAR_PHILIPPINES,
-		.name = "PH",
-		.country = "Philippines",
-		.config = r2config_itu
+		/* .id */ OR2_VAR_PHILIPPINES,
+		/* .name */ "PH",
+		/* .country */ "Philippines",
+		/* .config */ r2config_itu
 	},
 	/* VENEZUELA */ 
 	{
-		.id = OR2_VAR_VENEZUELA,
-		.name = "VE",
-		.country = "Venezuela",
-		.config = r2config_venezuela
+		/* .id */ OR2_VAR_VENEZUELA,
+		/* .name */ "VE",
+		/* .country */ "Venezuela",
+		/* .config */ r2config_venezuela
 	}
 };
 
@@ -309,8 +314,8 @@ static void turn_off_mf_engine(openr2_chan_t *r2chan)
 
 static int set_cas_signal(openr2_chan_t *r2chan, openr2_cas_signal_t signal)
 {
-	OR2_CHAN_STACK;
 	int res, cas;
+	OR2_CHAN_STACK;
 	if (signal == OR2_CAS_INVALID) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot set INVALID signal\n");
 		return -1;
@@ -335,9 +340,9 @@ static int set_cas_signal(openr2_chan_t *r2chan, openr2_cas_signal_t signal)
    other tones will be added as needed */
 int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t variant, int max_ani, int max_dnis)
 {
-	OR2_CONTEXT_STACK;
 	unsigned i = 0;
 	unsigned limit = sizeof(r2variants)/sizeof(r2variants[0]);
+	OR2_CONTEXT_STACK;
 	/* if we don't know that variant, return failure */
 	for (i = 0; i < limit; i++) {
 		if (variant == r2variants[i].id) {
@@ -521,8 +526,7 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 	}
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_proto_get_error(openr2_protocol_error_t error)
+FT_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
 {
 	switch ( error ) {
 	case OR2_INVALID_CAS_BITS:
@@ -608,8 +612,7 @@ static const char *callstate2str(openr2_call_state_t state)
 	return "*Unknown*";
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause)
+FT_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause)
 {
 	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
@@ -917,8 +920,8 @@ static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)
 static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan);
 static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	int ret;
+	OR2_CHAN_STACK;
 	/* put silence only if we have a write tone */
 	if (!tone && r2chan->mf_write_tone) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_MF_TRACE, "MF Tx >> %c [OFF]\n", r2chan->mf_write_tone);
@@ -950,8 +953,8 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 /* this function just accepts from -3 to 1 as valid offsets */
 static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
-	OR2_CHAN_STACK;
 	int a_offset = abs(offset);
+	OR2_CHAN_STACK;
 	switch (offset) {
 	case -1:
 	case -2:
@@ -1084,10 +1087,10 @@ static void start_dialing_dtmf(openr2_chan_t *r2chan);
 static void r2_answer_timeout_expired(openr2_chan_t *r2chan);
 int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	int cas, res;
 	openr2_cas_state_t out_r2_state = OR2_INVALID_STATE;
 	openr2_call_disconnect_cause_t out_disconnect_cause = OR2_CAUSE_NORMAL_CLEARING;
+	OR2_CHAN_STACK;
 
 	/* if we have CAS persistence check and we're here because of the timer expired
 	   then we don't need to read the CAS again, let's go directly to handle the bits */
@@ -1503,8 +1506,8 @@ int openr2_proto_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode
 
 static void request_calling_party_category(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	int tone = GA_TONE(r2chan).request_category ? GA_TONE(r2chan).request_category : GA_TONE(r2chan).request_category_and_change_to_gc;
+	OR2_CHAN_STACK;
 	r2chan->mf_group = GA_TONE(r2chan).request_category ? OR2_MF_GA : OR2_MF_GC;
 	r2chan->mf_state = OR2_MF_CATEGORY_RQ_TXD;
 	prepare_mf_tone(r2chan, tone);
@@ -1535,10 +1538,10 @@ static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 
 static void bypass_change_to_g2(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* Most variants of MFC/R2 offer a way to go directly to the call accepted state,
 	   bypassing the use of group B and II tones */
 	int accept_tone = GA_TONE(r2chan).address_complete_charge_setup;
+	OR2_CHAN_STACK;
 	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "By-passing B/II signals, accept the call with signal 0x%X\n", accept_tone);
 	prepare_mf_tone(r2chan, accept_tone);
@@ -1547,11 +1550,11 @@ static void bypass_change_to_g2(openr2_chan_t *r2chan)
 
 static void request_change_to_g2(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* request to change to group 2 can come from either from Group C (only for Mexico)
 	   or Group A (All the world, including Mexico) */
 	int change_tone = (OR2_MF_GC == r2chan->mf_group) ? GC_TONE(r2chan).request_change_to_g2
 		                                          : GA_TONE(r2chan).request_change_to_g2;
+	OR2_CHAN_STACK;
 	r2chan->mf_group = OR2_MF_GB;
 	r2chan->mf_state = OR2_MF_CHG_GII_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requesting change to Group II with signal 0x%X\n", change_tone);
@@ -1635,10 +1638,10 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan)
 
 static void request_next_dnis_digit(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_mf_tone_t request_tone = (OR2_MF_GC == r2chan->mf_group) 
 		                      ? GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga
 		                      : GA_TONE(r2chan).request_next_dnis_digit;
+	OR2_CHAN_STACK;
 	r2chan->mf_group = OR2_MF_GA;
 	r2chan->mf_state = OR2_MF_DNIS_RQ_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requesting next DNIS with signal 0x%X.\n", request_tone);
@@ -1647,8 +1650,8 @@ static void request_next_dnis_digit(openr2_chan_t *r2chan)
 
 static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	int rc;
+	OR2_CHAN_STACK;
 	if (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone) {
 		if (r2chan->dnis_len == STR_LEN(r2chan->dnis)){
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Dropping DNIS digit %c, exceeded max DNIS length of %d\n", tone, STR_LEN(r2chan->dnis));
@@ -1720,10 +1723,10 @@ static int category2tone(openr2_chan_t *r2chan, openr2_calling_party_category_t 
 
 static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	int next_ani_request_tone = GC_TONE(r2chan).request_next_ani_digit ? 
 		                    GC_TONE(r2chan).request_next_ani_digit : 
 				    GA_TONE(r2chan).request_next_ani_digit;
+	OR2_CHAN_STACK;
 	/* no tone, just request next ANI if needed, otherwise
 	   switch to Group B/II  */
 	if (!tone || (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone)) {
@@ -2039,9 +2042,9 @@ static openr2_call_mode_t get_mode_from_tone(openr2_chan_t *r2chan, int tone)
 
 static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
-	OR2_CHAN_STACK;
 	openr2_mf_state_t previous_mf_state;
 	openr2_call_state_t previous_call_state;
+	OR2_CHAN_STACK;
 	if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
 		/* they answered before we even detected they accepted,
 		   lets just call on_call_accepted and immediately
@@ -2103,10 +2106,10 @@ static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
 
 static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	openr2_mf_tone_t request_category_tone = GA_TONE(r2chan).request_category ?
 						 GA_TONE(r2chan).request_category :
 						 GA_TONE(r2chan).request_category_and_change_to_gc;
+	OR2_CHAN_STACK;
 	if (handle_dnis_request(r2chan, tone)) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Group A DNIS request handled\n");
 	} else if (r2chan->category_sent && (tone == GA_TONE(r2chan).request_next_ani_digit)) {
@@ -2214,10 +2217,10 @@ static int timediff(struct timeval *t1, struct timeval *t2)
 
 static int check_threshold(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	int res = 0;
 	int tone_threshold = 0;
 	struct timeval currtime = {0, 0};
+	OR2_CHAN_STACK;
 	if (r2chan->r2context->mf_threshold) {
 		if (r2chan->mf_threshold_tone != tone) {
 			res = gettimeofday(&r2chan->mf_threshold_time, NULL);
@@ -2328,9 +2331,9 @@ static void start_dialing_dtmf(openr2_chan_t *r2chan)
 
 int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
 {
-	OR2_CHAN_STACK;
 	const char *digit;
 	int copy_ani = 1, copy_dnis = 1;
+	OR2_CHAN_STACK;
 
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requested to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
 			dnis, openr2_proto_get_category_string(category));
@@ -2563,8 +2566,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 	return 0;
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_proto_get_category_string(openr2_calling_party_category_t category)
+FT_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category)
 {
 	switch (category) {
 	case OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER:
@@ -2584,8 +2586,7 @@ const char *openr2_proto_get_category_string(openr2_calling_party_category_t cat
 	}
 }
 
-OR2_EXPORT_SYMBOL
-openr2_calling_party_category_t openr2_proto_get_category(const char *category)
+FT_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const char *category)
 {
 	if (!openr2_strncasecmp(category, "NATIONAL_SUBSCRIBER", sizeof("NATIONAL_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
@@ -2620,8 +2621,7 @@ openr2_calling_party_category_t openr2_proto_get_category(const char *category)
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 }
 
-OR2_EXPORT_SYMBOL
-openr2_variant_t openr2_proto_get_variant(const char *variant_name)
+FT_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant_name)
 {
 	int i;
 	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
@@ -2633,8 +2633,7 @@ openr2_variant_t openr2_proto_get_variant(const char *variant_name)
 	return OR2_VAR_UNKNOWN;
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_proto_get_variant_string(openr2_variant_t variant)
+FT_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant)
 {
 	int i;
 	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
@@ -2687,8 +2686,7 @@ const char *openr2_proto_get_mf_group_string(openr2_chan_t *r2chan)
 	return mfgroup2str(r2chan->mf_group);
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
+FT_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
 {
 	return get_string_from_mode(mode);
 }
@@ -2705,8 +2703,7 @@ int openr2_proto_get_rx_mf_signal(openr2_chan_t *r2chan)
 	return r2chan->mf_read_tone;
 }
 
-OR2_EXPORT_SYMBOL
-const openr2_variant_entry_t *openr2_proto_get_variant_list(int *numvariants)
+FT_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants)
 {
 	if (!numvariants) {
 		return NULL;

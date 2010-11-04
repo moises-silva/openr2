@@ -23,7 +23,9 @@
 #ifndef _OPENR2_CONTEXT_PVT_H_
 #define _OPENR2_CONTEXT_PVT_H_
 
+#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 #include <stdarg.h>
 #include "r2thread.h"
 #include "r2log.h"

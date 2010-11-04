@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+#include "openr2/r2declare.h"
+
 typedef enum {
 	OR2_LOG_NOTHING     = 0,
 	OR2_LOG_ERROR       = ( 1 << 0 ), 
@@ -46,8 +48,8 @@ typedef enum {
 /* to be used on openr2_log() */
 #define OR2_CHANNEL_LOG __FILE__, __FUNCTION__, __LINE__
 
-const char *openr2_log_get_level_string(openr2_log_level_t level);
-openr2_log_level_t openr2_log_get_level(const char *levelstr);
+FT_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level);
+FT_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

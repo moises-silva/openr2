@@ -20,10 +20,18 @@
  *
  */
 
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 #include "openr2/r2zapcompat.h"
 #include "openr2/r2log-pvt.h"
 #include "openr2/r2chan-pvt.h"

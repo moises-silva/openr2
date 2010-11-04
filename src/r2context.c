@@ -23,11 +23,18 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <sys/stat.h>
 #include <errno.h>
+#include "openr2/r2declare.h"
 #include "openr2/r2thread.h"
 #include "openr2/r2engine.h"
 #include "openr2/r2log-pvt.h"
@@ -146,53 +153,53 @@ static const openr2_alaw_to_linear_func alaw_to_linear_default = openr2_alaw_to_
 static const openr2_linear_to_alaw_func linear_to_alaw_default = openr2_linear_to_alaw;
 
 static openr2_mflib_interface_t default_mf_interface = {
-	.mf_read_init = (openr2_mf_read_init_func)openr2_mf_rx_init,
-	.mf_write_init = (openr2_mf_write_init_func)openr2_mf_tx_init,
-	.mf_detect_tone = (openr2_mf_detect_tone_func)openr2_mf_rx,
-	.mf_generate_tone = (openr2_mf_generate_tone_func)openr2_mf_tx,
-	.mf_select_tone = (openr2_mf_select_tone_func)openr2_mf_tx_put,
-	.mf_want_generate = (openr2_mf_want_generate_func)want_generate_default,
-	.mf_read_dispose = NULL,
-	.mf_write_dispose = NULL
+	/* .mf_read_init */ (openr2_mf_read_init_func)openr2_mf_rx_init,
+	/* .mf_write_init */ (openr2_mf_write_init_func)openr2_mf_tx_init,
+	/* .mf_detect_tone */ (openr2_mf_detect_tone_func)openr2_mf_rx,
+	/* .mf_generate_tone */ (openr2_mf_generate_tone_func)openr2_mf_tx,
+	/* .mf_select_tone */ (openr2_mf_select_tone_func)openr2_mf_tx_put,
+	/* .mf_want_generate */ (openr2_mf_want_generate_func)want_generate_default,
+	/* .mf_read_dispose */ NULL,
+	/* .mf_write_dispose */ NULL
 };
 
 static openr2_transcoder_interface_t default_transcoder = {
-	.alaw_to_linear = openr2_alaw_to_linear,
-	.linear_to_alaw = openr2_linear_to_alaw
+	/* .alaw_to_linear */ openr2_alaw_to_linear,
+	/* .linear_to_alaw */ openr2_linear_to_alaw
 };
 
 static openr2_event_interface_t default_evmanager = {
-	.on_call_init = on_call_init_default,
-	.on_call_offered = on_call_offered_default,
-	.on_call_answered = on_call_answered_default,
-	.on_call_disconnect = on_call_disconnect_default,
-	.on_call_end = on_call_end_default,
-	.on_call_read = on_call_read_default,
-	.on_hardware_alarm = on_hardware_alarm_default,
-	.on_os_error = on_os_error_default,
-	.on_protocol_error = on_protocol_error_default,
-	.on_context_log = openr2_log_context_default,
-	.on_line_idle = on_line_idle_default,
-	.on_line_blocked = on_line_idle_default,
-	.on_dnis_digit_received = on_dnis_digit_received_default,
-	.on_ani_digit_received = on_ani_digit_received_default,
-	.on_billing_pulse_received = on_billing_pulse_received_default
+	/* .on_call_init */ on_call_init_default,
+	/* .on_call_offered */ on_call_offered_default,
+	/* .on_call_answered */ on_call_answered_default,
+	/* .on_call_disconnect */ on_call_disconnect_default,
+	/* .on_call_end */ on_call_end_default,
+	/* .on_call_read */ on_call_read_default,
+	/* .on_hardware_alarm */ on_hardware_alarm_default,
+	/* .on_os_error */ on_os_error_default,
+	/* .on_protocol_error */ on_protocol_error_default,
+	/* .on_context_log */ openr2_log_context_default,
+	/* .on_line_idle */ on_line_idle_default,
+	/* .on_line_blocked */ on_line_idle_default,
+	/* .on_dnis_digit_received */ on_dnis_digit_received_default,
+	/* .on_ani_digit_received */ on_ani_digit_received_default,
+	/* .on_billing_pulse_received */ on_billing_pulse_received_default
 };
 
 static openr2_dtmf_interface_t default_dtmf_engine = {
-	.dtmf_tx_init = (openr2_dtmf_tx_init_func)openr2_dtmf_tx_init,
-	.dtmf_tx_set_timing = (openr2_dtmf_tx_set_timing_func)openr2_dtmf_tx_set_timing,
-	.dtmf_tx_put = (openr2_dtmf_tx_put_func)openr2_dtmf_tx_put,
-	.dtmf_tx = (openr2_dtmf_tx_func)openr2_dtmf_tx,
+	/* .dtmf_tx_init */ (openr2_dtmf_tx_init_func)openr2_dtmf_tx_init,
+	/* .dtmf_tx_set_timing */ (openr2_dtmf_tx_set_timing_func)openr2_dtmf_tx_set_timing,
+	/* .dtmf_tx_put */ (openr2_dtmf_tx_put_func)openr2_dtmf_tx_put,
+	/* .dtmf_tx */ (openr2_dtmf_tx_func)openr2_dtmf_tx,
 
-	.dtmf_rx_init = (openr2_dtmf_rx_init_func)openr2_dtmf_rx_init,
-	.dtmf_rx_status = (openr2_dtmf_rx_status_func)openr2_dtmf_rx_status,
-	.dtmf_rx = (openr2_dtmf_rx_func)openr2_dtmf_rx
+	/* .dtmf_rx_init */ (openr2_dtmf_rx_init_func)openr2_dtmf_rx_init,
+	/* .dtmf_rx_status */ (openr2_dtmf_rx_status_func)openr2_dtmf_rx_status,
+	/* .dtmf_rx */ (openr2_dtmf_rx_func)openr2_dtmf_rx
 };
 
-OR2_EXPORT_SYMBOL
-openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_interface_t *evmanager, int max_ani, int max_dnis)
+FT_DECLARE(openr2_context_t *) openr2_context_new(openr2_variant_t variant, openr2_event_interface_t *evmanager, int max_ani, int max_dnis)
 {
+	openr2_context_t *r2context = NULL;
 	if (!evmanager) {
 		evmanager = &default_evmanager;
 	} else {
@@ -246,7 +253,7 @@ openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_inte
 			evmanager->on_billing_pulse_received = on_billing_pulse_received_default;
 		}
 	}
-	openr2_context_t *r2context = calloc(1, sizeof(*r2context));
+	r2context = calloc(1, sizeof(*r2context));
 	if (!r2context) {
 		r2context->last_error = OR2_LIBERR_OUT_OF_MEMORY;
 		return NULL;
@@ -267,8 +274,7 @@ openr2_context_t *openr2_context_new(openr2_variant_t variant, openr2_event_inte
 	return r2context;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib_interface_t *mflib)
+FT_DECLARE(int) openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib_interface_t *mflib)
 {
 	/* fix the MF iface */
 	if (!mflib) {
@@ -304,8 +310,7 @@ int openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib
 	return 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder)
+FT_DECLARE(int) openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder)
 {
 	/* fix the transcoder interface */
 	if (!transcoder) {
@@ -324,8 +329,7 @@ int openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_
 	return 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface)
+FT_DECLARE(int) openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface)
 {
 	if (!dtmf_interface) {
 		r2context->dtmfeng = &default_dtmf_engine;
@@ -363,16 +367,15 @@ int openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_i
 
 /* Is this really needed? in anycase, read events from hardware are likely to wake us up
    so probably we could trust on that instead of having the user to call this function? */
-OR2_EXPORT_SYMBOL
-int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	int res, ms;
 	struct timeval currtime;
 	/* iterate over all the channels to get the next event time,
 	   during this loop, timers cannot be deleted or created */
 	openr2_chan_t *current = r2context->chanlist;
 	openr2_chan_t *winner = NULL;
+	OR2_CONTEXT_STACK;
 
 	openr2_mutex_lock(r2context->timers_lock);
 
@@ -420,9 +423,9 @@ int openr2_context_get_time_to_next_event(openr2_context_t *r2context)
 
 void openr2_context_add_channel(openr2_context_t *r2context, openr2_chan_t *r2chan)
 {
-	OR2_CONTEXT_STACK;
 	/* put the channel at the head of the list*/
 	openr2_chan_t *head = r2context->chanlist;
+	OR2_CONTEXT_STACK;
 	r2context->chanlist = r2chan;
 	r2chan->next = head;
 	/* set the channel log level to our level. Users can override this */
@@ -431,9 +434,9 @@ void openr2_context_add_channel(openr2_context_t *r2context, openr2_chan_t *r2ch
 
 void openr2_context_remove_channel(openr2_context_t *r2context, openr2_chan_t *r2chan)
 {
-	OR2_CONTEXT_STACK;
 	openr2_chan_t *curr = r2context->chanlist;
 	openr2_chan_t *prev = NULL;
+	OR2_CONTEXT_STACK;
 	while (curr) {
 		if(curr == r2chan) {
 			if (prev) {
@@ -449,11 +452,10 @@ void openr2_context_remove_channel(openr2_context_t *r2context, openr2_chan_t *r
 	}
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_delete(openr2_context_t *r2context)
+FT_DECLARE(void) openr2_context_delete(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	openr2_chan_t *current, *next;
+	OR2_CONTEXT_STACK;
 	current = r2context->chanlist;
 	while ( current ) {
 		next = current->next;
@@ -464,15 +466,13 @@ void openr2_context_delete(openr2_context_t *r2context)
 	free(r2context);
 }
 
-OR2_EXPORT_SYMBOL
-openr2_liberr_t openr2_context_get_last_error(openr2_context_t *r2context)
+FT_DECLARE(openr2_liberr_t) openr2_context_get_last_error(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->last_error;
 }
 
-OR2_EXPORT_SYMBOL
-const char *openr2_context_error_string(openr2_liberr_t error)
+FT_DECLARE(const char *) openr2_context_error_string(openr2_liberr_t error)
 {
 	switch ( error ) {
 	case OR2_LIBERR_SYSCALL_FAILED: return "System call failed";
@@ -486,15 +486,13 @@ const char *openr2_context_error_string(openr2_liberr_t error)
 	}
 }
 
-OR2_EXPORT_SYMBOL
-openr2_variant_t openr2_context_get_variant(openr2_context_t *r2context)
+FT_DECLARE(openr2_variant_t) openr2_context_get_variant(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->variant;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
+FT_DECLARE(void) openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 {
 	OR2_CONTEXT_STACK;
 	if (ani_first < 0) {
@@ -503,15 +501,13 @@ void openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 	r2context->get_ani_first = ani_first ? 1 : 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_ani_first(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_ani_first(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->get_ani_first;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_skip_category_request(openr2_context_t *r2context, int skipcategory)
+FT_DECLARE(void) openr2_context_set_skip_category_request(openr2_context_t *r2context, int skipcategory)
 {
 	OR2_CONTEXT_STACK;
 	if (skipcategory < 0) {
@@ -520,15 +516,13 @@ void openr2_context_set_skip_category_request(openr2_context_t *r2context, int s
 	r2context->skip_category = skipcategory ? 1 : 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_skip_category_request(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_skip_category_request(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->skip_category;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
+FT_DECLARE(void) openr2_context_set_immediate_accept(openr2_context_t *r2context, int immediate_accept)
 {
 	OR2_CONTEXT_STACK;
 	if (immediate_accept < 0) {
@@ -537,29 +531,25 @@ void openr2_context_set_immediate_accept(openr2_context_t *r2context, int immedi
 	r2context->immediate_accept = immediate_accept ? 1 : 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_immediate_accept(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_immediate_accept(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->immediate_accept;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_t level)
+FT_DECLARE(void) openr2_context_set_log_level(openr2_context_t *r2context, openr2_log_level_t level)
 {
 	OR2_CONTEXT_STACK;
 	r2context->loglevel = level;
 }
 
-OR2_EXPORT_SYMBOL
-openr2_log_level_t openr2_context_get_log_level(openr2_context_t *r2context)
+FT_DECLARE(openr2_log_level_t) openr2_context_get_log_level(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->loglevel;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
+FT_DECLARE(void) openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 {
 	OR2_CONTEXT_STACK;
 	if (threshold < 0) {
@@ -568,15 +558,13 @@ void openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 	r2context->mf_threshold = threshold;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_mf_threshold(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_mf_threshold(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->mf_threshold;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable)
+FT_DECLARE(void) openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable)
 {
 	OR2_CONTEXT_STACK;
 	if (enable < 0) {
@@ -585,15 +573,13 @@ void openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable)
 	r2context->detect_dtmf = enable ? 1 : 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_dtmf_detection(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_dtmf_detection(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->detect_dtmf;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off)
+FT_DECLARE(void) openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off)
 {
 	OR2_CONTEXT_STACK;
 	if (enable < 0) {
@@ -606,8 +592,7 @@ void openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, in
 	}
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off)
+FT_DECLARE(int) openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, int *dtmf_off)
 {
 	OR2_CONTEXT_STACK;
 	if (dtmf_on) {
@@ -619,12 +604,15 @@ int openr2_context_get_dtmf_dialing(openr2_context_t *r2context, int *dtmf_on, i
 	return r2context->dial_with_dtmf;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_set_log_directory(openr2_context_t *r2context, char *directory)
+FT_DECLARE(int) openr2_context_set_log_directory(openr2_context_t *r2context, char *directory)
 {
-	OR2_CONTEXT_STACK;
 	struct stat buff;
+#ifdef WIN32
+	mode_t perms = 0;
+#else
 	mode_t perms = (S_IRWXU) | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH); /* rwx | rx | rx */
+#endif
+	OR2_CONTEXT_STACK;
 	if (!directory) {
 		return -1;
 	}
@@ -649,8 +637,7 @@ int openr2_context_set_log_directory(openr2_context_t *r2context, char *director
 	return 0;
 }
 
-OR2_EXPORT_SYMBOL
-char *openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len)
+FT_DECLARE(char *) openr2_context_get_log_directory(openr2_context_t *r2context, char *directory, int len)
 {
 	OR2_CONTEXT_STACK;
 	if (!directory) {
@@ -661,22 +648,19 @@ char *openr2_context_get_log_directory(openr2_context_t *r2context, char *direct
 	return directory;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_max_ani(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_max_ani(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->max_ani;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_max_dnis(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_max_dnis(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->max_dnis;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
+FT_DECLARE(void) openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
 {
 	OR2_CONTEXT_STACK;
 	/* ignore any timeout less than 0 */
@@ -686,15 +670,13 @@ void openr2_context_set_mf_back_timeout(openr2_context_t *r2context, int ms)
 	r2context->timers.mf_back_cycle = ms;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_mf_back_timeout(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->timers.mf_back_cycle;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms)
+FT_DECLARE(void) openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int ms)
 {
 	OR2_CONTEXT_STACK;
 	/* ignore any timeout less than 0 */
@@ -704,15 +686,13 @@ void openr2_context_set_metering_pulse_timeout(openr2_context_t *r2context, int 
 	r2context->timers.r2_metering_pulse = ms;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_metering_pulse_timeout(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->timers.r2_metering_pulse;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
+FT_DECLARE(void) openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
 {
 	OR2_CONTEXT_STACK;
 	if (enable < 0) {
@@ -721,18 +701,16 @@ void openr2_context_set_double_answer(openr2_context_t *r2context, int enable)
 	r2context->double_answer = enable;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_get_double_answer(openr2_context_t *r2context)
+FT_DECLARE(int) openr2_context_get_double_answer(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
 	return r2context->double_answer ? 1 : 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_type, openr2_io_interface_t *io_interface)
+FT_DECLARE(int) openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_type, openr2_io_interface_t *io_interface)
 {
-	OR2_CONTEXT_STACK;
 	openr2_io_interface_t *internal_io_interface = NULL;
+	OR2_CONTEXT_STACK;
 	switch (io_type) {
 	case OR2_IO_CUSTOM:
 		/* sanity check for all members */
@@ -848,13 +826,12 @@ int openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_
 		} \
 	}
 
-OR2_EXPORT_SYMBOL
-int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
+FT_DECLARE(int) openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename)
 {
-	OR2_CONTEXT_STACK;
 	FILE *variant_file;
 	int intvalue = 0;
 	char line[255];
+	OR2_CONTEXT_STACK;
 	if (!filename) {
 		return -1;
 	}

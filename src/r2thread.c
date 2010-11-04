@@ -32,24 +32,16 @@
   printf( "foobar * " fmt "\n", ## __VA_ARGS__ ); \
 } while (0)
 
-#ifdef WIN32
-/* required for TryEnterCriticalSection definition.  Must be defined before windows.h include */
-#define _WIN32_WINNT 0x0400
-#endif
-
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#ifdef HAVE_STRING_H                                                                                                                   
+#ifdef HAVE_STRING_H
 #include <string.h>
 #endif                                                                                                                                 
 

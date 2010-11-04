@@ -27,12 +27,16 @@
  */
 
 #include <stdio.h>
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 #include <time.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 #define FULLY_DEFINE_QUEUE_STATE_T
 #include "openr2/queue.h"

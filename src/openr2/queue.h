@@ -63,6 +63,8 @@ extern "C"
 {
 #endif
 
+#include <inttypes.h>
+
 /*! Check if a queue is empty.
     \brief Check if a queue is empty.
     \param s The queue context.

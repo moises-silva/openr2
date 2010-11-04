@@ -2,7 +2,7 @@
  * OpenR2 
  * MFC/R2 call setup library
  *
- * r2engine.h - MFC/R2 tone generation and detection.
+ * r2engine.c - MFC/R2 tone generation and detection.
  *              DTMF tone generation and detection.
  *
  * Borrowed and slightly modified from the LGPL SpanDSP library, 
@@ -29,10 +29,16 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 #include <time.h>
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <math.h>
+#include "openr2/r2declare.h"
+#include "openr2/fast_convert.h"
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2engine.h"
 
@@ -43,8 +49,6 @@
 
 #define ms_to_samples(t)            (((t)*SAMPLE_RATE)/1000)
 
-#define FALSE 0
-#define TRUE (!FALSE)
 #define SAMPLE_RATE 8000
 #define DBM0_MAX_SINE_POWER     (3.14f)
 
@@ -2712,15 +2716,13 @@ static void dtmf_tx_initialise(void)
     dtmf_tx_inited = TRUE;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist)
+FT_DECLARE(void) openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist)
 {
     s->low_level = dds_scaling_dbm0f((float) level);
     s->high_level = dds_scaling_dbm0f((float) (level + twist));
 }
 
-OR2_EXPORT_SYMBOL
-openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
+FT_DECLARE(openr2_dtmf_tx_state_t *) openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
 {
     if (s == NULL)
     {
@@ -2737,15 +2739,13 @@ openr2_dtmf_tx_state_t *openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s)
     return s;
 }
 
-OR2_EXPORT_SYMBOL
-void openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time)
+FT_DECLARE(void) openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time)
 {
     s->on_time = ((on_time >= 0)  ?  on_time  :  DEFAULT_DTMF_TX_ON_TIME)*SAMPLE_RATE/1000;
     s->off_time = ((off_time >= 0)  ?  off_time  :  DEFAULT_DTMF_TX_OFF_TIME)*SAMPLE_RATE/1000;
 }
 
-OR2_EXPORT_SYMBOL
-size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len)
+FT_DECLARE(size_t) openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len)
 {
     size_t space;
 
@@ -2764,8 +2764,7 @@ size_t openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len
     return -1;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
+FT_DECLARE(int) openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
 {
     int len;
     const char *cp;
@@ -2794,8 +2793,7 @@ int openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples)
     return len;
 }
 
-OR2_EXPORT_SYMBOL
-openr2_dtmf_rx_state_t *openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
+FT_DECLARE(openr2_dtmf_rx_state_t *) openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
                               openr2_digits_rx_callback_t callback,
                               void *user_data)
 {
@@ -2840,8 +2838,7 @@ openr2_dtmf_rx_state_t *openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s,
     return s;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
+FT_DECLARE(int) openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
 {
     float row_energy[4];
     float col_energy[4];
@@ -3050,8 +3047,7 @@ int openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples)
     return 0;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s)
+FT_DECLARE(int) openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s)
 {
     if (s->in_digit)
         return s->in_digit;

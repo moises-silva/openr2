@@ -26,12 +26,15 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "openr2/r2declare.h"
+
 #define OR2_LIB_INTERFACE 4
 #define OR2_LIB_REVISION 0
 #define OR2_LIB_AGE 0
-const char *openr2_get_version(void);
-const char *openr2_get_revision(void);
-int openr2_strncasecmp(const char *s1, const char *s2, size_t n);
+FT_DECLARE(const char *) openr2_get_version(void);
+FT_DECLARE(const char *) openr2_get_revision(void);
+FT_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

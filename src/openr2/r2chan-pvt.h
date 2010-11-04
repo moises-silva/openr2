@@ -24,7 +24,9 @@
 #define _OPENR2_CHAN_PVT_H_
 
 #include <stdio.h>
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include "r2engine.h"
 #include "r2log.h"
 #include "r2chan.h"

@@ -26,7 +26,15 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h> /* mode_t */
+#endif
+#ifdef WIN32
+#include <direct.h>
+#define F_OK 0
+#define mkdir(x,y) (mkdir)(x)
+#define mode_t int
+#endif
 #include "r2utils.h"
 
 #if defined(__cplusplus)

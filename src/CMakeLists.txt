@@ -6,7 +6,12 @@ PROJECT(openr2)
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 INCLUDE_DIRECTORIES(. ${CMAKE_CURRENT_BINARY_DIR}/..)
 
-IF(NOT DEFINED WIN32)
+# if we're building on windows, use our own inttypes.h
+IF(DEFINED WIN32)
+	SET(HAVE_INTTYPES_H 1)
+	INCLUDE_DIRECTORIES(openr2/msvc)
+ELSE()
+	ADD_DEFINITIONS(-DHAVE_GETTIMEOFDAY)
 	ADD_DEFINITIONS(-std=c99 -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes) # -pedantic
 ENDIF()
 
@@ -47,6 +52,17 @@ ENDIF()
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCES})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SOVERSION ${SOVERSION})
+
+# on windows, we check if winmm is available (guess it's always),
+# if it's not generate gettimeofday() with 20ms resolution instead of 1
+IF(DEFINED WIN32)
+	FIND_LIBRARY(MM_LIB NAMES winmm)
+	IF(NOT ${MM_LIB})
+		ADD_DEFINITIONS(-DWITHOUT_MM_LIB)
+	ELSE()
+		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${MM_LIB})
+	ENDIF()
+ENDIF()
 
 # install - all relative to CMAKE_INSTALL_PREFIX
 INSTALL(TARGETS ${PROJECT_NAME}

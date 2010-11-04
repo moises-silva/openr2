@@ -24,6 +24,7 @@
 #define _OPENR2_CHAN_H_
 
 #include <stdarg.h>
+#include "r2declare.h"
 #include "r2proto.h"
 #include "r2log.h"
 #include "r2context.h"
@@ -42,140 +43,140 @@ extern "C" {
 typedef void (*openr2_logging_func_t)(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap);
 
 /*! \brief allocate and initialize a new channel openning the underlying hardware channel number */
-openr2_chan_t *openr2_chan_new(openr2_context_t *r2context, int channo);
+FT_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int channo);
 
 /*! \brief allocate and initialize a new channel and associates the given I/O descriptor to it */
-openr2_chan_t *openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo);
+FT_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo);
 
 /*! \brief destroys the memory allocated when creating the channel
  * no need to call this function if the channel is already associated to a context, 
  * the context destruction will delete the channels associated to it 
  */
-void openr2_chan_delete(openr2_chan_t *r2chan);
+FT_DECLARE(void) openr2_chan_delete(openr2_chan_t *r2chan);
 
 /*! \brief Accepts an offered call on the given channel */
-int openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t accept);
+FT_DECLARE(int) openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t accept);
 
 /*! \brief Answers the call on the channel, the call must have been already accepted */
-int openr2_chan_answer_call(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_answer_call(openr2_chan_t *r2chan);
 
 /*! \brief Answers the call on the channel with the given mode, the call must have been already accepted */
-int openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode);
+FT_DECLARE(int) openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode);
 
 /*! \brief Disconnects the call or acnowledges a disconnect on the channel with the given reason
      the reason is ignored if its an acknowledge of hangup */
-int openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
+FT_DECLARE(int) openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause);
 
 /*! \brief Makes a call with the given ani, dnid and category */
-int openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category);
+FT_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category);
 
 /*! \brief Return the direction of the call in the given channel */
-openr2_direction_t openr2_chan_get_direction(openr2_chan_t *r2chan);
+FT_DECLARE(openr2_direction_t) openr2_chan_get_direction(openr2_chan_t *r2chan);
 
 /*! \brief writes the given buffer to the channel using the underlying I/O callbacks or default I/O implementation */
-int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int len);
+FT_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int len);
 
 /*! \brief Set the callback to call when logging */
-void openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback);
+FT_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback);
 
 /*! \brief Return the I/O descriptor associated to the channel */
-openr2_io_fd_t openr2_chan_get_fd(openr2_chan_t *r2chan);
+FT_DECLARE(openr2_io_fd_t) openr2_chan_get_fd(openr2_chan_t *r2chan);
 
 /*! \brief Get the channel number */
-int openr2_chan_get_number(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_number(openr2_chan_t *r2chan);
 
 /*! \brief Get the context associated to the channel */
-openr2_context_t *openr2_chan_get_context(openr2_chan_t *r2chan);
+FT_DECLARE(openr2_context_t *) openr2_chan_get_context(openr2_chan_t *r2chan);
 
 /*! \brief Associate an opaque pointer to the channel */
-void openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data);
+FT_DECLARE(void) openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data);
 
 /*! \brief Return the opaque pointer associated to the channel */
-void *openr2_chan_get_client_data(openr2_chan_t *r2chan);
+FT_DECLARE(void *) openr2_chan_get_client_data(openr2_chan_t *r2chan);
 
 /*! \brief Return the number of milliseconds left for the next scheduled event in the channel */
-int openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan);
 
 /*! \brief Set the logging level for the channel */
-openr2_log_level_t openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level);
+FT_DECLARE(openr2_log_level_t) openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level);
 
 /*! \brief Return the logging level for the channel */
-openr2_log_level_t openr2_chan_get_log_level(openr2_chan_t *r2chan);
+FT_DECLARE(openr2_log_level_t) openr2_chan_get_log_level(openr2_chan_t *r2chan);
 
 /*! \brief Enable the media reading for the channel, the stack will call the I/O read operation when needed */
-void openr2_chan_enable_read(openr2_chan_t *r2chan);
+FT_DECLARE(void) openr2_chan_enable_read(openr2_chan_t *r2chan);
 
 /*! \brief Disable the media reading for the channel, the stack will NOT call the I/O read operation when needed */
-void openr2_chan_disable_read(openr2_chan_t *r2chan);
+FT_DECLARE(void) openr2_chan_disable_read(openr2_chan_t *r2chan);
 
 /*! \brief Return non-zero if the reading of media is enabled for the channel */
-int openr2_chan_get_read_enabled(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_read_enabled(openr2_chan_t *r2chan);
 
 /*! \brief enable the call debugging files for this channel */
-void openr2_chan_enable_call_files(openr2_chan_t *r2chan);
+FT_DECLARE(void) openr2_chan_enable_call_files(openr2_chan_t *r2chan);
 
 /*! \brief disable the call debugging files for this channel */
-void openr2_chan_disable_call_files(openr2_chan_t *r2chan);
+FT_DECLARE(void) openr2_chan_disable_call_files(openr2_chan_t *r2chan);
 
 /*! \brief return non-zero if the call debugging files are enabled for this channel */
-int openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan);
 
 /*! \brief get the DNIS in the channel */
-const char *openr2_chan_get_dnis(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_dnis(openr2_chan_t *r2chan);
 
 /*! \brief get the ANI in the channel */
-const char *openr2_chan_get_ani(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_ani(openr2_chan_t *r2chan);
 
 /*! \brief set the channel CAS in the idle state */
-int openr2_chan_set_idle(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan);
 
 /*! \brief set the channel CAS in the blocked state */
-int openr2_chan_set_blocked(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan);
 
 /*! \brief check for out of band events and process them if any change occured (CAS signaling and hardware Alarms) */
-int openr2_chan_process_oob_events(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_process_oob_events(openr2_chan_t *r2chan);
 
 /*! \brief check for CAS signaling changes and process them if any change occured */
-int openr2_chan_process_cas_signaling(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_process_cas_signaling(openr2_chan_t *r2chan);
 
 /*! \brief check for MF signaling changes and process them if any change occured */
-int openr2_chan_process_mf_signaling(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_process_mf_signaling(openr2_chan_t *r2chan);
 
 /*! \brief check for any signaling change and process them if any change occured */
-int openr2_chan_process_signaling(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_process_signaling(openr2_chan_t *r2chan);
 
 /*! \brief check if there is any expired timer and execute the timeout callbacks if needed */
-int openr2_chan_run_schedule(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the last CAS bits received */
-const char *openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the last CAS bits transmitted */
-const char *openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the current call state */
-const char *openr2_chan_get_call_state_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_call_state_string(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the current call state */
-const char *openr2_chan_get_r2_state_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_r2_state_string(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the current MF state */
-const char *openr2_chan_get_mf_state_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_mf_state_string(openr2_chan_t *r2chan);
 
 /*! \brief return a meaningful string for the current MF group */
-const char *openr2_chan_get_mf_group_string(openr2_chan_t *r2chan);
+FT_DECLARE(const char *) openr2_chan_get_mf_group_string(openr2_chan_t *r2chan);
 
 /*! \brief return the ASCII code for the last transmitted MF signal */
-int openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan);
 
 /*! \brief return the ASCII code for the last received MF signal */
-int openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan);
+FT_DECLARE(int) openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan);
 
 /*! \brief set the opaque handle that will be passed back to the DTMF callbacks */
-int openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle);
+FT_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle);
 
 /*! \brief set the opaque handles that will be passed back to the MF generation and detection callbacks */
-int openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle);
+FT_DECLARE(int) openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t

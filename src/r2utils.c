@@ -25,18 +25,68 @@
 
 #include <string.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#include <time.h>
 #include <errno.h>
+#include "openr2/r2declare.h"
 #include "openr2/r2thread.h"
 #include "openr2/r2utils-pvt.h"
 
 static openr2_mutex_t *localtime_lock = NULL;
 static openr2_mutex_t *ctime_lock = NULL;
 
+#ifndef HAVE_GETTIMEOFDAY
+
+#ifdef WIN32
+#include <mmsystem.h>
+
+int gettimeofday(struct timeval *tp, void *nothing)
+{
+#ifdef WITHOUT_MM_LIB
+    SYSTEMTIME st;
+    time_t tt;
+    struct tm tmtm;
+    /* mktime converts local to UTC */
+    GetLocalTime (&st);
+    tmtm.tm_sec = st.wSecond;
+    tmtm.tm_min = st.wMinute;
+    tmtm.tm_hour = st.wHour;
+    tmtm.tm_mday = st.wDay;
+    tmtm.tm_mon = st.wMonth - 1;
+    tmtm.tm_year = st.wYear - 1900;  tmtm.tm_isdst = -1;
+    tt = mktime (&tmtm);
+    tp->tv_sec = tt;
+    tp->tv_usec = st.wMilliseconds * 1000;
+#else
+    /**
+     ** The earlier time calculations using GetLocalTime
+     ** had a time resolution of 10ms.The timeGetTime, part
+     ** of multimedia apis offer a better time resolution
+     ** of 1ms.Need to link against winmm.lib for this
+     **/
+    unsigned long Ticks = 0;
+    unsigned long Sec =0;
+    unsigned long Usec = 0;
+    Ticks = timeGetTime();
+
+    Sec = Ticks/1000;
+    Usec = (Ticks - (Sec*1000))*1000;
+    tp->tv_sec = Sec;
+    tp->tv_usec = Usec;
+#endif /* WITHOUT_MM_LIB */
+    (void)nothing;
+    return 0;
+}
+#endif /* WIN32 */
+#endif /* HAVE_GETTIMEOFDAY */
+
 /* VERSION should be always defined */
-OR2_EXPORT_SYMBOL
-const char *openr2_get_version(void)
+FT_DECLARE(const char *) openr2_get_version(void)
 {
 #ifdef VERSION
 	return VERSION;
@@ -46,8 +96,7 @@ const char *openr2_get_version(void)
 }
 
 /* REVISION will be only defined if built via SVN */
-OR2_EXPORT_SYMBOL
-const char *openr2_get_revision()
+FT_DECLARE(const char *) openr2_get_revision()
 {
 #ifdef REVISION
 	return REVISION;
@@ -123,8 +172,7 @@ char *openr2_ctime_r(const time_t *timep, char *buf)
 	return buf;
 }
 
-OR2_EXPORT_SYMBOL
-int openr2_strncasecmp(const char *s1, const char *s2, size_t n)
+FT_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n)
 {
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;

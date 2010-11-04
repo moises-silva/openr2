@@ -32,8 +32,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __FTDM_DECLARE_H__
-#define __FTDM_DECLARE_H__
+#ifndef __R2DECLARE_H__
+#define __R2DECLARE_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,51 +43,58 @@ extern "C" {
 #define _XOPEN_SOURCE 600
 #endif
 
-#ifndef HAVE_STRINGS_H
-#define HAVE_STRINGS_H 1
-#endif
-#ifndef HAVE_SYS_SOCKET_H
-#define HAVE_SYS_SOCKET_H 1
-#endif
-
 #ifndef __WINDOWS__
 #if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32) || defined(_WIN64)
 #define __WINDOWS__
 #endif
 #endif
 
+#ifdef WIN32
 #ifdef _MSC_VER
-#if defined(FT_DECLARE_STATIC)
-#define FT_DECLARE(type)			type __stdcall
-#define FT_DECLARE_NONSTD(type)		type __cdecl
-#define FT_DECLARE_DATA
-#elif defined(FREETDM_EXPORTS)
-#define FT_DECLARE(type)			__declspec(dllexport) type __stdcall
-#define FT_DECLARE_NONSTD(type)		__declspec(dllexport) type __cdecl
-#define FT_DECLARE_DATA				__declspec(dllexport)
-#else
-#define FT_DECLARE(type)			__declspec(dllimport) type __stdcall
-#define FT_DECLARE_NONSTD(type)		__declspec(dllimport) type __cdecl
-#define FT_DECLARE_DATA				__declspec(dllimport)
-#endif
-#define EX_DECLARE_DATA				__declspec(dllexport)
-#else
-#if (defined(__GNUC__) || defined(__SUNPRO_CC) || defined (__SUNPRO_C)) && defined(HAVE_VISIBILITY)
-#define FT_DECLARE(type)		__attribute__((visibility("default"))) type
-#define FT_DECLARE_NONSTD(type)	__attribute__((visibility("default"))) type
-#define FT_DECLARE_DATA		__attribute__((visibility("default")))
-#else
-#define FT_DECLARE(type)		type
-#define FT_DECLARE_NONSTD(type)	type
-#define FT_DECLARE_DATA
-#endif
-#define EX_DECLARE_DATA
-#endif
-
-#ifdef _MSC_VER
+/* disable the following warnings 
+ * C4100: The formal parameter is not referenced in the body of the function. The unreferenced parameter is ignored. 
+ * C4200: Non standard extension C zero sized array
+ * C4204: nonstandard extension used : non-constant aggregate initializer 
+ * C4706: assignment within conditional expression
+ * C4819: The file contains a character that cannot be represented in the current code page
+ * C4132: 'object' : const object should be initialized (fires innapropriately for prototyped forward declaration of cost var)
+ * C4510: default constructor could not be generated
+ * C4512: assignment operator could not be generated
+ * C4610: struct  can never be instantiated - user defined constructor required
+ */
+#pragma warning(disable:4100 4200 4204 4706 4819 4132 4510 4512 4610 4996)
 #ifndef __inline__
 #define __inline__ __inline
 #endif
+#endif /* _MSC_VER */
+#if defined(FREETDM_DECLARE_STATIC)
+#define FT_DECLARE(type)            type __stdcall
+#define FT_DECLARE_NONSTD(type)     type __cdecl
+#define FT_DECLARE_DATA
+#elif defined(FREETDM_EXPORTS)
+#define FT_DECLARE(type)            __declspec(dllexport) type __stdcall
+#define FT_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
+#define FT_DECLARE_DATA             __declspec(dllexport)
+#else
+#define FT_DECLARE(type)            __declspec(dllimport) type __stdcall
+#define FT_DECLARE_NONSTD(type)     __declspec(dllimport) type __cdecl
+#define FT_DECLARE_DATA             __declspec(dllimport)
+#endif
+#define EX_DECLARE_DATA             __declspec(dllexport)
+#else /* WIN32 */
+#if (defined(__GNUC__) || defined(__SUNPRO_CC) || defined (__SUNPRO_C)) && defined(HAVE_VISIBILITY)
+#define FT_DECLARE(type)        __attribute__((visibility("default"))) type
+#define FT_DECLARE_NONSTD(type) __attribute__((visibility("default"))) type
+#define FT_DECLARE_DATA     __attribute__((visibility("default")))
+#else
+#define FT_DECLARE(type)        type
+#define FT_DECLARE_NONSTD(type) type
+#define FT_DECLARE_DATA
+#endif
+#define EX_DECLARE_DATA
+#endif /* WIN32 */
+
+#ifdef _MSC_VER
 #if (_MSC_VER >= 1400)			/* VC8+ */
 #ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
@@ -95,15 +102,6 @@ extern "C" {
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
 #endif
-#endif
-#ifndef strcasecmp
-#define strcasecmp(s1, s2) _stricmp(s1, s2)
-#endif
-#ifndef strncasecmp
-#define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-#endif
-#ifndef snprintf
-#define snprintf _snprintf
 #endif
 #ifndef S_IRUSR
 #define S_IRUSR _S_IREAD
@@ -113,11 +111,7 @@ extern "C" {
 #endif
 #undef HAVE_STRINGS_H
 #undef HAVE_SYS_SOCKET_H
-/* disable warning for zero length array in a struct */
-/* this will cause errors on c99 and ansi compliant compilers and will need to be fixed in the wanpipe header files */
-#pragma warning(disable:4706)
-#pragma comment(lib, "Winmm")
-#endif
+#endif /* _MSC_VER */
 
 #define FTDM_STR2ENUM_P(_FUNC1, _FUNC2, _TYPE) FT_DECLARE(_TYPE) _FUNC1 (const char *name); FT_DECLARE(const char *) _FUNC2 (_TYPE type);
 #define FTDM_STR2ENUM(_FUNC1, _FUNC2, _TYPE, _STRINGS, _MAX)	\
@@ -148,14 +142,6 @@ extern "C" {
 #include <windows.h>
 #define FTDM_INVALID_SOCKET INVALID_HANDLE_VALUE
 typedef HANDLE ftdm_socket_t;
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int8 uint8_t;
-typedef __int64 int64_t;
-typedef __int32 int32_t;
-typedef __int16 int16_t;
-typedef __int8 int8_t;
 #else
 #define FTDM_INVALID_SOCKET -1
 typedef int ftdm_socket_t;

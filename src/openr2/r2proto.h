@@ -27,6 +27,7 @@
 extern "C" {
 #endif
 
+#include "r2declare.h"
 #include "r2exports.h"
 
 #define OR2_MAX_ANI 80
@@ -167,14 +168,14 @@ typedef enum {
 	OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT
 } openr2_calling_party_category_t;
 
-const char *openr2_proto_get_error(openr2_protocol_error_t reason);
-const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
-const char *openr2_proto_get_category_string(openr2_calling_party_category_t category);
-openr2_calling_party_category_t openr2_proto_get_category(const char *category);
-const char *openr2_proto_get_variant_string(openr2_variant_t variant);
-openr2_variant_t openr2_proto_get_variant(const char *variant);
-const char *openr2_proto_get_call_mode_string(openr2_call_mode_t mode);
-const openr2_variant_entry_t *openr2_proto_get_variant_list(int *numvariants);
+FT_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t reason);
+FT_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
+FT_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category);
+FT_DECLARE(openr2_calling_party_category_t)  openr2_proto_get_category(const char *category);
+FT_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant);
+FT_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant);
+FT_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode);
+FT_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t
