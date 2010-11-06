@@ -23,6 +23,7 @@
  * Cleiber Marques da Silva <cleibermarques@hotmail.com>
  * Humberto Figuera <hfiguera@gmail.com>
  * Afonso Zimmermann <afonso.zimmermann@gmail.com>
+ * Arnaldo Pereira <arnaldo@sangoma.com>
  *
  */
 
@@ -526,7 +527,7 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 	}
 }
 
-FT_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
+OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
 {
 	switch ( error ) {
 	case OR2_INVALID_CAS_BITS:
@@ -612,7 +613,7 @@ static const char *callstate2str(openr2_call_state_t state)
 	return "*Unknown*";
 }
 
-FT_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause)
+OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause)
 {
 	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
@@ -2566,7 +2567,7 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 	return 0;
 }
 
-FT_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category)
+OR2_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category)
 {
 	switch (category) {
 	case OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER:
@@ -2586,7 +2587,7 @@ FT_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_c
 	}
 }
 
-FT_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const char *category)
+OR2_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const char *category)
 {
 	if (!openr2_strncasecmp(category, "NATIONAL_SUBSCRIBER", sizeof("NATIONAL_SUBSCRIBER")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
@@ -2621,7 +2622,7 @@ FT_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const char
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 }
 
-FT_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant_name)
+OR2_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant_name)
 {
 	int i;
 	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
@@ -2633,7 +2634,7 @@ FT_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant_name)
 	return OR2_VAR_UNKNOWN;
 }
 
-FT_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant)
+OR2_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant)
 {
 	int i;
 	int limit = sizeof(r2variants)/sizeof(r2variants[0]);
@@ -2686,7 +2687,7 @@ const char *openr2_proto_get_mf_group_string(openr2_chan_t *r2chan)
 	return mfgroup2str(r2chan->mf_group);
 }
 
-FT_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
+OR2_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode)
 {
 	return get_string_from_mode(mode);
 }
@@ -2703,7 +2704,7 @@ int openr2_proto_get_rx_mf_signal(openr2_chan_t *r2chan)
 	return r2chan->mf_read_tone;
 }
 
-FT_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants)
+OR2_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants)
 {
 	if (!numvariants) {
 		return NULL;

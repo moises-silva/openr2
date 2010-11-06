@@ -168,14 +168,14 @@ typedef enum {
 	OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT
 } openr2_calling_party_category_t;
 
-FT_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t reason);
-FT_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
-FT_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category);
-FT_DECLARE(openr2_calling_party_category_t)  openr2_proto_get_category(const char *category);
-FT_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant);
-FT_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant);
-FT_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode);
-FT_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants);
+OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t reason);
+OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
+OR2_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category);
+OR2_DECLARE(openr2_calling_party_category_t)  openr2_proto_get_category(const char *category);
+OR2_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t variant);
+OR2_DECLARE(openr2_variant_t) openr2_proto_get_variant(const char *variant);
+OR2_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t mode);
+OR2_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *numvariants);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t

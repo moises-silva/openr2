@@ -32,9 +32,9 @@ extern "C" {
 #define OR2_LIB_INTERFACE 4
 #define OR2_LIB_REVISION 0
 #define OR2_LIB_AGE 0
-FT_DECLARE(const char *) openr2_get_version(void);
-FT_DECLARE(const char *) openr2_get_revision(void);
-FT_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n);
+OR2_DECLARE(const char *) openr2_get_version(void);
+OR2_DECLARE(const char *) openr2_get_revision(void);
+OR2_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

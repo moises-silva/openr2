@@ -201,16 +201,16 @@ int openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples);
 int openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit);
 
 /* DTMF Tx routines */
-FT_DECLARE(int) openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples);
-FT_DECLARE(size_t) openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len);
-FT_DECLARE(void) openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time);
-FT_DECLARE(void) openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist);
-FT_DECLARE(openr2_dtmf_tx_state_t *) openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s);
+OR2_DECLARE(int) openr2_dtmf_tx(openr2_dtmf_tx_state_t *s, int16_t amp[], int max_samples);
+OR2_DECLARE(size_t) openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *digits, int len);
+OR2_DECLARE(void) openr2_dtmf_tx_set_timing(openr2_dtmf_tx_state_t *s, int on_time, int off_time);
+OR2_DECLARE(void) openr2_dtmf_tx_set_level(openr2_dtmf_tx_state_t *s, int level, int twist);
+OR2_DECLARE(openr2_dtmf_tx_state_t *) openr2_dtmf_tx_init(openr2_dtmf_tx_state_t *s);
 
 /* DTMF Rx routines */
-FT_DECLARE(openr2_dtmf_rx_state_t *) openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s, openr2_digits_rx_callback_t callback, void *user_data);
-FT_DECLARE(int) openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples);
-FT_DECLARE(int) openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s);
+OR2_DECLARE(openr2_dtmf_rx_state_t *) openr2_dtmf_rx_init(openr2_dtmf_rx_state_t *s, openr2_digits_rx_callback_t callback, void *user_data);
+OR2_DECLARE(int) openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], int samples);
+OR2_DECLARE(int) openr2_dtmf_rx_status(openr2_dtmf_rx_state_t *s);
 
 static __inline__ int openr2_top_bit(unsigned int bits)
 {

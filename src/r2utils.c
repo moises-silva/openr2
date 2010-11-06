@@ -18,6 +18,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Contributors:
+ *
+ * Arnaldo Pereira <arnaldo@sangoma.com>
+ *
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -86,7 +90,7 @@ int gettimeofday(struct timeval *tp, void *nothing)
 #endif /* HAVE_GETTIMEOFDAY */
 
 /* VERSION should be always defined */
-FT_DECLARE(const char *) openr2_get_version(void)
+OR2_DECLARE(const char *) openr2_get_version(void)
 {
 #ifdef VERSION
 	return VERSION;
@@ -96,7 +100,7 @@ FT_DECLARE(const char *) openr2_get_version(void)
 }
 
 /* REVISION will be only defined if built via SVN */
-FT_DECLARE(const char *) openr2_get_revision()
+OR2_DECLARE(const char *) openr2_get_revision()
 {
 #ifdef REVISION
 	return REVISION;
@@ -172,7 +176,7 @@ char *openr2_ctime_r(const time_t *timep, char *buf)
 	return buf;
 }
 
-FT_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n)
+OR2_DECLARE(int) openr2_strncasecmp(const char *s1, const char *s2, size_t n)
 {
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;

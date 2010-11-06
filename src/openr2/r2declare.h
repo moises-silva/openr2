@@ -68,28 +68,28 @@ extern "C" {
 #endif
 #endif /* _MSC_VER */
 #if defined(FREETDM_DECLARE_STATIC)
-#define FT_DECLARE(type)            type __stdcall
-#define FT_DECLARE_NONSTD(type)     type __cdecl
-#define FT_DECLARE_DATA
+#define OR2_DECLARE(type)            type __stdcall
+#define OR2_DECLARE_NONSTD(type)     type __cdecl
+#define OR2_DECLARE_DATA
 #elif defined(FREETDM_EXPORTS)
-#define FT_DECLARE(type)            __declspec(dllexport) type __stdcall
-#define FT_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
-#define FT_DECLARE_DATA             __declspec(dllexport)
+#define OR2_DECLARE(type)            __declspec(dllexport) type __stdcall
+#define OR2_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
+#define OR2_DECLARE_DATA             __declspec(dllexport)
 #else
-#define FT_DECLARE(type)            __declspec(dllimport) type __stdcall
-#define FT_DECLARE_NONSTD(type)     __declspec(dllimport) type __cdecl
-#define FT_DECLARE_DATA             __declspec(dllimport)
+#define OR2_DECLARE(type)            __declspec(dllimport) type __stdcall
+#define OR2_DECLARE_NONSTD(type)     __declspec(dllimport) type __cdecl
+#define OR2_DECLARE_DATA             __declspec(dllimport)
 #endif
 #define EX_DECLARE_DATA             __declspec(dllexport)
 #else /* WIN32 */
 #if (defined(__GNUC__) || defined(__SUNPRO_CC) || defined (__SUNPRO_C)) && defined(HAVE_VISIBILITY)
-#define FT_DECLARE(type)        __attribute__((visibility("default"))) type
-#define FT_DECLARE_NONSTD(type) __attribute__((visibility("default"))) type
-#define FT_DECLARE_DATA     __attribute__((visibility("default")))
+#define OR2_DECLARE(type)        __attribute__((visibility("default"))) type
+#define OR2_DECLARE_NONSTD(type) __attribute__((visibility("default"))) type
+#define OR2_DECLARE_DATA     __attribute__((visibility("default")))
 #else
-#define FT_DECLARE(type)        type
-#define FT_DECLARE_NONSTD(type) type
-#define FT_DECLARE_DATA
+#define OR2_DECLARE(type)        type
+#define OR2_DECLARE_NONSTD(type) type
+#define OR2_DECLARE_DATA
 #endif
 #define EX_DECLARE_DATA
 #endif /* WIN32 */
@@ -113,9 +113,9 @@ extern "C" {
 #undef HAVE_SYS_SOCKET_H
 #endif /* _MSC_VER */
 
-#define FTDM_STR2ENUM_P(_FUNC1, _FUNC2, _TYPE) FT_DECLARE(_TYPE) _FUNC1 (const char *name); FT_DECLARE(const char *) _FUNC2 (_TYPE type);
+#define FTDM_STR2ENUM_P(_FUNC1, _FUNC2, _TYPE) OR2_DECLARE(_TYPE) _FUNC1 (const char *name); OR2_DECLARE(const char *) _FUNC2 (_TYPE type);
 #define FTDM_STR2ENUM(_FUNC1, _FUNC2, _TYPE, _STRINGS, _MAX)	\
-	FT_DECLARE(_TYPE) _FUNC1 (const char *name)							\
+	OR2_DECLARE(_TYPE) _FUNC1 (const char *name)							\
 	{														\
 		int i;												\
 		_TYPE t = _MAX ;									\
@@ -129,7 +129,7 @@ extern "C" {
 															\
 		return t;											\
 	}														\
-	FT_DECLARE(const char *) _FUNC2 (_TYPE type)						\
+	OR2_DECLARE(const char *) _FUNC2 (_TYPE type)						\
 	{														\
 		if (type > _MAX) {									\
 			type = _MAX;									\

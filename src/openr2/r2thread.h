@@ -18,7 +18,7 @@
  * Contributors: 
  *
  * Moises Silva <moy@sangoma.com>
- * Arnaldo M Pereira <arnaldo@sangoma.com>
+ * Arnaldo Pereira <arnaldo@sangoma.com>
  *
  */
 
@@ -40,16 +40,6 @@ extern "C" {
 #define SNG_INVALID_SOCKET INVALID_HANDLE_VALUE
 #define SNG_THREAD_CALLING_CONVENTION __stdcall
 typedef HANDLE openr2_socket_t;
-#if 0
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int8 uint8_t;
-typedef __int64 int64_t;
-typedef __int32 int32_t;
-typedef __int16 int16_t;
-typedef __int8 int8_t;
-#endif
 
 struct openr2_mutex {
 	CRITICAL_SECTION mutex;

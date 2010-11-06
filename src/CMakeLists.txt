@@ -1,4 +1,4 @@
-# author: Arnaldo M Pereira <arnaldo@sangoma.com>
+# author: Arnaldo Pereira <arnaldo@sangoma.com>
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(openr2)
@@ -31,15 +31,6 @@ ADD_DEFINITIONS(-D__OR2_COMPILING_LIBRARY__)
 
 SET(SOURCES r2chan.c r2context.c r2log.c r2proto.c r2utils.c
 	r2engine.c r2ioabs.c queue.c r2thread.c
-#	openr2/queue.h
-#	openr2/r2chan-pvt.h
-#	openr2/r2context-pvt.h
-#	openr2/r2engine.h
-#	openr2/r2zapcompat.h
-#	openr2/r2ioabs.h
-#	openr2/r2log-pvt.h
-#	openr2/r2proto-pvt.h
-#	openr2/r2utils-pvt.h 
 )
 
 IF(DEFINED WANT_R2TEST)

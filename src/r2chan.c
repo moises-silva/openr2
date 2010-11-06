@@ -162,7 +162,7 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	return r2chan;
 }
 
-FT_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle)
+OR2_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle)
 {
 	openr2_chan_lock(r2chan);
 
@@ -186,7 +186,7 @@ FT_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_r
 	return 0;
 }
 
-FT_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int channo)
+OR2_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int channo)
 {
 	if (channo <=0 ) {
 		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Invalid channel number %d\n", channo);
@@ -196,7 +196,7 @@ FT_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int cha
 	return __openr2_chan_new(r2context, channo, 1);
 }
 
-FT_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo)
+OR2_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo)
 {
 	openr2_chan_t *r2chan = NULL;
 	if (channo <=0 ) {
@@ -215,7 +215,7 @@ FT_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context,
 	return r2chan;
 }
 
-FT_DECLARE(int) openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle)
+OR2_DECLARE(int) openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle)
 {
 	openr2_chan_lock(r2chan);
 	if (mf_write_handle) {
@@ -286,7 +286,7 @@ static int openr2_chan_handle_timers(openr2_chan_t *r2chan)
 	return 0;
 }
 
-FT_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan)
 {
 	int ret = 0;
 	openr2_chan_lock(r2chan);
@@ -454,25 +454,25 @@ done:
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_process_mf_signaling(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_process_mf_signaling(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_MF);
 }
 
-FT_DECLARE(int) openr2_chan_process_oob_events(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_process_oob_events(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_OOB);
 }
 
-FT_DECLARE(int) openr2_chan_process_cas_signaling(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_process_cas_signaling(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return openr2_proto_handle_cas(r2chan);
 }
 
-FT_DECLARE(int) openr2_chan_process_signaling(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_process_signaling(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	return openr2_chan_process(r2chan, OR2_CHAN_PROCESS_MF | OR2_CHAN_PROCESS_OOB);
@@ -580,7 +580,7 @@ void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan)
 	openr2_mutex_unlock(r2chan->r2context->timers_lock);
 }
 
-FT_DECLARE(void) openr2_chan_delete(openr2_chan_t *r2chan)
+OR2_DECLARE(void) openr2_chan_delete(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	openr2_chan_lock(r2chan);
@@ -604,7 +604,7 @@ FT_DECLARE(void) openr2_chan_delete(openr2_chan_t *r2chan)
 	free(r2chan);
 }
 
-FT_DECLARE(int) openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
+OR2_DECLARE(int) openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -614,7 +614,7 @@ FT_DECLARE(int) openr2_chan_accept_call(openr2_chan_t *r2chan, openr2_call_mode_
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_answer_call(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_answer_call(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -624,7 +624,7 @@ FT_DECLARE(int) openr2_chan_answer_call(openr2_chan_t *r2chan)
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
+OR2_DECLARE(int) openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -634,7 +634,7 @@ FT_DECLARE(int) openr2_chan_answer_call_with_mode(openr2_chan_t *r2chan, openr2_
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
+OR2_DECLARE(int) openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -644,7 +644,7 @@ FT_DECLARE(int) openr2_chan_disconnect_call(openr2_chan_t *r2chan, openr2_call_d
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -654,7 +654,7 @@ FT_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan)
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -664,7 +664,7 @@ FT_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
 	return retcode;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -674,7 +674,7 @@ FT_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
 	return retstr;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -684,7 +684,7 @@ FT_DECLARE(const char *) openr2_chan_get_tx_cas_string(openr2_chan_t *r2chan)
 	return retstr;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_call_state_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_call_state_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -694,7 +694,7 @@ FT_DECLARE(const char *) openr2_chan_get_call_state_string(openr2_chan_t *r2chan
 	return retstr;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_r2_state_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_r2_state_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -704,7 +704,7 @@ FT_DECLARE(const char *) openr2_chan_get_r2_state_string(openr2_chan_t *r2chan)
 	return retstr;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_mf_state_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_mf_state_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -714,7 +714,7 @@ FT_DECLARE(const char *) openr2_chan_get_mf_state_string(openr2_chan_t *r2chan)
 	return retstr;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_mf_group_string(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_mf_group_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;
 	OR2_CHAN_STACK;
@@ -724,7 +724,7 @@ FT_DECLARE(const char *) openr2_chan_get_mf_group_string(openr2_chan_t *r2chan)
 	return retstr;
 }
 
-FT_DECLARE(int) openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -734,7 +734,7 @@ FT_DECLARE(int) openr2_chan_get_tx_mf_signal(openr2_chan_t *r2chan)
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -744,7 +744,7 @@ FT_DECLARE(int) openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
 	return retcode;
 }
 
-FT_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)
+OR2_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)
 {
 	int myerrno;
 	int res = 0;
@@ -765,7 +765,7 @@ FT_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *bu
 	return wrote;
 }
 
-FT_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category)
+OR2_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
@@ -775,49 +775,49 @@ FT_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, co
 	return retcode;
 }
 
-FT_DECLARE(openr2_direction_t) openr2_chan_get_direction(openr2_chan_t *r2chan)
+OR2_DECLARE(openr2_direction_t) openr2_chan_get_direction(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(openr2_direction_t,direction);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback)
+OR2_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback)
 {
 	OR2_CHAN_SET_PROP(on_channel_log,logcallback);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(openr2_io_fd_t) openr2_chan_get_fd(openr2_chan_t *r2chan)
+OR2_DECLARE(openr2_io_fd_t) openr2_chan_get_fd(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(openr2_io_fd_t,fd);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(int) openr2_chan_get_number(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_number(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(int,number);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(openr2_context_t *) openr2_chan_get_context(openr2_chan_t *r2chan)
+OR2_DECLARE(openr2_context_t *) openr2_chan_get_context(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(openr2_context_t*,r2context);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data)
+OR2_DECLARE(void) openr2_chan_set_client_data(openr2_chan_t *r2chan, void *data)
 {
 	OR2_CHAN_SET_PROP(client_data,data);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void *) openr2_chan_get_client_data(openr2_chan_t *r2chan)
+OR2_DECLARE(void *) openr2_chan_get_client_data(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(void*,client_data);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(int) openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_time_to_next_event(openr2_chan_t *r2chan)
 {
 	int res, ms;
 	struct timeval currtime;
@@ -859,7 +859,7 @@ done:
 	return ms;
 }
 
-FT_DECLARE(openr2_log_level_t) openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level)
+OR2_DECLARE(openr2_log_level_t) openr2_chan_set_log_level(openr2_chan_t *r2chan, openr2_log_level_t level)
 {
 	openr2_log_level_t retlevel = OR2_LOG_NOTHING;
 	OR2_CHAN_STACK;
@@ -870,55 +870,55 @@ FT_DECLARE(openr2_log_level_t) openr2_chan_set_log_level(openr2_chan_t *r2chan, 
 	return retlevel;
 }
 
-FT_DECLARE(openr2_log_level_t) openr2_chan_get_log_level(openr2_chan_t *r2chan)
+OR2_DECLARE(openr2_log_level_t) openr2_chan_get_log_level(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(openr2_log_level_t,loglevel);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_enable_read(openr2_chan_t *r2chan)
+OR2_DECLARE(void) openr2_chan_enable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_SET_PROP(read_enabled,1);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_disable_read(openr2_chan_t *r2chan)
+OR2_DECLARE(void) openr2_chan_disable_read(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_SET_PROP(read_enabled,0);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(int) openr2_chan_get_read_enabled(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_read_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(int,read_enabled);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_enable_call_files(openr2_chan_t *r2chan)
+OR2_DECLARE(void) openr2_chan_enable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_SET_PROP(call_files,1);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(void) openr2_chan_disable_call_files(openr2_chan_t *r2chan)
+OR2_DECLARE(void) openr2_chan_disable_call_files(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_SET_PROP(call_files,0);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(int) openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan)
+OR2_DECLARE(int) openr2_chan_get_call_files_enabled(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(int,call_files);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_dnis(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_dnis(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(const char *,dnis);
 	OR2_CHAN_STACK;
 }
 
-FT_DECLARE(const char *) openr2_chan_get_ani(openr2_chan_t *r2chan)
+OR2_DECLARE(const char *) openr2_chan_get_ani(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_RET_PROP(const char *,ani);
 	OR2_CHAN_STACK;

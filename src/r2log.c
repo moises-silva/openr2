@@ -121,7 +121,7 @@ void openr2_log2(struct openr2_context_s *r2context, const char *file, const cha
 	}	
 }
 
-FT_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level)
+OR2_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level)
 {
 	switch (level) {
 	case OR2_LOG_ERROR:
@@ -147,7 +147,7 @@ FT_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level)
 	};
 }
 
-FT_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr)
+OR2_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr)
 {
 	if (!openr2_strncasecmp("ALL", levelstr, sizeof("ALL")-1)) {
 		return OR2_LOG_ALL;

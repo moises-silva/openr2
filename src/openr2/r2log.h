@@ -48,8 +48,8 @@ typedef enum {
 /* to be used on openr2_log() */
 #define OR2_CHANNEL_LOG __FILE__, __FUNCTION__, __LINE__
 
-FT_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level);
-FT_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr);
+OR2_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level);
+OR2_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */
