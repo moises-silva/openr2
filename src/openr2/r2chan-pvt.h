@@ -33,6 +33,11 @@
 #include "r2proto-pvt.h"
 #include "r2thread.h"
 
+/* timeval */
+#ifdef WIN32_LEAN_AND_MEAN 
+#include <winsock2.h>
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

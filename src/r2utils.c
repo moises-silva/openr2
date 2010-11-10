@@ -49,6 +49,11 @@ static openr2_mutex_t *ctime_lock = NULL;
 #ifdef WIN32
 #include <mmsystem.h>
 
+/* timeval */
+#ifdef WIN32_LEAN_AND_MEAN 
+#include <winsock2.h>
+#endif
+
 int gettimeofday(struct timeval *tp, void *nothing)
 {
 #ifdef WITHOUT_MM_LIB
@@ -95,7 +100,7 @@ OR2_DECLARE(const char *) openr2_get_version(void)
 #ifdef VERSION
 	return VERSION;
 #else
-	return "wtf?"
+	return "wtf?";
 #endif
 }
 

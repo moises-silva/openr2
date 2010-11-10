@@ -175,6 +175,7 @@ static openr2_transcoder_interface_t default_transcoder = {
 static openr2_event_interface_t default_evmanager = {
 	/* .on_call_init */ on_call_init_default,
 	/* .on_call_offered */ on_call_offered_default,
+	/* .on_call_accepted */ on_call_accepted_default,
 	/* .on_call_answered */ on_call_answered_default,
 	/* .on_call_disconnect */ on_call_disconnect_default,
 	/* .on_call_end */ on_call_end_default,
@@ -182,9 +183,9 @@ static openr2_event_interface_t default_evmanager = {
 	/* .on_hardware_alarm */ on_hardware_alarm_default,
 	/* .on_os_error */ on_os_error_default,
 	/* .on_protocol_error */ on_protocol_error_default,
-	/* .on_context_log */ openr2_log_context_default,
+	/* .on_line_blocked */ on_line_blocked_default,
 	/* .on_line_idle */ on_line_idle_default,
-	/* .on_line_blocked */ on_line_idle_default,
+	/* .on_context_log */ openr2_log_context_default,
 	/* .on_dnis_digit_received */ on_dnis_digit_received_default,
 	/* .on_ani_digit_received */ on_ani_digit_received_default,
 	/* .on_billing_pulse_received */ on_billing_pulse_received_default

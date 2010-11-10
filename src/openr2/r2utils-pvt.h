@@ -76,6 +76,11 @@ int openr2_mkdir_recursive(char *dir, mode_t mode);
 struct tm *openr2_localtime_r(const time_t *timep, struct tm *result);
 char *openr2_ctime_r(const time_t *timep, char *buf);
 
+/* gettimeofday defined in r2utils for WIN32 */
+#ifdef WIN32
+int gettimeofday(struct timeval *tp, void *nothing);
+#endif
+
 #if defined(__cplusplus)
 } /* endif extern "C" */
 #endif
