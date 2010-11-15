@@ -70,5 +70,6 @@ INSTALL(FILES
 		openr2/r2log.h
 		openr2/r2exports.h
 		openr2/r2thread.h
+		openr2/r2declare.h
 	DESTINATION include/openr2
 )
