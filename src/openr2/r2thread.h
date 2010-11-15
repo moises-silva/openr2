@@ -54,7 +54,9 @@ typedef int openr2_socket_t;
 
 /* it seems some of the flags we use to compile (like -std=c99??) may cause some pthread defs to be missing
    should we get rid of those defs completely instead of defining __USE_UNIX98? */
+#ifndef __USE_UNIX98
 #define __USE_UNIX98
+#endif
 #include <pthread.h>
 #include <unistd.h>
 #include <errno.h>

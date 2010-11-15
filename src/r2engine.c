@@ -27,6 +27,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <inttypes.h>
 #ifdef HAVE_STRING_H
@@ -49,6 +53,12 @@
 
 #define ms_to_samples(t)            (((t)*SAMPLE_RATE)/1000)
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE (!FALSE)
+#endif
 #define SAMPLE_RATE 8000
 #define DBM0_MAX_SINE_POWER     (3.14f)
 

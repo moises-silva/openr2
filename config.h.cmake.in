@@ -40,6 +40,9 @@
 /* Define to 1 if you have the <zaptel/zaptel.h> header file. */
 #cmakedefine HAVE_ZAPTEL_ZAPTEL_H 1
 
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine HAVE_SYS_TIME_H 1
+
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #cmakedefine NO_MINUS_C_MINUS_O 1
 

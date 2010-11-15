@@ -113,38 +113,10 @@ extern "C" {
 #undef HAVE_SYS_SOCKET_H
 #endif /* _MSC_VER */
 
-#define FTDM_STR2ENUM_P(_FUNC1, _FUNC2, _TYPE) OR2_DECLARE(_TYPE) _FUNC1 (const char *name); OR2_DECLARE(const char *) _FUNC2 (_TYPE type);
-#define FTDM_STR2ENUM(_FUNC1, _FUNC2, _TYPE, _STRINGS, _MAX)	\
-	OR2_DECLARE(_TYPE) _FUNC1 (const char *name)							\
-	{														\
-		int i;												\
-		_TYPE t = _MAX ;									\
-															\
-		for (i = 0; i < _MAX ; i++) {						\
-			if (!strcasecmp(name, _STRINGS[i])) {			\
-				t = (_TYPE) i;								\
-				break;										\
-			}												\
-		}													\
-															\
-		return t;											\
-	}														\
-	OR2_DECLARE(const char *) _FUNC2 (_TYPE type)						\
-	{														\
-		if (type > _MAX) {									\
-			type = _MAX;									\
-		}													\
-		return _STRINGS[(int)type];							\
-	}														\
-
 #ifdef __WINDOWS__
 #include <stdio.h>
 #include <windows.h>
-#define FTDM_INVALID_SOCKET INVALID_HANDLE_VALUE
-typedef HANDLE ftdm_socket_t;
 #else
-#define FTDM_INVALID_SOCKET -1
-typedef int ftdm_socket_t;
 #include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
