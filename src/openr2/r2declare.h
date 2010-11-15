@@ -71,7 +71,7 @@ extern "C" {
 #define OR2_DECLARE(type)            type __stdcall
 #define OR2_DECLARE_NONSTD(type)     type __cdecl
 #define OR2_DECLARE_DATA
-#elif defined(FREETDM_EXPORTS)
+#elif defined(OR2_EXPORTS)
 #define OR2_DECLARE(type)            __declspec(dllexport) type __stdcall
 #define OR2_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
 #define OR2_DECLARE_DATA             __declspec(dllexport)
