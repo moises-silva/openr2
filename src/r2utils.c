@@ -69,7 +69,7 @@ int gettimeofday(struct timeval *tp, void *nothing)
     tmtm.tm_mon = st.wMonth - 1;
     tmtm.tm_year = st.wYear - 1900;  tmtm.tm_isdst = -1;
     tt = mktime (&tmtm);
-    tp->tv_sec = tt;
+    tp->tv_sec = (long) tt;
     tp->tv_usec = st.wMilliseconds * 1000;
 #else
     /**

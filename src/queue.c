@@ -352,7 +352,7 @@ int queue_write_msg(queue_state_t *s, const uint8_t *buf, int len)
     if ((real_len = optr - iptr - 1) < 0)
         real_len += s->len;
     /*endif*/
-    if (real_len < len + sizeof(uint16_t))
+    if ((uint16_t) real_len < len + sizeof(uint16_t))
         return -1;
     /*endif*/
     real_len = len + sizeof(uint16_t);

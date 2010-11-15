@@ -2767,7 +2767,7 @@ OR2_DECLARE(size_t) openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *di
         if ((len = strlen(digits)) == 0)
             return 0;
     }
-    if ((space = queue_free_space(&s->queue.queue)) < len)
+    if ((space = queue_free_space(&s->queue.queue)) < (size_t) len)
         return len - space;
     if (queue_write(&s->queue.queue, (const uint8_t *) digits, len) >= 0)
         return 0;

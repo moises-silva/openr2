@@ -381,7 +381,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 			/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
 			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
 				/* assuming ALAW codec */
-				for (i = 0; i < res; i++) {
+				for (i = 0; i < (uint32_t) res; i++) {
 					tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
 				}	
 #ifdef OR2_MF_DEBUG	
@@ -418,7 +418,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 				openr2_proto_handle_dtmf_end(r2chan);
 				continue;
 			}
-			for (i = 0; i < res; i++) {
+			for (i = 0; i < (uint32_t) res; i++) {
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = openr2_io_write(r2chan, read_buf, res);
@@ -440,7 +440,7 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 #ifdef OR2_MF_DEBUG
 			write(r2chan->mf_write_fd, tone_buf, res*2);
 #endif
-			for (i = 0; i < res; i++) {
+			for (i = 0; i < (uint32_t) res; i++) {
 				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 			}
 			wrote = openr2_io_write(r2chan, read_buf, res);

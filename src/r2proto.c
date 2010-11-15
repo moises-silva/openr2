@@ -66,7 +66,7 @@
 
 /* Note that we compare >= because even if max_dnis is zero
    we could get 1 digit, want it or not :-) */
-#define DNIS_COMPLETE(r2chan) ((r2chan)->dnis_len >= (r2chan)->r2context->max_dnis)
+#define DNIS_COMPLETE(r2chan) ((r2chan)->dnis_len >= (uint32_t) (r2chan)->r2context->max_dnis)
 
 #define OFFER_CALL(r2chan) \
 (r2chan)->call_state = OR2_CALL_OFFERED; \
@@ -1741,7 +1741,7 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 		}
 		/* if we don't have a tone, or the ANI len is not enough yet, 
 		   ask for more ANI */
-		if (!tone || r2chan->r2context->max_ani > r2chan->ani_len) {
+		if (!tone || (uint32_t) r2chan->r2context->max_ani > r2chan->ani_len) {
 			r2chan->mf_state = OR2_MF_ANI_RQ_TXD;
 			prepare_mf_tone(r2chan, next_ani_request_tone);
 		} else {
