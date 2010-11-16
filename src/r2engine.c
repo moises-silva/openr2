@@ -549,7 +549,7 @@ static int tone_gen(openr2_tone_gen_state_t *s, int16_t amp[], int max_samples)
                     /* There must be two, and only two tones */
                     xamp = dds_modf(&s->phase[0], -s->tone[0].phase_rate, s->tone[0].gain, 0)
                          *(1.0f + dds_modf(&s->phase[1], s->tone[1].phase_rate, s->tone[1].gain, 0));
-                    amp[samples] = (int16_t) rintf(xamp);
+                    amp[samples] = (int16_t) lfastrintf(xamp);
                 }
             }
             else
@@ -567,7 +567,7 @@ static int tone_gen(openr2_tone_gen_state_t *s, int16_t amp[], int max_samples)
                        However, we are normally generating well controlled tones,
                        that cannot clip. So, the overhead of doing saturation is
                        a waste of valuable time. */
-                    amp[samples] = (int16_t) rintf(xamp);
+                    amp[samples] = (int16_t) lfastrintf(xamp);
                 }
             }
         }
@@ -2764,7 +2764,7 @@ OR2_DECLARE(size_t) openr2_dtmf_tx_put(openr2_dtmf_tx_state_t *s, const char *di
        in which case zero is returned. */
     if (len < 0)
     {
-        if ((len = strlen(digits)) == 0)
+        if ((len = (int) strlen(digits)) == 0)
             return 0;
     }
     if ((space = queue_free_space(&s->queue.queue)) < (size_t) len)
@@ -3011,7 +3011,7 @@ OR2_DECLARE(int) openr2_dtmf_rx(openr2_dtmf_rx_state_t *s, const int16_t amp[], 
                     /* Avoid reporting multiple no digit conditions on flaky hits */
                     if (s->in_digit  ||  hit)
                     {
-                        i = (s->in_digit  &&  !hit)  ?  -99  :  rintf(log10f(s->energy)*10.0f - 20.08f - DTMF_POWER_OFFSET + DBM0_MAX_POWER);
+                        i = (s->in_digit  &&  !hit)  ?  -99  :  lfastrintf(log10f(s->energy)*10.0f - 20.08f - DTMF_POWER_OFFSET + DBM0_MAX_POWER);
                         s->realtime_callback(s->realtime_callback_data, hit, i, 0);
                     }
                 }
