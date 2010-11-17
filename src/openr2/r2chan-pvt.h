@@ -244,7 +244,7 @@ typedef struct openr2_chan_s {
 	unsigned category_sent;
 
 	/* channel logging callback */
-	openr2_logging_func_t on_channel_log;
+	openr2_chan_logging_func_t on_channel_log;
 
 	/* logging level */
 	openr2_log_level_t loglevel;
@@ -253,6 +253,7 @@ typedef struct openr2_chan_s {
 	int call_files;
 	long call_count;
 	FILE *logfile;
+	FILE *generic_logfile;
 
 	/* generic flags */
 	int32_t flags;

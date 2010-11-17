@@ -100,14 +100,6 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	}
 #endif
 
-#if 0
-	/* someday I may get paid to check this return codes :-) */
-	pthread_mutexattr_t chanlockattr;
-	pthread_mutexattr_init(&chanlockattr);
-	pthread_mutexattr_settype(&chanlockattr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&r2chan->lock, &chanlockattr);
-#endif
-
 	openr2_mutex_create(&r2chan->lock);
 
 	/* no persistence check has been done */
@@ -781,7 +773,7 @@ OR2_DECLARE(openr2_direction_t) openr2_chan_get_direction(openr2_chan_t *r2chan)
 	OR2_CHAN_STACK;
 }
 
-OR2_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback)
+OR2_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_chan_logging_func_t logcallback)
 {
 	OR2_CHAN_SET_PROP(on_channel_log,logcallback);
 	OR2_CHAN_STACK;

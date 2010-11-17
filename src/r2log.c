@@ -34,6 +34,50 @@
 #include "openr2/r2chan-pvt.h"
 #include "openr2/r2context-pvt.h"
 
+void openr2_log_generic_default(const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
+{
+	struct timeval currtime;
+	struct tm currtime_tm;
+	time_t currsec = time(NULL);
+	int res = gettimeofday(&currtime, NULL);
+	if (-1 == res) {
+		fprintf(stderr, "gettimeofday failed!\n");
+		return;
+	} 
+	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
+		fprintf(stderr, "openr2_localtime_r failed!\n");
+		return;
+	}
+#if 0
+	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
+	   because that will call openr2_log */
+	fprintf(r2chan->generic_logfile, "[%02d:%02d:%02d:%03lu] [Thread: %02lu] [Chan %d] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
+			currtime_tm.tm_sec, currtime.tv_usec/1000, openr2_thread_self(), r2chan->number);
+	if (r2chan->r2context->configured_from_file) {
+		fprintf(r2chan->generic_logfile, "M - ");
+	}	
+#else
+	fprintf(stdout, "[%02d:%02d:%02d:%03lu] [Thread: %02lu] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
+			currtime_tm.tm_sec, currtime.tv_usec/1000, openr2_thread_self());
+#endif
+	vfprintf(stdout, fmt, ap);
+}
+
+openr2_generic_logging_func_t _openr2_log_generic = openr2_log_generic_default;
+
+void openr2_log_generic(const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	_openr2_log_generic(file, function, line, level, fmt, ap);
+	va_end(ap);
+}
+
+OR2_DECLARE(void) openr2_generic_set_logging_func(openr2_generic_logging_func_t logcallback)
+{
+	_openr2_log_generic = logcallback;
+}
+
 void openr2_log_channel_default(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
@@ -58,15 +102,6 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, const char *file, const c
 	vprintf(fmt, ap);
 }
 
-void openr2_log_context_default(openr2_context_t *r2context, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
-{
-	printf("[%s] Context -- ", openr2_log_get_level_string(level));
-	if (r2context->configured_from_file) {
-		printf("M -- ");
-	}
-	vprintf(fmt, ap);
-}
-
 static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
@@ -83,12 +118,21 @@ static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 	}
 	/* Avoid infinite recurstion: Don't call openr2_chan_get_number 
 	   because that will call openr2_log */
-	fprintf(r2chan->logfile, "[%02d:%02d:%02d:%03lu] [Thread: %s] [Chan %d] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
-			currtime_tm.tm_sec, currtime.tv_usec/1000, "FIXME", r2chan->number);
+	fprintf(r2chan->logfile, "[%02d:%02d:%02d:%03lu] [Thread: %02lu] [Chan %d] - ", currtime_tm.tm_hour, currtime_tm.tm_min, 
+			currtime_tm.tm_sec, currtime.tv_usec/1000, openr2_thread_self(), r2chan->number);
 	if (r2chan->r2context->configured_from_file) {
 		fprintf(r2chan->logfile, "M - ");
 	}	
 	vfprintf(r2chan->logfile, fmt, ap);
+}
+
+void openr2_log_context_default(openr2_context_t *r2context, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
+{
+	printf("[%s] Context -- ", openr2_log_get_level_string(level));
+	if (r2context->configured_from_file) {
+		printf("M -- ");
+	}
+	vprintf(fmt, ap);
 }
 
 void openr2_log(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, ...)

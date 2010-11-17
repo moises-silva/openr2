@@ -23,8 +23,8 @@
  */
 
 
-#ifndef _SNG_THREAD_H
-#define _SNG_THREAD_H
+#ifndef _R2THREAD_H
+#define _R2THREAD_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,8 +37,8 @@ extern "C" {
 #include <windows.h>
 #include <process.h>
 #include <inttypes.h>
-#define SNG_INVALID_SOCKET INVALID_HANDLE_VALUE
-#define SNG_THREAD_CALLING_CONVENTION __stdcall
+#define OR2_INVALID_SOCKET INVALID_HANDLE_VALUE
+#define OR2_THREAD_CALLING_CONVENTION __stdcall
 typedef HANDLE openr2_socket_t;
 
 struct openr2_mutex {
@@ -46,7 +46,7 @@ struct openr2_mutex {
 };
 
 #else /* WIN32 */
-#define SNG_INVALID_SOCKET -1
+#define OR2_INVALID_SOCKET -1
 typedef int openr2_socket_t;
 #include <stdio.h>
 #include <stdint.h>
@@ -63,7 +63,7 @@ typedef int openr2_socket_t;
 #include <string.h>
 #include <poll.h>
 
-#define SNG_THREAD_CALLING_CONVENTION
+#define OR2_THREAD_CALLING_CONVENTION
 
 struct openr2_mutex {
 	pthread_mutex_t mutex;
@@ -94,27 +94,7 @@ extern openr2_memory_handler_t g_openr2_mem_handler;
 #define openr2_safe_free(it) if (it) { openr2_free(it); it = NULL; }
 #define openr2_array_len(array) sizeof(array)/sizeof(array[0])
 
-#define SNG_PRE __FILE__, __FUNCTION__, __LINE__
-#define SNG_LOG_LEVEL_DEBUG 7
-#define SNG_LOG_LEVEL_INFO 6
-#define SNG_LOG_LEVEL_NOTICE 5
-#define SNG_LOG_LEVEL_WARNING 4
-#define SNG_LOG_LEVEL_ERROR 3
-#define SNG_LOG_LEVEL_CRIT 2
-#define SNG_LOG_LEVEL_ALERT 1
-#define SNG_LOG_LEVEL_EMERG 0
-
-/*! \brief Log levels  */
-#define SNG_LOG_DEBUG SNG_PRE, SNG_LOG_LEVEL_DEBUG
-#define SNG_LOG_INFO SNG_PRE, SNG_LOG_LEVEL_INFO
-#define SNG_LOG_NOTICE SNG_PRE, SNG_LOG_LEVEL_NOTICE
-#define SNG_LOG_WARNING SNG_PRE, SNG_LOG_LEVEL_WARNING
-#define SNG_LOG_ERROR SNG_PRE, SNG_LOG_LEVEL_ERROR
-#define SNG_LOG_CRIT SNG_PRE, SNG_LOG_LEVEL_CRIT
-#define SNG_LOG_ALERT SNG_PRE, SNG_LOG_LEVEL_ALERT
-#define SNG_LOG_EMERG SNG_PRE, SNG_LOG_LEVEL_EMERG
-
-typedef enum { SNG_SUCCESS, SNG_FAIL, SNG_TIMEOUT } openr2_status_t;
+typedef enum { OR2_SUCCESS, OR2_FAIL, OR2_TIMEOUT } openr2_status_t;
 
 typedef struct openr2_mutex openr2_mutex_t;
 typedef struct openr2_thread openr2_thread_t;
@@ -167,6 +147,9 @@ openr2_status_t openr2_interrupt_destroy(openr2_interrupt_t **cond);
 openr2_status_t openr2_interrupt_signal(openr2_interrupt_t *cond);
 openr2_status_t openr2_interrupt_wait(openr2_interrupt_t *cond, int ms);
 openr2_status_t openr2_interrupt_multiple_wait(openr2_interrupt_t *interrupts[], size_t size, int ms);
+
+/* when pthread is available, return thread_id. -1 otherwise */
+unsigned long openr2_thread_self(void);
 
 #ifdef __cplusplus
 }

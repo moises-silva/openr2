@@ -27,10 +27,8 @@
 #endif
 
 #include "openr2/r2thread.h"
-
-#define SNG_LOG(level, fmt, ...) do { \
-  printf( "foobar * " fmt "\n", ## __VA_ARGS__ ); \
-} while (0)
+#include "openr2/r2log.h"
+#include "openr2/r2log-pvt.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -43,49 +41,49 @@
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
-#endif                                                                                                                                 
+#endif
 
 #define _openr2_assert(assertion, msg) \
-    if (!(assertion)) { \
-        SNG_LOG(SNG_LOGLEVEL_CRIT, msg); \
+	if (!(assertion)) { \
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, msg); \
 		return; \
-    }
+	}
 
 #define _openr2_assert_return(assertion, retval, msg) \
-    if (!(assertion)) { \
-        SNG_LOG(SNG_LOGLEVEL_CRIT, msg); \
+	if (!(assertion)) { \
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, msg); \
 		return retval; \
-    }
+	}
 
 static __inline__ void *openr2_std_malloc(void *pool, size_t size)
 {
-    void *ptr = malloc(size);
-    pool = NULL; /* fix warning */
-    _openr2_assert_return(ptr != NULL, NULL, "Out of memory");
-    return ptr;
+	void *ptr = malloc(size);
+	pool = NULL; /* fix warning */
+	_openr2_assert_return(ptr != NULL, NULL, "Out of memory");
+	return ptr;
 }
 
 static __inline__ void *openr2_std_calloc(void *pool, size_t elements, size_t size)
 {
-    void *ptr = calloc(elements, size);
-    pool = NULL;
-    _openr2_assert_return(ptr != NULL, NULL, "Out of memory");
-    return ptr;
+	void *ptr = calloc(elements, size);
+	pool = NULL;
+	_openr2_assert_return(ptr != NULL, NULL, "Out of memory");
+	return ptr;
 }
 
 static __inline__ void *openr2_std_realloc(void *pool, void *buff, size_t size)
 {
-    buff = realloc(buff, size);
-    pool = NULL;
-    _openr2_assert_return(buff != NULL, NULL, "Out of memory");
-    return buff;
+	buff = realloc(buff, size);
+	pool = NULL;
+	_openr2_assert_return(buff != NULL, NULL, "Out of memory");
+	return buff;
 }
 
 static __inline__ void openr2_std_free(void *pool, void *ptr)
 {
-    pool = NULL;
-    _openr2_assert_return(ptr != NULL, , "Attempted to free null pointer");
-    free(ptr);
+	pool = NULL;
+	_openr2_assert_return(ptr != NULL, , "Attempted to free null pointer");
+	free(ptr);
 }
 
 openr2_memory_handler_t g_openr2_mem_handler =
@@ -99,10 +97,10 @@ openr2_memory_handler_t g_openr2_mem_handler =
 
 size_t thread_default_stacksize = 0;
 
-static void * SNG_THREAD_CALLING_CONVENTION thread_launch(void *args)
+static void * OR2_THREAD_CALLING_CONVENTION thread_launch(void *args)
 {
 	void *exit_val;
-    openr2_thread_t *thread = (openr2_thread_t *)args;
+	openr2_thread_t *thread = (openr2_thread_t *)args;
 	exit_val = thread->function(thread, thread->private_data);
 #ifndef WIN32
 	pthread_attr_destroy(&thread->attribute);
@@ -120,7 +118,7 @@ openr2_status_t openr2_thread_create_detached(openr2_thread_function_t func, voi
 openr2_status_t openr2_thread_create_detached_ex(openr2_thread_function_t func, void *data, size_t stack_size)
 {
 	openr2_thread_t *thread = NULL;
-	openr2_status_t status = SNG_FAIL;
+	openr2_status_t status = OR2_FAIL;
 
 	if (!func || !(thread = (openr2_thread_t *)openr2_malloc(sizeof(openr2_thread_t)))) {
 		goto done;
@@ -137,7 +135,7 @@ openr2_status_t openr2_thread_create_detached_ex(openr2_thread_function_t func, 
 	}
 	CloseHandle(thread->handle);
 
-	status = SNG_SUCCESS;
+	status = OR2_SUCCESS;
 	goto done;
 #else
 	
@@ -149,7 +147,7 @@ openr2_status_t openr2_thread_create_detached_ex(openr2_thread_function_t func, 
 
 	if (pthread_create(&thread->handle, &thread->attribute, thread_launch, thread) != 0) goto failpthread;
 
-	status = SNG_SUCCESS;
+	status = OR2_SUCCESS;
 	goto done;
  failpthread:
 	pthread_attr_destroy(&thread->attribute);
@@ -166,7 +164,7 @@ openr2_status_t openr2_thread_create_detached_ex(openr2_thread_function_t func, 
 
 openr2_status_t openr2_mutex_create(openr2_mutex_t **mutex)
 {
-	openr2_status_t status = SNG_FAIL;
+	openr2_status_t status = OR2_FAIL;
 #ifndef WIN32
 	pthread_mutexattr_t attr;
 #endif
@@ -196,7 +194,7 @@ openr2_status_t openr2_mutex_create(openr2_mutex_t **mutex)
  success:
 #endif
 	*mutex = check;
-	status = SNG_SUCCESS;
+	status = OR2_SUCCESS;
 
  done:
 	return status;
@@ -207,16 +205,16 @@ openr2_status_t openr2_mutex_destroy(openr2_mutex_t **mutex)
 	openr2_mutex_t *mp = *mutex;
 	*mutex = NULL;
 	if (!mp) {
-		return SNG_FAIL;
+		return OR2_FAIL;
 	}
 #ifdef WIN32
 	DeleteCriticalSection(&mp->mutex);
 #else
 	if (pthread_mutex_destroy(&mp->mutex))
-		return SNG_FAIL;
+		return OR2_FAIL;
 #endif
 	openr2_safe_free(mp);
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 openr2_status_t _openr2_mutex_lock(openr2_mutex_t *mutex)
@@ -226,23 +224,23 @@ openr2_status_t _openr2_mutex_lock(openr2_mutex_t *mutex)
 #else
 	int err;
 	if ((err = pthread_mutex_lock(&mutex->mutex))) {
-		SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to lock mutex %d:%s\n", err, strerror(err));
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to lock mutex %d:%s\n", err, strerror(err));
+		return OR2_FAIL;
 	}
 #endif
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 openr2_status_t _openr2_mutex_trylock(openr2_mutex_t *mutex)
 {
 #ifdef WIN32
 	if (!TryEnterCriticalSection(&mutex->mutex))
-		return SNG_FAIL;
+		return OR2_FAIL;
 #else
 	if (pthread_mutex_trylock(&mutex->mutex))
-		return SNG_FAIL;
+		return OR2_FAIL;
 #endif
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 openr2_status_t _openr2_mutex_unlock(openr2_mutex_t *mutex)
@@ -251,9 +249,9 @@ openr2_status_t _openr2_mutex_unlock(openr2_mutex_t *mutex)
 	LeaveCriticalSection(&mutex->mutex);
 #else
 	if (pthread_mutex_unlock(&mutex->mutex))
-		return SNG_FAIL;
+		return OR2_FAIL;
 #endif
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 
@@ -264,24 +262,24 @@ openr2_status_t openr2_interrupt_create(openr2_interrupt_t **ininterrupt, openr2
 	int fds[2];
 #endif
 
-	_openr2_assert_return(ininterrupt != NULL, SNG_FAIL, "interrupt double pointer is null!\n");
+	_openr2_assert_return(ininterrupt != NULL, OR2_FAIL, "interrupt double pointer is null!\n");
 
 	interrupt = openr2_calloc(1, sizeof(*interrupt));
 	if (!interrupt) {
-		SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to allocate interrupt memory\n");
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to allocate interrupt memory\n");
+		return OR2_FAIL;
 	}
 
 	interrupt->device = device;
 #ifdef WIN32
 	interrupt->event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (!interrupt->event) {
-		SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to allocate interrupt event\n");
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to allocate interrupt event\n");
 		goto failed;
 	}
 #else
 	if (pipe(fds)) {
-		SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to allocate interrupt pipe: %s\n", strerror(errno));
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to allocate interrupt pipe: %s\n", strerror(errno));
 		goto failed;
 	}
 	interrupt->readfd = fds[0];
@@ -289,7 +287,7 @@ openr2_status_t openr2_interrupt_create(openr2_interrupt_t **ininterrupt, openr2
 #endif
 
 	*ininterrupt = interrupt;
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 
 failed:
 	if (interrupt) {
@@ -303,7 +301,7 @@ failed:
 #endif
 		openr2_safe_free(interrupt);
 	}
-	return SNG_FAIL;
+	return OR2_FAIL;
 }
 
 #define ONE_BILLION 1000000000
@@ -320,29 +318,29 @@ openr2_status_t openr2_interrupt_wait(openr2_interrupt_t *interrupt, int ms)
 	char pipebuf[255];
 #endif
 
-	_openr2_assert_return(interrupt != NULL, SNG_FAIL, "Condition is null!\n");
+	_openr2_assert_return(interrupt != NULL, OR2_FAIL, "Condition is null!\n");
 
 
 	/* start implementation */
 #ifdef WIN32
 	ints[0] = interrupt->event;
-	if (interrupt->device != SNG_INVALID_SOCKET) {
+	if (interrupt->device != OR2_INVALID_SOCKET) {
 		num++;
 		ints[1] = interrupt->device;
 	}
 	res = WaitForMultipleObjects(num, ints, FALSE, ms >= 0 ? ms : INFINITE);
 	switch (res) {
 	case WAIT_TIMEOUT:
-		return SNG_TIMEOUT;
+		return OR2_TIMEOUT;
 	case WAIT_FAILED:
 	case WAIT_ABANDONED: /* is it right to fail with abandoned? */
-		return SNG_FAIL;
+		return OR2_FAIL;
 	default:
 		if (res >= (sizeof(ints)/sizeof(ints[0]))) {
-			SNG_LOG(SNG_LOGLEVEL_ERROR, "Error waiting for freetdm interrupt event (WaitForSingleObject returned %d)\n", res);
-			return SNG_FAIL;
+			openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Error waiting for freetdm interrupt event (WaitForSingleObject returned %d)\n", res);
+			return OR2_FAIL;
 		}
-		return SNG_SUCCESS;
+		return OR2_SUCCESS;
 	}
 #else
 pollagain:
@@ -350,7 +348,7 @@ pollagain:
 	ints[0].events = POLLIN;
 	ints[0].revents = 0;
 
-	if (interrupt->device != SNG_INVALID_SOCKET) {
+	if (interrupt->device != OR2_INVALID_SOCKET) {
 		num++;
 		ints[1].fd = interrupt->device;
 		ints[1].events = POLLIN;
@@ -363,32 +361,32 @@ pollagain:
 		if (errno == EINTR) {
 			goto pollagain;
 		}
-		SNG_LOG(SNG_LOGLEVEL_CRIT, "interrupt poll failed (%s)\n", strerror(errno));
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "interrupt poll failed (%s)\n", strerror(errno));
+		return OR2_FAIL;
 	}
 
 	if (res == 0) {
-		return SNG_TIMEOUT;
+		return OR2_TIMEOUT;
 	}
 
 	if (ints[0].revents & POLLIN) {
 		res = read(ints[0].fd, pipebuf, sizeof(pipebuf));
 		if (res == -1) {
-			SNG_LOG(SNG_LOGLEVEL_CRIT, "reading interrupt descriptor failed (%s)\n", strerror(errno));
+			openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "reading interrupt descriptor failed (%s)\n", strerror(errno));
 		}
 	}
 
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 #endif
 }
 
 openr2_status_t openr2_interrupt_signal(openr2_interrupt_t *interrupt)
 {
-	_openr2_assert_return(interrupt != NULL, SNG_FAIL, "Interrupt is null!\n");
+	_openr2_assert_return(interrupt != NULL, OR2_FAIL, "Interrupt is null!\n");
 #ifdef WIN32
 	if (!SetEvent(interrupt->event)) {
-		SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to signal interrupt\n");
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to signal interrupt\n");
+		return OR2_FAIL;
 
 	}
 #else
@@ -403,18 +401,18 @@ openr2_status_t openr2_interrupt_signal(openr2_interrupt_t *interrupt)
 		 * otherwise users that never call interrupt wait eventually will 
 		 * eventually have the pipe buffer filled */
 		if ((err = write(interrupt->writefd, "w", 1)) != 1) {
-			SNG_LOG(SNG_LOGLEVEL_ERROR, "Failed to signal interrupt: %s\n", strerror(errno));
-			return SNG_FAIL;
+			openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Failed to signal interrupt: %s\n", strerror(errno));
+			return OR2_FAIL;
 		}
 	}
 #endif
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 openr2_status_t openr2_interrupt_destroy(openr2_interrupt_t **ininterrupt)
 {
 	openr2_interrupt_t *interrupt = NULL;
-	_openr2_assert_return(ininterrupt != NULL, SNG_FAIL, "Interrupt null when destroying!\n");
+	_openr2_assert_return(ininterrupt != NULL, OR2_FAIL, "Interrupt null when destroying!\n");
 	interrupt = *ininterrupt;
 #ifdef WIN32
 	CloseHandle(interrupt->event);
@@ -427,7 +425,7 @@ openr2_status_t openr2_interrupt_destroy(openr2_interrupt_t **ininterrupt)
 #endif
 	openr2_safe_free(interrupt);
 	*ininterrupt = NULL;
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
 }
 
 openr2_status_t openr2_interrupt_multiple_wait(openr2_interrupt_t *interrupts[], size_t size, int ms)
@@ -440,13 +438,13 @@ openr2_status_t openr2_interrupt_multiple_wait(openr2_interrupt_t *interrupts[],
 	HANDLE ints[20];
 	if (size > (openr2_array_len(ints)/2)) {
 		/* improve if needed: dynamically allocate the list of interrupts *only* when exceeding the default size */
-		SNG_LOG(SNG_LOGLEVEL_CRIT, "Unsupported size of interrupts: %d, implement me!\n", size);
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Unsupported size of interrupts: %d, implement me!\n", size);
+		return OR2_FAIL;
 	}
 
 	for (i = 0; i < size; i++) {
 		ints[i] = interrupts[i]->event;
-		if (interrupts[i]->device != SNG_INVALID_SOCKET) {
+		if (interrupts[i]->device != OR2_INVALID_SOCKET) {
 
 			ints[size+numdevices] = interrupts[i]->device;
 			numdevices++;
@@ -457,16 +455,16 @@ openr2_status_t openr2_interrupt_multiple_wait(openr2_interrupt_t *interrupts[],
 
 	switch (res) {
 	case WAIT_TIMEOUT:
-		return SNG_TIMEOUT;
+		return OR2_TIMEOUT;
 	case WAIT_FAILED:
 	case WAIT_ABANDONED: /* is it right to fail with abandoned? */
-		return SNG_FAIL;
+		return OR2_FAIL;
 	default:
 		if (res >= (size+numdevices)) {
-			SNG_LOG(SNG_LOGLEVEL_ERROR, "Error waiting for freetdm interrupt event (WaitForSingleObject returned %d)\n", res);
-			return SNG_FAIL;
+			openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "Error waiting for freetdm interrupt event (WaitForSingleObject returned %d)\n", res);
+			return OR2_FAIL;
 		}
-		/* fall-through to SNG_SUCCESS at the end of the function */
+		/* fall-through to OR2_SUCCESS at the end of the function */
 	}
 #elif defined(__linux__) || defined(__FreeBSD__)
 	int res = 0;
@@ -479,7 +477,7 @@ pollagain:
 		ints[i].events = POLLIN;
 		ints[i].revents = 0;
 		ints[i].fd = interrupts[i]->readfd;
-		if (interrupts[i]->device != SNG_INVALID_SOCKET) {
+		if (interrupts[i]->device != OR2_INVALID_SOCKET) {
 			ints[size+numdevices].events = POLLIN;
 			ints[size+numdevices].revents = 0;
 			ints[size+numdevices].fd = interrupts[i]->device;
@@ -494,12 +492,12 @@ pollagain:
 		if (errno == EINTR) {
 			goto pollagain;
 		}
-		SNG_LOG(SNG_LOGLEVEL_CRIT, "interrupt poll failed (%s)\n", strerror(errno));
-		return SNG_FAIL;
+		openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "interrupt poll failed (%s)\n", strerror(errno));
+		return OR2_FAIL;
 	}
 
 	if (res == 0) {
-		return SNG_TIMEOUT;
+		return OR2_TIMEOUT;
 	}
 
 	/* check for events in the pipes, NOT in the devices */
@@ -507,13 +505,23 @@ pollagain:
 		if (ints[i].revents & POLLIN) {
 			res = read(ints[i].fd, pipebuf, sizeof(pipebuf));
 			if (res == -1) {
-				SNG_LOG(SNG_LOGLEVEL_CRIT, "reading interrupt descriptor failed (%s)\n", strerror(errno));
+				openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, "reading interrupt descriptor failed (%s)\n", strerror(errno));
 			}
 		}
 	}
 #else
 #endif
-	return SNG_SUCCESS;
+	return OR2_SUCCESS;
+}
+
+unsigned long openr2_thread_self(void)
+{
+#ifdef WIN32
+	return -1;
+#else
+	return (unsigned long) pthread_self();
+#endif
+	
 }
 
 /* For Emacs:

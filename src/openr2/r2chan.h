@@ -40,7 +40,7 @@ extern "C" {
 #define OR2_CHAN_READ_SIZE 160
 
 /* callback for logging channel related info */
-typedef void (*openr2_logging_func_t)(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap);
+typedef void (*openr2_chan_logging_func_t)(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap);
 
 /*! \brief allocate and initialize a new channel openning the underlying hardware channel number */
 OR2_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int channo);
@@ -77,7 +77,7 @@ OR2_DECLARE(openr2_direction_t) openr2_chan_get_direction(openr2_chan_t *r2chan)
 OR2_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int len);
 
 /*! \brief Set the callback to call when logging */
-OR2_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_logging_func_t logcallback);
+OR2_DECLARE(void) openr2_chan_set_logging_func(openr2_chan_t *r2chan, openr2_chan_logging_func_t logcallback);
 
 /*! \brief Return the I/O descriptor associated to the channel */
 OR2_DECLARE(openr2_io_fd_t) openr2_chan_get_fd(openr2_chan_t *r2chan);

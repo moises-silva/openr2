@@ -42,14 +42,23 @@ typedef enum {
 	OR2_LOG_EX_DEBUG    = ( OR2_LOG_ALL + 1 )
 } openr2_log_level_t;	
 
+typedef void (*openr2_generic_logging_func_t)(const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap);
+
+/* default first args to log functions */
+#define OR2_LOG_PREP __FILE__, __FUNCTION__, __LINE__
+
 /* must be used on each openr2_log2() call */
-#define OR2_CONTEXT_LOG __FILE__, __FUNCTION__, __LINE__
+#define OR2_CONTEXT_LOG OR2_LOG_PREP
 
 /* to be used on openr2_log() */
-#define OR2_CHANNEL_LOG __FILE__, __FUNCTION__, __LINE__
+#define OR2_CHANNEL_LOG OR2_LOG_PREP
+
+/* generic log, not channel nor context */
+#define OR2_GENERIC_LOG OR2_LOG_PREP
 
 OR2_DECLARE(const char *) openr2_log_get_level_string(openr2_log_level_t level);
 OR2_DECLARE(openr2_log_level_t) openr2_log_get_level(const char *levelstr);
+OR2_DECLARE(void) openr2_generic_set_logging_func(openr2_generic_logging_func_t logcallback);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */
