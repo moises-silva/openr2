@@ -47,6 +47,7 @@ int openr2_io_setup(openr2_chan_t *r2chan);
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait);
 int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event);
 openr2_io_interface_t *openr2_io_get_zt_interface(void);
+openr2_io_interface_t *openr2_io_get_dummy_interface(void);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

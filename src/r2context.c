@@ -275,7 +275,10 @@ OR2_DECLARE(openr2_context_t *) openr2_context_new(openr2_variant_t variant, ope
 		free(r2context);
 		return NULL;
 	}
-	openr2_context_set_io_type(r2context, OR2_IO_DEFAULT, NULL);
+	if (openr2_context_set_io_type(r2context, OR2_IO_DEFAULT, NULL) == -1) {
+		free(r2context);
+		return NULL;
+	}
 	return r2context;
 }
 
@@ -780,15 +783,13 @@ OR2_DECLARE(int) openr2_context_set_io_type(openr2_context_t *r2context, openr2_
 		/* check first if zaptel interface is available */
 		internal_io_interface = openr2_io_get_zt_interface();
 		if (!internal_io_interface) {
-			/* if not available, bail out with error since we don't have any other built-in interface yet,
-			   but we should check for openr2_io_get_oz_interface to get openzap interface or openr2_io_get_wp_interface
-			   for wanpipe interface */
-			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Unavailable default I/O interface.\n");
-			return -1;
+			/* use dummy io interface and print a notice message. we expect the user to set his implementation, by later
+			   calling openr2_context_set_io_type() again */
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_NOTICE, "Unavailable default I/O interface, using dummy.\n");
+			internal_io_interface = openr2_io_get_dummy_interface();
 		}
 		r2context->io_type = io_type;
 		r2context->io = internal_io_interface;
-		return 0;
 		return 0;
 	default:
 		break;

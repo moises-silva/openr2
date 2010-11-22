@@ -18,6 +18,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Contributors:
+ *
+ * Arnaldo Pereira <arnaldo@sangoma.com>
+ *
  */
 
 #ifdef HAVE_FCNTL_H
@@ -38,6 +42,46 @@
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2utils-pvt.h"
 #include "openr2/r2ioabs.h"
+
+#define DUMMY_CHAN_RETURN \
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Please recompile openr2 with DAHDI headers available.\n"); \
+	return -1;
+
+static openr2_io_fd_t dummy_open(openr2_context_t *r2context, int channo)
+{
+	openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Please recompile openr2 with DAHDI headers available.\n");
+	return NULL;
+}
+
+static int dummy_close(openr2_chan_t *r2chan) { DUMMY_CHAN_RETURN }
+static int dummy_set_cas(openr2_chan_t *r2chan, int cas) { DUMMY_CHAN_RETURN }
+static int dummy_flush_write_buffers(openr2_chan_t *r2chan) { DUMMY_CHAN_RETURN }
+static int dummy_get_cas(openr2_chan_t *r2chan, int *cas) { DUMMY_CHAN_RETURN }
+static int dummy_read(openr2_chan_t *r2chan, const void *buf, int size) { DUMMY_CHAN_RETURN }
+static int dummy_write(openr2_chan_t *r2chan, const void *buf, int size) { DUMMY_CHAN_RETURN }
+static int dummy_setup(openr2_chan_t *r2chan) { DUMMY_CHAN_RETURN }
+static int dummy_wait(openr2_chan_t *r2chan, int *flags, int wait) { DUMMY_CHAN_RETURN }
+static int dummy_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event) { DUMMY_CHAN_RETURN }
+
+/* dummy io interface */
+static openr2_io_interface_t dummy_io_interface = 
+{
+	.open = dummy_open,
+	.close = dummy_close,
+	.set_cas = dummy_set_cas,
+	.get_cas = dummy_get_cas,
+	.flush_write_buffers = dummy_flush_write_buffers,
+	.write = dummy_write,
+	.read = dummy_read,
+	.setup = dummy_setup,
+	.wait = dummy_wait,
+	.get_oob_event = dummy_get_oob_event
+};
+
+openr2_io_interface_t *openr2_io_get_dummy_interface()
+{
+	return &dummy_io_interface;
+}
 
 #ifndef OR2_ZAP_UNAVAILABLE
 static openr2_io_fd_t zt_open(openr2_context_t *r2context, int channo)
