@@ -66,16 +66,16 @@ static int dummy_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 /* dummy io interface */
 static openr2_io_interface_t dummy_io_interface = 
 {
-	.open = dummy_open,
-	.close = dummy_close,
-	.set_cas = dummy_set_cas,
-	.get_cas = dummy_get_cas,
-	.flush_write_buffers = dummy_flush_write_buffers,
-	.write = dummy_write,
-	.read = dummy_read,
-	.setup = dummy_setup,
-	.wait = dummy_wait,
-	.get_oob_event = dummy_get_oob_event
+	/* .open */ dummy_open,
+	/* .close */ dummy_close,
+	/* .set_cas */ dummy_set_cas,
+	/* .get_cas */ dummy_get_cas,
+	/* .flush_write_buffers */ dummy_flush_write_buffers,
+	/* .write */ dummy_write,
+	/* .read */ dummy_read,
+	/* .setup */ dummy_setup,
+	/* .wait */ dummy_wait,
+	/* .get_oob_event */ dummy_get_oob_event
 };
 
 openr2_io_interface_t *openr2_io_get_dummy_interface()
