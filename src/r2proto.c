@@ -364,7 +364,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->cas_r2_bits = 0xC; /*  1100 */
 
 	/* set default values for the protocol timers */
-	r2context->timers.mf_back_cycle = 5000;
+	r2context->timers.mf_back_cycle = 2000;
 	r2context->timers.mf_back_resume_cycle = 150;
 
 	/* this was 10000 but someone from mx reported that Telmex needs more time in international calls */
