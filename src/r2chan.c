@@ -105,8 +105,8 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	/* no persistence check has been done */
 	r2chan->cas_persistence_check_signal = -1;
 
-	/* start with read enabled */
-	r2chan->read_enabled = 1;
+	/* start with read disabled, we only read when there is a call being setup */
+	r2chan->read_enabled = 0;
 
 	/* set the owner context */
 	r2chan->r2context = r2context;

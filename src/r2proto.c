@@ -649,7 +649,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	openr2_chan_cancel_all_timers(r2chan);
 
 	/* initialize all the proto and call stuff */
-	r2chan->read_enabled = 1;
+	r2chan->read_enabled = 0;
 	r2chan->ani[0] = '\0';
 	r2chan->ani_len = 0;
 	r2chan->ani_ptr = NULL;
