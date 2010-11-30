@@ -793,7 +793,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to get local time\n");
 		return;
 	}
-	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%d-%s-%ld-%d%02d%02d%02d%02d%02d.call", 
+	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%03d-%s-%04ld-%d%02d%02d%02d%02d%02d.call", 
 			r2chan->r2context->logdir ? r2chan->r2context->logdir : currdir, 
 			r2chan->number, 
 			backward ? "backward" : "forward",
