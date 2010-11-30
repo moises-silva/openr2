@@ -534,7 +534,7 @@ void openr2_chan_cancel_timer(openr2_chan_t *r2chan, int *timer_id)
 {
 	int i = 0;
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_EX_DEBUG, "Attempting to cancel timer timer %d\n", *timer_id);
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_EX_DEBUG, "Attempting to cancel timer %d\n", *timer_id);
 	if (*timer_id < 1) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_EX_DEBUG, "Cannot cancel timer %d\n", *timer_id);
 		return;
