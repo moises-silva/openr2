@@ -1,0 +1,29 @@
+CMake is a build system generator, which might be used to generate build
+files for msvc, nmake and others, on windows.
+
+To build openr2 on windows, follow these steps:
+
+	1. Install cmake, you can find it on http://www.cmake.org/cmake/resources/software.html
+	2. Run cmake-gui
+	3. Click on 'Browse Source...' and select the openr2 source directory
+	4. Click on 'Browse Build...' and choose the build directory. This has to be an empty
+	   directory, anywhere you like.
+	5. Click on 'Configure'.
+	6. Choose the generator you want and click 'finish'. If you want to build with visual studio,
+	   choose it from the list. If whatever compiler you want to use is not listed, this means
+	   that either you don't have the compiler installed or CMake is not compatible with it -
+	   choose another.
+	7. Click on 'Configure' again. This will perform all the required system checks and
+	   show you the variables you might want to customize before generating the build files.
+	   So, take a look at the shown variables and change them if you like - this is not required.
+	6. Click on 'Configure' again, to instruct cmake that you reviewed the variables and you're
+	   good to go.
+	7. Click on 'Generate'. This step will generate the build files on the directory
+	   specified on step 4.
+	8. Run the compiler of your choice (the one you've just generated the build files for) and
+	   build it. On visual studio, all you have to do is open the solution file, that should
+	   have been generated on the 'build dir' and build it. There's also an INSTALL target that
+	   you might use to install the library on your system.
+
+If you have problems building with cmake, feel free to contact: 
+Arnaldo Pereira <arnaldo@sangoma.com>

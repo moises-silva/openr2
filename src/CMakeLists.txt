@@ -65,8 +65,9 @@ ENDIF()
 
 # install - all relative to CMAKE_INSTALL_PREFIX
 INSTALL(TARGETS ${PROJECT_TARGET}
-	RUNTIME DESTINATION lib
+	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
 )
 
 INSTALL(FILES openr2/openr2.h DESTINATION include)
@@ -81,3 +82,8 @@ INSTALL(FILES
 		openr2/r2declare.h
 	DESTINATION include/openr2
 )
+
+IF(DEFINED WIN32)
+	# on windows, also add our own inttypes.h to the distributed headers
+	INSTALL(FILES openr2/msvc/inttypes.h DESTINATION include/openr2)
+ENDIF()

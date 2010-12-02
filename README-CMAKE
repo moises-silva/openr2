@@ -1,14 +1,22 @@
-To bootstrap using cmake:
+CMake is a build system generator, we're currently using it to build openr2 on both
+linux and windows systems. For instructions on how to build on windows, please see
+README.windows.
 
-	mkdir openr2-build
-	cd openr2-build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr PATH-TO-OPENR2-SOURCE
+To build it using cmake on linux, follow these steps:
 
-After that, the software is ready to build. Useful commands:
+	1. From outside the source tree, create a "build dir": mkdir openr2-build
+	2. Enter openr2-build: cd openr2-build
+	3. Assuming openr2 sources are inside 'openr2.trunk' directory AND that this directory
+	   is at the same level as openr2-build, run: cmake -DCMAKE_INSTALL_PREFIX=/usr ../openr2.trunk
+	4. Build it: make
+	5. Install: sudo make install
+	6. Run ldconfig: sudo ldconfig
 
-	make help
-	make VERBOSE=1
+After this, you should see libopenr2 listed on the output of 'ldconfig -p' command. If you have any
+build problems and want to debug the gcc command line used, instead of just 'make', run 'make VERBOSE=1'
+on step 4.
 
-Currently, tested on linux.
+For help on cmake targets, run 'make help' anytime after step 3.
 
-Arnaldo M Pereira <arnaldo@sangoma.com>
+If you have problems building with cmake, feel free to contact: 
+Arnaldo Pereira <arnaldo@sangoma.com>
