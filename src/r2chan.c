@@ -293,7 +293,8 @@ OR2_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan)
 
 #define HANDLE_IO_WRITE_RESULT(wrote) \
 			if (!wrote) { \
-				continue; \
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "No bytes written to channel %d when %d bytes were requested\n", r2chan->number, res); \
+				goto done; \
 			} \
 			if (wrote == -1) { \
 				retcode = -1; \
@@ -317,130 +318,128 @@ static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 
 	openr2_chan_lock(r2chan);
 	openr2_chan_handle_timers(r2chan);
-	while(1) {
 
-		/* check for CAS and ALARM events only if requested */
-		interesting_events = (processing_mask & OR2_CHAN_PROCESS_OOB) ? OR2_IO_OOB_EVENT : 0;
+tryagain:
+	/* check for CAS and ALARM events only if requested */
+	interesting_events = (processing_mask & OR2_CHAN_PROCESS_OOB) ? OR2_IO_OOB_EVENT : 0;
 
-		/* we also want to be notified about read-ready if we have read enabled and the user requested MF processing */
-		if (r2chan->read_enabled && (processing_mask & OR2_CHAN_PROCESS_MF)) {
-			/* XXX read enabled is NOT enough, we should also check if the MF engine is turned on or the channel is answered XXX*/
-			interesting_events |= OR2_IO_READ;
+	/* we also want to be notified about read-ready if we have read enabled and the user requested MF processing */
+	if (r2chan->read_enabled && (processing_mask & OR2_CHAN_PROCESS_MF)) {
+		/* XXX read enabled is NOT enough, we should also check if the MF engine is turned on or the channel is answered XXX*/
+		interesting_events |= OR2_IO_READ;
+	}
+
+	/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
+	if (!(processing_mask & OR2_CHAN_PROCESS_MF)) {
+		/* mf should be ignored, therefore OR2_IO_WRITE must not be enabled regardless of other flags */
+	} else if (r2chan->dialing_dtmf) {
+		interesting_events |= OR2_IO_WRITE;
+	} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
+			MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
+		interesting_events |= OR2_IO_WRITE;
+	}
+
+	/* ask the I/O layer to poll for the requested events immediately, no blocking */
+	res = openr2_io_wait(r2chan, &interesting_events, 0);
+	if (res) {
+		retcode = -1;
+		goto done;
+	}
+
+	/* if there is no interesting events, do nothing */
+	if (!interesting_events) {
+		retcode = 0;
+		goto done;
+	}
+
+	/* if there is an OOB event, probably CAS bits just changed */
+	if (OR2_IO_OOB_EVENT & interesting_events) {
+		res = openr2_io_get_oob_event(r2chan, &event);
+		if (!res && event != OR2_OOB_EVENT_NONE) {
+			openr2_chan_handle_oob_event(r2chan, event);
 		}
+	}
 
-		/* we also want to be notified about write-ready if we're in the MF process and have some tone to write */
-		if (!(processing_mask & OR2_CHAN_PROCESS_MF)) {
-			/* mf should be ignored, therefore OR2_IO_WRITE must not be enabled regardless of other flags */
-		} else if (r2chan->dialing_dtmf) {
-			interesting_events |= OR2_IO_WRITE;
-		} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
-	            MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
-			interesting_events |= OR2_IO_WRITE;
-		}
-
-		/* ask the I/O layer to poll for the requested events immediately, no blocking */
-		res = openr2_io_wait(r2chan, &interesting_events, 0);
-		if (res) {
+	if (r2chan->read_enabled && (OR2_IO_READ & interesting_events)) {
+		res = openr2_io_read(r2chan, read_buf, sizeof(read_buf));
+		if (-1 == res) {
 			retcode = -1;
 			goto done;
 		}
+		if (!res) {
+			/* if nothing was read, continue, may be there is a priority event (ie DAHDI read ELAST) */
+			goto tryagain;
+		}
+		/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
+		if (r2chan->mf_state != OR2_MF_OFF_STATE) {
+			/* assuming ALAW codec */
+			for (i = 0; i < (uint32_t) res; i++) {
+				tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
+			}	
+#ifdef OR2_MF_DEBUG	
+			write(r2chan->mf_read_fd, tone_buf, res*2);
+#endif
+			if (r2chan->detecting_dtmf) {
+				DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
+				res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
+				if (!res) {
+					r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
+					if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
+						openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF detection\n");
+						openr2_proto_handle_dtmf_end(r2chan);
+						goto checkwrite;
+					}
+				}
+			} else {
+				tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
+				if ( tone_result != -1 ) {
+					openr2_proto_handle_mf_tone(r2chan, tone_result);
+				} 
+			}
+		} else if (r2chan->answered) {
+			EMI(r2chan)->on_call_read(r2chan, read_buf, res);
+		}
+	}
 
-		/* if there is no interesting events, do nothing */
-		if (!interesting_events) {
-			retcode = 0;
+checkwrite:
+
+	/* we only write MF or DTMF tones here. Speech write is responsibility of the user, she should call openr2_chan_write for that */
+	if (r2chan->dialing_dtmf && (OR2_IO_WRITE & interesting_events)) {
+		res = DTMF(r2chan)->dtmf_tx(r2chan->dtmf_write_handle, tone_buf, r2chan->io_buf_size);
+		if (res <= 0) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF generation\n");
+			openr2_proto_handle_dtmf_end(r2chan);
 			goto done;
 		}
-
-		/* if there is an OOB event, probably CAS bits just changed */
-		if (OR2_IO_OOB_EVENT & interesting_events) {
-			res = openr2_io_get_oob_event(r2chan, &event);
-			if (!res && event != OR2_OOB_EVENT_NONE) {
-				openr2_chan_handle_oob_event(r2chan, event);
-			}
-			continue;
+		for (i = 0; i < (uint32_t) res; i++) {
+			read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 		}
-
-		if (OR2_IO_READ & interesting_events) {
-			res = openr2_io_read(r2chan, read_buf, sizeof(read_buf));
-			if (-1 == res) {
-				retcode = -1;
-				goto done;
-			}
-			if (!res) {
-				/* if nothing was read, continue, may be there is a priority event (ie DAHDI read ELAST) */
-				continue;
-			}
-			/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
-			if (r2chan->mf_state != OR2_MF_OFF_STATE) {
-				/* assuming ALAW codec */
-				for (i = 0; i < (uint32_t) res; i++) {
-					tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
-				}	
-#ifdef OR2_MF_DEBUG	
-				write(r2chan->mf_read_fd, tone_buf, res*2);
-#endif
-				if (r2chan->detecting_dtmf) {
-					DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
-					res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
-					if (!res) {
-						r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
-						if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
-							openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF detection\n");
-							openr2_proto_handle_dtmf_end(r2chan);
-							continue;
-						}
-					}
-				} else {
-					tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
-					if ( tone_result != -1 ) {
-						openr2_proto_handle_mf_tone(r2chan, tone_result);
-					} 
-				}
-			} else if (r2chan->answered) {
-				EMI(r2chan)->on_call_read(r2chan, read_buf, res);
-			}
-			continue;
+		wrote = openr2_io_write(r2chan, read_buf, res);
+		HANDLE_IO_WRITE_RESULT(wrote);
+	} else if ((OR2_MF_OFF_STATE != r2chan->mf_state) &&
+			(OR2_IO_WRITE & interesting_events)) {
+		res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
+		/* if there are no samples to convert and write then continue,
+		   the generate routine already took care of it */
+		if (!res) {
+			goto done;
 		}
-
-		/* we only write MF or DTMF tones here. Speech write is responsibility of the user, she should call openr2_chan_write for that */
-		if (r2chan->dialing_dtmf && (OR2_IO_WRITE & interesting_events)) {
-			res = DTMF(r2chan)->dtmf_tx(r2chan->dtmf_write_handle, tone_buf, r2chan->io_buf_size);
-			if (res <= 0) {
-				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF generation\n");
-				openr2_proto_handle_dtmf_end(r2chan);
-				continue;
-			}
-			for (i = 0; i < (uint32_t) res; i++) {
-				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
-			}
-			wrote = openr2_io_write(r2chan, read_buf, res);
-			HANDLE_IO_WRITE_RESULT(wrote);
-			continue;
-		} else if (OR2_IO_WRITE & interesting_events) {
-			res = MFI(r2chan)->mf_generate_tone(r2chan->mf_write_handle, tone_buf, r2chan->io_buf_size);
-			/* if there are no samples to convert and write then continue,
-			   the generate routine already took care of it */
-			if (!res) {
-				continue;
-			}
-			/* an error on tone generation, lets just bail out and hope for the best */
-			if (-1 == res) {
-				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to generate MF tone.\n");
-				retcode = -1;
-				goto done;
-			}
+		/* an error on tone generation, lets just bail out and hope for the best */
+		if (-1 == res) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to generate MF tone.\n");
+			retcode = -1;
+			goto done;
+		}
 #ifdef OR2_MF_DEBUG
-			write(r2chan->mf_write_fd, tone_buf, res*2);
+		write(r2chan->mf_write_fd, tone_buf, res*2);
 #endif
-			for (i = 0; i < (uint32_t) res; i++) {
-				read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
-			}
-			wrote = openr2_io_write(r2chan, read_buf, res);
-			HANDLE_IO_WRITE_RESULT(wrote);
-			continue;
+		for (i = 0; i < (uint32_t) res; i++) {
+			read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
 		}
+		wrote = openr2_io_write(r2chan, read_buf, res);
+		HANDLE_IO_WRITE_RESULT(wrote);
+	}
 
-	}	
 done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
