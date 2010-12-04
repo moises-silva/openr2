@@ -252,6 +252,7 @@ typedef struct openr2_chan_s {
 	/* call file logging */
 	int call_files;
 	long call_count;
+	char logname[512];
 	FILE *logfile;
 	FILE *generic_logfile;
 

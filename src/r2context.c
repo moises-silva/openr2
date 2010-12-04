@@ -48,7 +48,7 @@
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2ioabs.h"
 
-static void on_call_init_default(openr2_chan_t *r2chan)
+static void on_call_init_default(openr2_chan_t *r2chan, const char *logname)
 {
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call starting at chan %d\n", openr2_chan_get_number(r2chan));

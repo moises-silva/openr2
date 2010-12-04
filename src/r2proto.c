@@ -667,6 +667,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->category_sent = 0;
 	r2chan->mf_write_tone = 0;
 	r2chan->mf_read_tone = 0;
+	r2chan->logname[0] = '\0';
 	openr2_set_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
 	close_logfile(r2chan);
 }
@@ -761,7 +762,6 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 {
 	time_t currtime;
 	struct tm loctime;
-	char stringbuf[512];
 	char currdir[512];
 	char timestr[30];
 	int res = 0;
@@ -793,14 +793,14 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to get local time\n");
 		return;
 	}
-	res = snprintf(stringbuf, sizeof(stringbuf), "%s/chan-%03d-%s-%04ld-%d%02d%02d%02d%02d%02d.call", 
+	res = snprintf(r2chan->logname, sizeof(r2chan->logname), "%s/chan-%03d-%s-%04ld-%d%02d%02d%02d%02d%02d.call", 
 			r2chan->r2context->logdir ? r2chan->r2context->logdir : currdir, 
 			r2chan->number, 
 			backward ? "backward" : "forward",
 			r2chan->call_count++,
 			(1900 + loctime.tm_year), (1 + loctime.tm_mon), loctime.tm_mday, 
 			loctime.tm_hour, loctime.tm_min, loctime.tm_sec);
-	if (res >= sizeof(stringbuf)) {
+	if (res >= sizeof(r2chan->logname)) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Failed to create file name of length %d.\n", res);
 		return;
 	} 
@@ -815,7 +815,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Closing log file failed: %s\n", strerror(myerrno));
 		}
 	}
-	r2chan->logfile = fopen(stringbuf, "w");
+	r2chan->logfile = fopen(r2chan->logname, "w");
 	if (!r2chan->logfile) {
 		myerrno = errno;
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
@@ -909,7 +909,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		return;
 	}
 	/* notify the user that a new call is starting to arrive */
-	EMI(r2chan)->on_call_init(r2chan);
+	EMI(r2chan)->on_call_init(r2chan, r2chan->logname);
 }
 
 static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)
