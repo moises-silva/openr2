@@ -270,7 +270,6 @@ OR2_DECLARE(openr2_context_t *) openr2_context_new(openr2_variant_t variant, ope
 	r2context->evmanager = evmanager;
 	r2context->dtmfeng = &default_dtmf_engine;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
-	r2context->span_id = 0;
 	openr2_mutex_create(&r2context->timers_lock);
 	if (openr2_proto_configure_context(r2context, variant, max_ani, max_dnis)) {
 		free(r2context);
@@ -797,13 +796,6 @@ OR2_DECLARE(int) openr2_context_set_io_type(openr2_context_t *r2context, openr2_
 	}
 	openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_ERROR, "Invalid I/O type %d\n", io_type);
 	return -1;
-}
-
-OR2_DECLARE(void) openr2_context_set_span_id(openr2_context_t *r2context, int span_id)
-{
-	OR2_CONTEXT_STACK;
-	openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Setting span_id: %d\n", span_id);
-	r2context->span_id = span_id;
 }
 
 #define LOADTONE(mytone) \

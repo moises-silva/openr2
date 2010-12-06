@@ -261,6 +261,10 @@ typedef struct openr2_chan_s {
 
 	/* linking */
 	struct openr2_chan_s *next;
+
+	/* span's id this channel belong to */
+	int span_id;
+
 } openr2_chan_t;
 
 #define openr2_chan_lock(r2chan) openr2_mutex_lock(r2chan->lock)

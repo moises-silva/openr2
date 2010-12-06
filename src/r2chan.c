@@ -154,6 +154,14 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	return r2chan;
 }
 
+OR2_DECLARE(void) openr2_chan_set_span_id(openr2_chan_t *r2chan, int span_id)
+{
+	openr2_chan_lock(r2chan);
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Setting span_id: %d\n", span_id);
+	r2chan->span_id = span_id;
+	openr2_chan_unlock(r2chan);
+}
+
 OR2_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_read_handle, void *dtmf_write_handle)
 {
 	openr2_chan_lock(r2chan);

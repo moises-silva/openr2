@@ -795,7 +795,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 	}
 	res = snprintf(r2chan->logname, sizeof(r2chan->logname), "%s/chan-s%dc%d-%s-%04ld-%d%02d%02d%02d%02d%02d.call", 
 			r2chan->r2context->logdir ? r2chan->r2context->logdir : currdir, 
-			r2chan->r2context->span_id, r2chan->number,
+			r2chan->span_id, r2chan->number,
 			backward ? "backward" : "forward",
 			r2chan->call_count++,
 			(1900 + loctime.tm_year), (1 + loctime.tm_mon), loctime.tm_mday, 

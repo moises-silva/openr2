@@ -178,6 +178,9 @@ OR2_DECLARE(int) openr2_chan_set_dtmf_handles(openr2_chan_t *r2chan, void *dtmf_
 /*! \brief set the opaque handles that will be passed back to the MF generation and detection callbacks */
 OR2_DECLARE(int) openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_write_handle, void *mf_read_handle);
 
+/*! \brief set channel's span_id */
+OR2_DECLARE(void) openr2_chan_set_span_id(openr2_chan_t *r2chan, int span_id);
+
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t
 #undef openr2_context_t

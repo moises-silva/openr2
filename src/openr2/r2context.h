@@ -263,7 +263,6 @@ OR2_DECLARE(void) openr2_context_set_double_answer(openr2_context_t *r2context, 
 OR2_DECLARE(int) openr2_context_get_double_answer(openr2_context_t *r2context);
 OR2_DECLARE(int) openr2_context_configure_from_advanced_file(openr2_context_t *r2context, const char *filename);
 OR2_DECLARE(int) openr2_context_set_io_type(openr2_context_t *r2context, openr2_io_type_t io_type, openr2_io_interface_t *io_interface);
-OR2_DECLARE(void) openr2_context_set_span_id(openr2_context_t *r2context, int span_id);
 OR2_DECLARE(void) openr2_context_set_dtmf_detection(openr2_context_t *r2context, int enable);
 OR2_DECLARE(int) openr2_context_get_dtmf_detection(openr2_context_t *r2context);
 OR2_DECLARE(void) openr2_context_set_dtmf_dialing(openr2_context_t *r2context, int enable, int dtmf_on, int dtmf_off);

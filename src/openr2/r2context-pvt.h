@@ -169,9 +169,6 @@ typedef struct openr2_context_s {
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;
 
-	/* span id */
-	int span_id;
-
 } openr2_context_t;
 
 
