@@ -821,6 +821,7 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		EMI(r2chan)->on_os_error(r2chan, myerrno);
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "fopen failed: %s\n", strerror(myerrno));
 	} else {
+		EMI(r2chan)->on_call_log_created(r2chan, r2chan->logname);
 		currtime = time(NULL);
 		if (openr2_ctime_r(&currtime, timestr)) {
 			timestr[strlen(timestr)-1] = 0; /* remove end of line */
@@ -909,7 +910,7 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		return;
 	}
 	/* notify the user that a new call is starting to arrive */
-	EMI(r2chan)->on_call_init(r2chan, r2chan->logname);
+	EMI(r2chan)->on_call_init(r2chan);
 }
 
 static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)

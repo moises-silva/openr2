@@ -67,7 +67,7 @@ typedef struct {
 
 /* Event Management interface. Users should provide
    this interface to handle library events like call starting, new call, read audio etc. */
-typedef void (*openr2_handle_new_call_func)(openr2_chan_t *r2chan, const char *logname);
+typedef void (*openr2_handle_new_call_func)(openr2_chan_t *r2chan);
 typedef void (*openr2_handle_call_offered_func)(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category);
 typedef void (*openr2_handle_call_accepted_func)(openr2_chan_t *r2chan, openr2_call_mode_t mode);
 typedef void (*openr2_handle_call_answered_func)(openr2_chan_t *r2chan);
@@ -80,6 +80,7 @@ typedef void (*openr2_handle_protocol_error_func)(openr2_chan_t *r2chan, openr2_
 typedef void (*openr2_handle_line_blocked_func)(openr2_chan_t *r2chan);
 typedef void (*openr2_handle_line_idle_func)(openr2_chan_t *r2chan);
 typedef void (*openr2_handle_billing_pulse_received_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_call_log_created_func)(openr2_chan_t *r2chan, const char *name);
 typedef int (*openr2_handle_dnis_digit_received_func)(openr2_chan_t *r2chan, char digit);
 typedef void (*openr2_handle_ani_digit_received_func)(openr2_chan_t *r2chan, char digit);
 typedef void (*openr2_handle_context_logging_func)(openr2_context_t *r2context, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap);
@@ -136,6 +137,9 @@ typedef struct {
 
 	/* Billing pulse arrived */
 	openr2_handle_billing_pulse_received_func on_billing_pulse_received;
+
+	/* New call log was created */
+	openr2_handle_call_log_created_func on_call_log_created;
 } openr2_event_interface_t;
 
 #define OR2_IO_READ      (1 << 0)

@@ -48,7 +48,7 @@
 #include "openr2/r2context-pvt.h"
 #include "openr2/r2ioabs.h"
 
-static void on_call_init_default(openr2_chan_t *r2chan, const char *logname)
+static void on_call_init_default(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call starting at chan %d\n", openr2_chan_get_number(r2chan));
@@ -141,6 +141,12 @@ static void on_billing_pulse_received_default(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Billing pulse received on chan %d\n", openr2_chan_get_number(r2chan));
 }
 
+static void on_call_log_created_default(openr2_chan_t *r2chan, const char *logname)
+{
+	OR2_CHAN_STACK;
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Log %s created on chan %d\n", logname, openr2_chan_get_number(r2chan));
+}
+
 static int want_generate_default(openr2_mf_tx_state_t *state, int signal)
 {
 	return signal ? 1 : 0;
@@ -188,7 +194,8 @@ static openr2_event_interface_t default_evmanager = {
 	/* .on_context_log */ openr2_log_context_default,
 	/* .on_dnis_digit_received */ on_dnis_digit_received_default,
 	/* .on_ani_digit_received */ on_ani_digit_received_default,
-	/* .on_billing_pulse_received */ on_billing_pulse_received_default
+	/* .on_billing_pulse_received */ on_billing_pulse_received_default,
+	/* .on_call_log_created */ on_call_log_created_default
 };
 
 static openr2_dtmf_interface_t default_dtmf_engine = {
@@ -256,6 +263,9 @@ OR2_DECLARE(openr2_context_t *) openr2_context_new(openr2_variant_t variant, ope
 		}
 		if (!evmanager->on_billing_pulse_received) {
 			evmanager->on_billing_pulse_received = on_billing_pulse_received_default;
+		}
+		if (!evmanager->on_call_log_created) {
+			evmanager->on_call_log_created = on_call_log_created_default;
 		}
 	}
 	r2context = calloc(1, sizeof(*r2context));
