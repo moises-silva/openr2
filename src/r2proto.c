@@ -928,6 +928,7 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 	if (!tone && r2chan->mf_write_tone) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_MF_TRACE, "MF Tx >> %c [OFF]\n", r2chan->mf_write_tone);
 		if (openr2_io_flush_write_buffers(r2chan)) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "failed to flush tx buffers\n");
 			return;
 		}
 	} 
@@ -949,7 +950,7 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 			}
 		}	
 		r2chan->mf_write_tone = tone;
-	}	
+	}
 }
 
 /* this function just accepts from -3 to 1 as valid offsets */
