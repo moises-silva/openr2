@@ -149,7 +149,7 @@ static void on_call_log_created_default(openr2_chan_t *r2chan, const char *logna
 
 static int want_generate_default(openr2_mf_tx_state_t *state, int signal)
 {
-	return signal ? 1 : 0;
+	return 1;
 }
 
 static const openr2_mf_read_init_func mf_read_init_default = (openr2_mf_read_init_func)openr2_mf_rx_init;
