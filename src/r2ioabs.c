@@ -364,12 +364,13 @@ openr2_io_interface_t *openr2_io_get_zt_interface()
 
 #endif
 
-#define IO(r2chan) if (!r2chan->r2context->io) {  \
+#define IO(r2chan) int rc = 0; \
+	if (!r2chan->r2context->io) {  \
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, \
 				"%s: Cannot perform I/O operation because no valid I/O interface is available.\n", __FUNCTION__); \
 		return -1; \
-	}  \
-	return r2chan->r2context->io
+	} \
+	rc = r2chan->r2context->io
 
 openr2_io_fd_t openr2_io_open(openr2_context_t *r2context, int channo)
 {
@@ -383,45 +384,68 @@ openr2_io_fd_t openr2_io_open(openr2_context_t *r2context, int channo)
 int openr2_io_close(openr2_chan_t *r2chan)
 {
 	IO(r2chan)->close(r2chan);
+	return rc;
 }
 
 int openr2_io_set_cas(openr2_chan_t *r2chan, int cas)
 {
 	IO(r2chan)->set_cas(r2chan, cas);
+	return rc;
 }
 
+#define CASINTS(cas) ((cas) & (1 << 3)) ? 1 : 0, \
+	             ((cas) & (1 << 2)) ? 1 : 0, \
+		     ((cas) & (1 << 1)) ? 1 : 0, \
+		     ((cas) & (1 << 0)) ? 1 : 0
 int openr2_io_get_cas(openr2_chan_t *r2chan, int *cas)
 {
 	IO(r2chan)->get_cas(r2chan, cas);
+	if (!rc) {
+		if (*cas != r2chan->cas_raw_read) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "CAS bits changed from %d%d%d%d to %d%d%d%d\n", 
+					CASINTS(r2chan->cas_raw_read), CASINTS(*cas));
+			r2chan->cas_raw_read = *cas;
+		} else {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "CAS bits did not change since last read (%d%d%d%d)\n", 
+					CASINTS(r2chan->cas_raw_read));
+		}
+	}
+	return rc;
 }
 
 int openr2_io_flush_write_buffers(openr2_chan_t *r2chan)
 {
 	IO(r2chan)->flush_write_buffers(r2chan);
+	return rc;
 }
 
 int openr2_io_read(openr2_chan_t *r2chan, const void *buf, int size)
 {
 	IO(r2chan)->read(r2chan, buf, size);
+	return rc;
 }
 
 int openr2_io_write(openr2_chan_t *r2chan, const void *buf, int size)
 {
 	IO(r2chan)->write(r2chan, buf, size);
+	return rc;
 }
 
 int openr2_io_setup(openr2_chan_t *r2chan)
 {
 	IO(r2chan)->setup(r2chan);
+	return rc;
 }
 
 int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 {
 	IO(r2chan)->get_oob_event(r2chan, event);
+	return rc;
 }
 
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int block)
 {
 	IO(r2chan)->wait(r2chan, flags, block);
+	return rc;
 }
 

@@ -155,6 +155,9 @@ typedef struct openr2_chan_s {
 	/* last raw R2 signal written to this channel */
 	int cas_write;
 
+	/* last raw CAS signal read on this channel */
+	int cas_raw_read;
+
 	/* signal being checked for persistence */
 	int cas_persistence_check_signal;
 

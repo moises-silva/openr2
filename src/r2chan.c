@@ -233,6 +233,7 @@ static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_
 	OR2_CHAN_STACK;
 	switch (event) {
 	case OR2_OOB_EVENT_CAS_CHANGE:
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Handling OOB CAS event\n");
 		openr2_proto_handle_cas(r2chan);
 		break;
 	case OR2_OOB_EVENT_ALARM_ON:
