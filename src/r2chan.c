@@ -418,7 +418,7 @@ checkwrite:
 		if (res <= 0) {
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF generation\n");
 			openr2_proto_handle_dtmf_end(r2chan);
-			goto done;
+			goto tryagain;
 		}
 		for (i = 0; i < (uint32_t) res; i++) {
 			read_buf[i] = TI(r2chan)->linear_to_alaw(tone_buf[i]);
@@ -431,7 +431,7 @@ checkwrite:
 		/* if there are no samples to convert and write then continue,
 		   the generate routine already took care of it */
 		if (!res) {
-			goto done;
+			goto tryagain;
 		}
 		/* an error on tone generation, lets just bail out and hope for the best */
 		if (-1 == res) {
@@ -448,6 +448,8 @@ checkwrite:
 		wrote = openr2_io_write(r2chan, read_buf, res);
 		HANDLE_IO_WRITE_RESULT(wrote);
 	}
+
+	goto tryagain;
 
 done:
 	openr2_chan_unlock(r2chan);
