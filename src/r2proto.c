@@ -1297,7 +1297,7 @@ handlecas:
 				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 			}
 		/* For DTMF R2, for some strange reason they send CLEAR_FORWARD even when they are the backward side!! */
-		} else if (cas == R2(r2chan, CLEAR_FORWARD)) {
+		} else if (IS_DTMF_R2(r2chan) && cas == R2(r2chan, CLEAR_FORWARD)) {
 			CAS_LOG_RX(CLEAR_FORWARD);
 			r2chan->r2_state = OR2_CLEAR_FWD_RXD;
 			/* should we test for metering pulses here? */
@@ -1353,7 +1353,6 @@ handlecas:
 			CAS_LOG_RX(ANSWER);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_metering_pulse);
 			r2chan->r2_state = OR2_ANSWER_RXD;
-			/* TODO: we could notify the user here with a callback, but I have not seen a use for this yet */
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Metering pulse received");
 			EMI(r2chan)->on_billing_pulse_received(r2chan);
 		} else {
