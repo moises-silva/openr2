@@ -36,6 +36,8 @@
 
 #define USAGE "USAGE: %s [alaw|slinear] [alaw or slinear file path]\n"
 
+#define samples_to_ms(samples) (int)((((float)samples/(float)8000)) * (float)1000)
+
 int main(int argc, char *argv[])
 {
 	struct stat statbuf;
@@ -49,6 +51,7 @@ int main(int argc, char *argv[])
 	char digit = 0;
 	char bwd_currdigit = 0;
 	char fwd_currdigit = 0;
+	int processed_samples = 0;
 	openr2_mf_rx_state_t  fwd_rxstate;
 	openr2_mf_rx_state_t  bwd_rxstate;
 
@@ -102,24 +105,25 @@ int main(int argc, char *argv[])
 			}
 		} 
 
+		processed_samples += chunksize;
+
 		digit = openr2_mf_rx(&bwd_rxstate, slinear_buffer, CHUNK_SAMPLES);
-		if (digit) {
+		if (digit && digit != bwd_currdigit) {
 			bwd_currdigit = digit;
-			printf("Backward %c ON\n", bwd_currdigit);
-		} else if (bwd_currdigit) {
-			printf("Backward %c OFF\n", bwd_currdigit);
+			printf("Backward %c ON (samples = %d, ms = %d)\n", bwd_currdigit, processed_samples, samples_to_ms(processed_samples));
+		} else if (!digit && bwd_currdigit) {
+			printf("Backward %c OFF (samples = %d, ms %d)\n", bwd_currdigit, processed_samples, samples_to_ms(processed_samples));
 			bwd_currdigit = 0;
 		}
 
 		digit = openr2_mf_rx(&fwd_rxstate, slinear_buffer, CHUNK_SAMPLES);
-		if (digit) {
+		if (digit && digit != fwd_currdigit) {
 			fwd_currdigit = digit;
-			printf("Forward %c ON\n", fwd_currdigit);
-		} else if (fwd_currdigit) {
-			printf("Forward %c OFF\n", fwd_currdigit);
+			printf("Forward %c ON (samples = %d, ms = %d)\n", fwd_currdigit, processed_samples, samples_to_ms(processed_samples));
+		} else if (!digit && fwd_currdigit) {
+			printf("Forward %c OFF (samples = %d, ms = %d)\n", fwd_currdigit, processed_samples, samples_to_ms(processed_samples));
 			fwd_currdigit = 0;
 		}
-
 	}
 
 	fclose(audiofp);
