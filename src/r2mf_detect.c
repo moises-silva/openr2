@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 			}
 		} 
 
-		processed_samples += chunksize;
+		processed_samples += CHUNK_SAMPLES;
 
 		digit = openr2_mf_rx(&bwd_rxstate, slinear_buffer, CHUNK_SAMPLES);
 		if (digit && digit != bwd_currdigit) {
