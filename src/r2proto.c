@@ -69,8 +69,15 @@
 #define DNIS_COMPLETE(r2chan) ((r2chan)->dnis_len >= (uint32_t) (r2chan)->r2context->max_dnis)
 
 #define OFFER_CALL(r2chan) \
-(r2chan)->call_state = OR2_CALL_OFFERED; \
-EMI((r2chan))->on_call_offered((r2chan), (r2chan)->caller_ani_is_restricted ? NULL : (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan)))
+	do { \
+		if ((r2chan)->call_state != OR2_CALL_IDLE) { \
+			openr2_log((r2chan), OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot offer call in state %s\n", callstate2str((r2chan)->call_state)); \
+			handle_protocol_error((r2chan), OR2_INVALID_R2_STATE); \
+		} else { \
+			(r2chan)->call_state = OR2_CALL_OFFERED; \
+			EMI((r2chan))->on_call_offered((r2chan), (r2chan)->caller_ani_is_restricted ? NULL : (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan))); \
+		} \
+	} while (0)
 
 static void r2config_argentina(openr2_context_t *r2context)
 {
