@@ -959,6 +959,10 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 				r2chan->timer_ids.mf_back_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_cycle, 
 				mf_back_cycle_timeout_expired, "mf_back_cycle");
 			}
+			if (openr2_io_flush_write_buffers(r2chan)) {
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "failed to flush tx buffers\n");
+				return;
+			}
 		}	
 		r2chan->mf_write_tone = tone;
 	}
