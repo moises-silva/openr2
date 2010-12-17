@@ -24,6 +24,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
