@@ -85,6 +85,7 @@ static void r2config_argentina(openr2_context_t *r2context)
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_15;
 	r2context->mf_g1_tones.no_more_ani_available = OR2_MF_TONE_12;
+	r2context->mf_g2_tones.pay_phone = OR2_MF_TONE_4;
 	r2context->timers.r2_metering_pulse = 400;
 }
 
@@ -447,6 +448,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_g2_tones.international_subscriber = OR2_MF_TONE_7;
 	r2context->mf_g2_tones.international_priority_subscriber = OR2_MF_TONE_9;
 	r2context->mf_g2_tones.collect_call = OR2_MF_TONE_INVALID;
+	r2context->mf_g2_tones.pay_phone = OR2_MF_TONE_INVALID;
 
 	/* now configure the country specific variations */
 	r2variants[i].config(r2context);
@@ -1548,6 +1550,8 @@ static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	} else if (GII_TONE(r2chan).test_equipment == r2chan->caller_category) {
 		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
+	} else if (GII_TONE(r2chan).pay_phone == r2chan->caller_category) {
+		return OR2_CALLING_PARTY_CATEGORY_PAY_PHONE;
 	} else {
 		return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;
 	}
@@ -1733,6 +1737,8 @@ static int category2tone(openr2_chan_t *r2chan, openr2_calling_party_category_t 
 		return GII_TONE(r2chan).collect_call;
 	case OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT:
 		return GII_TONE(r2chan).test_equipment;
+	case OR2_CALLING_PARTY_CATEGORY_PAY_PHONE:
+		return GII_TONE(r2chan).pay_phone;
 	default:
 		return GII_TONE(r2chan).national_subscriber;;
 	}
@@ -2598,6 +2604,8 @@ OR2_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_
 		return "Collect Call";
 	case OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT:
 		return "Test Equipment";
+	case OR2_CALLING_PARTY_CATEGORY_PAY_PHONE:
+		return "Pay Phone";
 	default:
 		return "*Unknown*";
 	}
@@ -2617,6 +2625,8 @@ OR2_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const cha
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	} else if (!openr2_strncasecmp(category, "TEST_EQUIPMENT", sizeof("TEST_EQUIPMENT")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
+	} else if (!openr2_strncasecmp(category, "PAY_PHONE", sizeof("PAY_PHONE")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_PAY_PHONE;
 	}
 
 	/* this was added to allow values returned by openr2_proto_get_category_string to be passed back to openr2_proto_get_category and recover
@@ -2633,6 +2643,8 @@ OR2_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const cha
 		return OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL;
 	} else if (!openr2_strncasecmp(category, "Test Equipment", sizeof("Test Equipment")-1)) {
 		return OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT;
+	} else if (!openr2_strncasecmp(category, "Pay Phone", sizeof("Pay Phone")-1)) {
+		return OR2_CALLING_PARTY_CATEGORY_PAY_PHONE;
 	}	
 
 	return OR2_CALLING_PARTY_CATEGORY_UNKNOWN;

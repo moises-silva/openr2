@@ -903,6 +903,7 @@ OR2_DECLARE(int) openr2_context_configure_from_advanced_file(openr2_context_t *r
 		LOADTONE(mf_g2_tones.international_subscriber)
 		LOADTONE(mf_g2_tones.international_priority_subscriber)
 		LOADTONE(mf_g2_tones.collect_call)
+		LOADTONE(mf_g2_tones.pay_phone)
 
 		/* Timers */
 		LOADTIMER(timers.mf_back_cycle)
