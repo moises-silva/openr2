@@ -237,6 +237,9 @@ typedef enum {
 	/* we sent clear forward and then got clear back */
 	OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD = 309,
 
+	/* We sent seize, but before getting seize ack a clear forward was attempted */
+	OR2_SEIZE_TXD_CLEAR_FWD_PENDING = 310,
+
 	/* Blocked line */
 	OR2_BLOCKED = 400,
 

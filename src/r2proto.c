@@ -488,6 +488,8 @@ static const char *r2state2str(openr2_cas_state_t r2state)
 		return "Answer Received with MF Pending";
 	case OR2_CLEAR_FWD_TXD:
 		return "Clear Forward Transmitted";
+	case OR2_SEIZE_TXD_CLEAR_FWD_PENDING:
+		return "Seize Transmitted with Clear Forward Pending";
 	case OR2_BLOCKED:
 		return "Blocked";
 	default: 
@@ -1105,6 +1107,7 @@ static void persistence_check_expired(openr2_chan_t *r2chan)
 
 static void start_dialing_dtmf(openr2_chan_t *r2chan);
 static void r2_answer_timeout_expired(openr2_chan_t *r2chan);
+static int send_clear_forward(openr2_chan_t *r2chan);
 int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 {
 	int cas, res;
@@ -1200,10 +1203,19 @@ handlecas:
 		}
 		break;
 	case OR2_SEIZE_TXD:
+	case OR2_SEIZE_TXD_CLEAR_FWD_PENDING:
 		/* if we transmitted a seize we expect the seize ACK */
 		if (cas == R2(r2chan, SEIZE_ACK)) {
 			CAS_LOG_RX(SEIZE_ACK);
 			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_seize);
+			if (r2chan->r2_state == OR2_SEIZE_TXD_CLEAR_FWD_PENDING) {
+				openr2_log(r2chan, OR2_CHANNEL_LOG, 
+						OR2_LOG_DEBUG, "MFC/R2 seize acknowledge received when clear forward pending, disconnecting call now!\n");
+				if (send_clear_forward(r2chan)) {
+					openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
+				}
+				break;
+			}
 			r2chan->r2_state = OR2_SEIZE_ACK_RXD;
 			/* check if this is DTMF R2 */
 			if (!DIAL_DTMF(r2chan)) {
@@ -1211,7 +1223,7 @@ handlecas:
 				 * When the other side send us the seize ack, MF tones
 				 * can start, we start transmitting DNIS 
 				 * */
-				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "MFC/R2 call acknowledge!\n");
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "MFC/R2 seize acknowledge received!\n");
 				r2chan->mf_group = OR2_MF_GI;
 				MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 1);
 				MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 0);
@@ -2499,14 +2511,6 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 	prepare_mf_tone(r2chan, tone);
 }
 
-static int send_clear_forward(openr2_chan_t *r2chan)
-{
-	OR2_CHAN_STACK;
-	r2chan->r2_state = OR2_CLEAR_FWD_TXD;
-	turn_off_mf_engine(r2chan);
-	return set_cas_signal(r2chan, OR2_CAS_CLEAR_FORWARD);
-}
-
 static void r2_set_call_down(openr2_chan_t *r2chan)
 {
 	if (!IS_DTMF_R2(r2chan)) {
@@ -2514,6 +2518,20 @@ static void r2_set_call_down(openr2_chan_t *r2chan)
 				"The other end didn't go back to IDLE. Moving our side to IDLE anyway.\n");
 	}
 	report_call_end(r2chan);
+}
+
+static int send_clear_forward(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+
+	/* we don't rely on the other end to send us a reply for the CLEAR FORWARD we're about to send
+	 * so, we set this timer to ensure we bring this channel back to idle 
+	 * For MFC-R2 this is mostly a safety timer, for DTMF-R2 though I think this is a must */
+	openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_set_call_down, r2_set_call_down, "r2_set_call_down");
+
+	r2chan->r2_state = OR2_CLEAR_FWD_TXD;
+	turn_off_mf_engine(r2chan);
+	return set_cas_signal(r2chan, OR2_CAS_CLEAR_FORWARD);
 }
 
 /* BUG BUG BUG: As of now, when the call is in OR2_CALL_OFFERED state, the user has to call
@@ -2576,15 +2594,24 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 			}
 		}
 	} else {
-		/* we don't rely on the other end to send us a reply for the CLEAR FORWARD we're about to send
-		 * so, we set this timer to ensure we bring this channel back to idle
-		 */
-		openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_set_call_down, r2_set_call_down, "r2_set_call_down");
-
-		if (send_clear_forward(r2chan)) {
-			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
-			return -1;
+		
+		if (r2chan->r2_state == OR2_SEIZE_TXD) {
+			/* According to ITU Q.422 3.2.3.2 (Seize Procedure)
+			 * "The code af = 0, bf = 0 must be maintained until the seizing acknowledgement signal is recognized". 
+			 * This means we cannot send clear forward yet, we must wait for the seize ack, perhaps we will never get it
+			 * I decided to NOT cancel the seize ack timer (yeah, screw the spec!) because that would mean this line will 
+			 * get stuck forever if the other end for any reason did not see the bit change, may be the next time it will, who knows :)
+			 * and, in fact, the spec does not explicitly say we should not time out, however says seize should be maintained
+			 * until the seizing ack is recognized, but what if is not recognized? stay there forever?
+			 * */
+			r2chan->r2_state = OR2_SEIZE_TXD_CLEAR_FWD_PENDING;
+		} else {
+			if (send_clear_forward(r2chan)) {
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
+				return -1;
+			}
 		}
+
 	}
 	return 0;
 }
