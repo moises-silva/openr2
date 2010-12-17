@@ -383,6 +383,10 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.r2_answer_delay = 150;
 	r2context->timers.r2_double_answer = 400;
 
+	/* if, after we send clear forward, the other side does not go back to IDLE, we go back to IDLE
+	 * after this period of time anyways */
+	r2context->timers.r2_set_call_down = 500;
+
 	/* DTMF start dialing timer */
 	r2context->timers.dtmf_start_dial = 500;
 
@@ -2493,8 +2497,12 @@ static int send_clear_forward(openr2_chan_t *r2chan)
 	return set_cas_signal(r2chan, OR2_CAS_CLEAR_FORWARD);
 }
 
-static void dtmf_r2_set_call_down(openr2_chan_t *r2chan)
+static void r2_set_call_down(openr2_chan_t *r2chan)
 {
+	if (!IS_DTMF_R2(r2chan)) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING,
+				"The other end didn't go back to IDLE. Moving our side to IDLE anyway.\n");
+	}
 	report_call_end(r2chan);
 }
 
@@ -2558,15 +2566,11 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 			}
 		}
 	} else {
-		/* 
-		 * DTMF call clear down is simply going to IDLE (which happens to be the same as clear forward)
-		 * however for the sake of clarity we send clear forward and wait 100ms before reporting call end
+		/* we don't rely on the other end to send us a reply for the CLEAR FORWARD we're about to send
+		 * so, we set this timer to ensure we bring this channel back to idle
 		 */
-		if (DIAL_DTMF(r2chan)) {
-			/* TODO: is it worth to configure this timer? */
-			openr2_chan_add_timer(r2chan, 100, dtmf_r2_set_call_down, "dtmf_r2_set_call_down");
-		} 
-		
+		openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_set_call_down, r2_set_call_down, "r2_set_call_down");
+
 		if (send_clear_forward(r2chan)) {
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
 			return -1;

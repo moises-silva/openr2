@@ -913,6 +913,7 @@ OR2_DECLARE(int) openr2_context_configure_from_advanced_file(openr2_context_t *r
 		LOADTIMER(timers.r2_metering_pulse)
 		LOADTIMER(timers.r2_double_answer)
 		LOADTIMER(timers.r2_answer_delay)
+		LOADTIMER(timers.r2_set_call_down)
 		LOADTIMER(timers.cas_persistence_check)
 		LOADTIMER(timers.dtmf_start_dial)
 

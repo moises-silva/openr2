@@ -62,6 +62,8 @@ typedef struct {
 	int cas_persistence_check;
 	/* safety timer before starting to dial DTMF */
 	int dtmf_start_dial;
+	/* Put the channel back to IDLE state after sending a CLEAR FORWARD */
+	int r2_set_call_down;
 } openr2_timers_t;
 
 
