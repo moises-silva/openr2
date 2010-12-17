@@ -666,6 +666,35 @@ OR2_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
 	return retcode;
 }
 
+OR2_DECLARE(openr2_cas_signal_t) openr2_chan_get_rx_cas(openr2_chan_t *r2chan)
+{
+	openr2_cas_signal_t cas;
+	OR2_CHAN_STACK;
+	openr2_chan_lock(r2chan);
+	cas = openr2_proto_get_rx_cas(r2chan);
+	openr2_chan_unlock(r2chan);
+	return cas;
+}
+
+OR2_DECLARE(openr2_cas_signal_t) openr2_chan_get_tx_cas(openr2_chan_t *r2chan)
+{
+	openr2_cas_signal_t cas;
+	OR2_CHAN_STACK;
+	openr2_chan_lock(r2chan);
+	cas = openr2_proto_get_tx_cas(r2chan);
+	openr2_chan_unlock(r2chan);
+	return cas;
+}
+
+OR2_DECLARE(void) openr2_chan_get_cas(openr2_chan_t *r2chan, openr2_cas_signal_t *rxcas, openr2_cas_signal_t *txcas)
+{
+	OR2_CHAN_STACK;
+	openr2_chan_lock(r2chan);
+	*rxcas = openr2_proto_get_rx_cas(r2chan);
+	*txcas = openr2_proto_get_tx_cas(r2chan);
+	openr2_chan_unlock(r2chan);
+}
+
 OR2_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan)
 {
 	const char *retstr = 0;

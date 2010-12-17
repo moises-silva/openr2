@@ -2654,6 +2654,18 @@ OR2_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t varia
 	return "*Unknown*";
 }
 
+openr2_cas_signal_t openr2_proto_get_rx_cas(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return r2chan->cas_rx_signal;
+}
+
+openr2_cas_signal_t openr2_proto_get_tx_cas(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	return r2chan->cas_tx_signal;
+}
+
 const char *openr2_proto_get_rx_cas_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;

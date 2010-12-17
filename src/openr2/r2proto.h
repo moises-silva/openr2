@@ -168,6 +168,50 @@ typedef enum {
 	OR2_CALLING_PARTY_CATEGORY_TEST_EQUIPMENT
 } openr2_calling_party_category_t;
 
+/* Number of CAS signals. CAS signaling is
+   known as line supervisory signaling  
+
+   WATCH OUT!!
+   This number MUST match the number of 
+   enums AND r2proto.c standard_cas_signals
+   and cas_names arrays!!
+*/
+#define OR2_NUM_CAS_SIGNALS 8
+
+/*
+   WATCH OUT!!
+   Each value of this enum should correspond to the
+   proper index in standard_cas_signals and cas_names arrays!!
+   */
+typedef enum {
+	/* Invalid signal */
+	OR2_CAS_INVALID = -1,
+	/* The line is ready to receive or make calls */
+	OR2_CAS_IDLE = 0,
+	/* The line is not ready to receive or make calls */
+	OR2_CAS_BLOCK,
+	/* We set to this state our CAS bits when we want to let know
+	   the other side that we want to start a new call */
+	OR2_CAS_SEIZE,
+	/* We answer with this CAS bits when we are sized and we want to proceed
+	   with the MF signaling. After setting the bits to this state, the other end
+	   will start sending MF signaling */
+	OR2_CAS_SEIZE_ACK,
+	/* We want to HANGUP the call */
+	OR2_CAS_CLEAR_BACK,
+	/* Hangup immediately. I have only seen this in Brazil, where the central
+	   waits several seconds (30?) after Clear Back to release the line, with
+	   this signal no waiting will be done. When receiving this signal openr2 
+	   behaves the same as with clear back, no waiting is done with clear back
+	   anyway, should we? */
+	OR2_CAS_FORCED_RELEASE,
+	/* They want to HANGUP the call */
+	OR2_CAS_CLEAR_FORWARD,
+	/* We set this to let know the other end we are ANSWERing the call and the
+	   speech path is open */
+	OR2_CAS_ANSWER,
+} openr2_cas_signal_t;
+
 OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t reason);
 OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t cause);
 OR2_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_category_t category);

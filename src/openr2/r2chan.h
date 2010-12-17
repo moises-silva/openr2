@@ -148,6 +148,15 @@ OR2_DECLARE(int) openr2_chan_process_signaling(openr2_chan_t *r2chan);
 /*! \brief check if there is any expired timer and execute the timeout callbacks if needed */
 OR2_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan);
 
+/*! \brief return the last CAS bits received */
+OR2_DECLARE(openr2_cas_signal_t) openr2_chan_get_rx_cas(openr2_chan_t *r2chan);
+
+/*! \brief return the last CAS bits transmitted */
+OR2_DECLARE(openr2_cas_signal_t) openr2_chan_get_tx_cas(openr2_chan_t *r2chan);
+
+/*! \brief save the channel's last received and transmitted bits, respectively, to rxcas and txcas */
+OR2_DECLARE(void) openr2_chan_get_cas(openr2_chan_t *r2chan, openr2_cas_signal_t *rxcas, openr2_cas_signal_t *txcas);
+
 /*! \brief return a meaningful string for the last CAS bits received */
 OR2_DECLARE(const char *) openr2_chan_get_rx_cas_string(openr2_chan_t *r2chan);
 
