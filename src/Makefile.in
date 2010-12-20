@@ -40,7 +40,7 @@ build_triplet = @build@
 host_triplet = @host@
 @WANT_OR2_TRACE_STACKS_TRUE@am__append_1 = -DOR2_TRACE_STACKS
 @HAVE_SVNVERSION_TRUE@am__append_2 = -DREVISION=\"$(shell svnversion -n .)\"
-@HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@am__append_3 = -fvisibility=hidden
+@HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@am__append_3 = -fvisibility=hidden -DHAVE_VISIBILITY
 @WANT_R2TEST_TRUE@bin_PROGRAMS = r2test$(EXEEXT) \
 @WANT_R2TEST_TRUE@	r2dtmf_detect$(EXEEXT)
 subdir = src
@@ -68,7 +68,7 @@ am_libopenr2_la_OBJECTS = libopenr2_la-r2chan.lo \
 	libopenr2_la-r2context.lo libopenr2_la-r2log.lo \
 	libopenr2_la-r2proto.lo libopenr2_la-r2utils.lo \
 	libopenr2_la-r2engine.lo libopenr2_la-r2ioabs.lo \
-	libopenr2_la-queue.lo
+	libopenr2_la-queue.lo libopenr2_la-r2thread.lo
 libopenr2_la_OBJECTS = $(am_libopenr2_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -131,7 +131,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GREP = @GREP@
 HAVE_ATTR_VISIBILITY_HIDDEN_FALSE = @HAVE_ATTR_VISIBILITY_HIDDEN_FALSE@
 HAVE_ATTR_VISIBILITY_HIDDEN_TRUE = @HAVE_ATTR_VISIBILITY_HIDDEN_TRUE@
 HAVE_SVNVERSION_FALSE = @HAVE_SVNVERSION_FALSE@
@@ -168,9 +167,12 @@ WANT_OR2_TRACE_STACKS_FALSE = @WANT_OR2_TRACE_STACKS_FALSE@
 WANT_OR2_TRACE_STACKS_TRUE = @WANT_OR2_TRACE_STACKS_TRUE@
 WANT_R2TEST_FALSE = @WANT_R2TEST_FALSE@
 WANT_R2TEST_TRUE = @WANT_R2TEST_TRUE@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -187,30 +189,23 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 svnversioncommand = @svnversioncommand@
@@ -229,7 +224,7 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2exports.h 
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c \
-		       r2engine.c r2ioabs.c queue.c \
+		       r2engine.c r2ioabs.c queue.c r2thread.c \
 		       openr2/queue.h \
 		       openr2/r2chan-pvt.h \
 		       openr2/r2context-pvt.h \
@@ -360,6 +355,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2ioabs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2proto.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2thread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenr2_la-r2utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r2dtmf_detect-r2dtmf_detect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r2test-r2test.Po@am__quote@
@@ -440,6 +436,13 @@ libopenr2_la-queue.lo: queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='queue.c' object='libopenr2_la-queue.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -c -o libopenr2_la-queue.lo `test -f 'queue.c' || echo '$(srcdir)/'`queue.c
+
+libopenr2_la-r2thread.lo: r2thread.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -MT libopenr2_la-r2thread.lo -MD -MP -MF "$(DEPDIR)/libopenr2_la-r2thread.Tpo" -c -o libopenr2_la-r2thread.lo `test -f 'r2thread.c' || echo '$(srcdir)/'`r2thread.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libopenr2_la-r2thread.Tpo" "$(DEPDIR)/libopenr2_la-r2thread.Plo"; else rm -f "$(DEPDIR)/libopenr2_la-r2thread.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='r2thread.c' object='libopenr2_la-r2thread.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopenr2_la_CFLAGS) $(CFLAGS) -c -o libopenr2_la-r2thread.lo `test -f 'r2thread.c' || echo '$(srcdir)/'`r2thread.c
 
 r2dtmf_detect-r2dtmf_detect.o: r2dtmf_detect.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(r2dtmf_detect_CFLAGS) $(CFLAGS) -MT r2dtmf_detect-r2dtmf_detect.o -MD -MP -MF "$(DEPDIR)/r2dtmf_detect-r2dtmf_detect.Tpo" -c -o r2dtmf_detect-r2dtmf_detect.o `test -f 'r2dtmf_detect.c' || echo '$(srcdir)/'`r2dtmf_detect.c; \

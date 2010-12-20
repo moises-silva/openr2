@@ -1,4 +1,4 @@
-AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes
+AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes -DHAVE_GETTIMEOFDAY
 if WANT_OR2_TRACE_STACKS
 AM_CFLAGS += -DOR2_TRACE_STACKS
 endif
