@@ -12,6 +12,10 @@ To build it using cmake on linux, follow these steps:
 	5. Install: sudo make install
 	6. Run ldconfig: sudo ldconfig
 
+You can specify variables definition on step 3, through -DVAR=VALUE. To also generate r2dtmf_detect and
+r2test binaries, for example, you would use:
+	cmake -DDWANT_R2TEST=1 -DCMAKE_INSTALL_PREFIX=/usr ../openr2.trunk
+
 After this, you should see libopenr2 listed on the output of 'ldconfig -p' command. If you have any
 build problems and want to debug the gcc command line used, instead of just 'make', run 'make VERBOSE=1'
 on step 4.
