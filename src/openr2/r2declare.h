@@ -67,7 +67,7 @@ extern "C" {
 #define __inline__ __inline
 #endif
 #endif /* _MSC_VER */
-#if defined(FREETDM_DECLARE_STATIC)
+#if defined(OR2_DECLARE_STATIC)
 #define OR2_DECLARE(type)            type __stdcall
 #define OR2_DECLARE_NONSTD(type)     type __cdecl
 #define OR2_DECLARE_DATA

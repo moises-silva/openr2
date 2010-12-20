@@ -1,4 +1,4 @@
-AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes -DHAVE_SYS_TIME_H
+AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes
 if WANT_OR2_TRACE_STACKS
 AM_CFLAGS += -DOR2_TRACE_STACKS
 endif
@@ -18,7 +18,7 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2exports.h 
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c \
-		       r2engine.c r2ioabs.c queue.c \
+		       r2engine.c r2ioabs.c queue.c r2thread.c \
 		       openr2/queue.h \
 		       openr2/r2chan-pvt.h \
 		       openr2/r2context-pvt.h \
@@ -31,7 +31,7 @@ libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c \
 
 libopenr2_la_CFLAGS = $(AM_CFLAGS) -D__OR2_COMPILING_LIBRARY__
 if HAVE_ATTR_VISIBILITY_HIDDEN
-libopenr2_la_CFLAGS += -fvisibility=hidden
+libopenr2_la_CFLAGS += -fvisibility=hidden -DHAVE_VISIBILITY
 endif
 libopenr2_la_LDFLAGS = -lm -lpthread -version-info @OPENR2_LT_CURRENT@:@OPENR2_LT_REVISION@:@OPENR2_LT_AGE@
 
