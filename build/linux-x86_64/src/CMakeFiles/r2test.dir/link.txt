@@ -1,0 +1,1 @@
+/usr/bin/gcc    -fPIC CMakeFiles/r2test.dir/r2test.c.o  -o r2test -rdynamic -lpthread -lm libopenr2.so.3 -Wl,-rpath,/home/arnaldo/openr2.trunk.rw/build/linux-x86_64/src 

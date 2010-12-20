@@ -1,0 +1,1 @@
+/usr/bin/gcc    -fPIC CMakeFiles/r2dtmf_detect.dir/r2dtmf_detect.c.o  -o r2dtmf_detect -rdynamic -lpthread -lm libopenr2.so.3 -Wl,-rpath,/home/arnaldo/openr2.trunk.rw/build/linux-x86_64/src 
