@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding = "Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="INSTALL"
+	ProjectGUID="{EB768385-2A24-43B1-93B8-AC52C2947880}"
+	Keyword="Win32Proj">
+	<Platforms>
+		<Platform
+			Name="x64"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="Debug"
+			IntermediateDirectory="INSTALL.dir\Debug"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"
+				AssemblerListingLocation="Debug"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="3"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$(OutDir) -P cmake_install.cmake&#x0D;&#x0A;if errorlevel 1 goto VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="Release"
+			IntermediateDirectory="INSTALL.dir\Release"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"
+				AssemblerListingLocation="Release"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="3"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$(OutDir) -P cmake_install.cmake&#x0D;&#x0A;if errorlevel 1 goto VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="MinSizeRel|x64"
+			OutputDirectory="MinSizeRel"
+			IntermediateDirectory="INSTALL.dir\MinSizeRel"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"
+				AssemblerListingLocation="MinSizeRel"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="3"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$(OutDir) -P cmake_install.cmake&#x0D;&#x0A;if errorlevel 1 goto VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="RelWithDebInfo|x64"
+			OutputDirectory="RelWithDebInfo"
+			IntermediateDirectory="INSTALL.dir\RelWithDebInfo"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"
+				AssemblerListingLocation="RelWithDebInfo"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\.&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\..&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\openr2\msvc&quot;;"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="3"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$(OutDir) -P cmake_install.cmake&#x0D;&#x0A;if errorlevel 1 goto VCReportError"/>
+		</Configuration>
+	</Configurations>
+	<Files>
+			<File
+				RelativePath="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt">
+				<FileConfiguration
+					Name="Debug|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/src/CMakeLists.txt"
+					CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; &quot;-HE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw&quot; &quot;-BE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008&quot; --check-stamp-file &quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/src/CMakeLists.txt"
+					CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; &quot;-HE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw&quot; &quot;-BE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008&quot; --check-stamp-file &quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MinSizeRel|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/src/CMakeLists.txt"
+					CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; &quot;-HE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw&quot; &quot;-BE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008&quot; --check-stamp-file &quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="RelWithDebInfo|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/src/CMakeLists.txt"
+					CommandLine="&quot;E:\Program Files (x86)\CMake 2.8\bin\cmake.exe&quot; &quot;-HE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw&quot; &quot;-BE:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008&quot; --check-stamp-file &quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\src\CMakeLists.txt&quot;;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\generate.stamp"/>
+				</FileConfiguration>
+			</File>
+		<Filter
+			Name="CMake Rules"
+			Filter="">
+			<File
+				RelativePath="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force.rule">
+				<FileConfiguration
+					Name="Debug|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MinSizeRel|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="RelWithDebInfo|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="&quot;E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
+					Outputs="E:\Documents and Settings\Administrator\Desktop\openr2.trunk.rw\build\windows-x86_64\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
