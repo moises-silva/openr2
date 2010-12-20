@@ -1,0 +1,3 @@
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/ALL_BUILD.dir
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/ZERO_CHECK.dir
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/src/CMakeFiles/libopenr2.dir

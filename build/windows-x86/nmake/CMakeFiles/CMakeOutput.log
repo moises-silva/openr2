@@ -1,0 +1,217 @@
+The system is: Windows - 5.1 - x86
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Program Files/Microsoft Visual Studio 9.0/VC/bin/cl.exe 
+Build flags: ;/DWIN32;/D_WINDOWS;/W3;/Zm1000
+Id flags: 
+
+The output was:
+0
+Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 9.00.21022.08
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+
+The C compiler identification is MSVC, found in "C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CompilerIdC/CMakeCCompilerId.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/Program Files/Microsoft Visual Studio 9.0/VC/bin/cl.exe 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeCXXCompilerId.cpp
+Microsoft (R) Incremental Linker Version 9.00.21022.08
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCXXCompilerId.exe 
+CMakeCXXCompilerId.obj 
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
+
+The CXX compiler identification is MSVC, found in "C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.exe"
+
+Determining the version of compiler passed with the following output:
+CMakeTestNMakeCLVersion.c
+
+VERSION=1500
+
+Determining if this is a free VC compiler passed with the following output:
+CMakeTestForFreeVC.cxx
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm154.tmp
+testCCompiler.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm155.tmp
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CMakeCCompilerABI.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm15B.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm15C.tmp
+LINK : warning LNK4068: /MACHINE not specified; defaulting to X86
+LINK : warning LNK4068: /MACHINE not specified; defaulting to X86
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.cxx.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm162.tmp
+testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm163.tmp
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/CMakeCXXCompilerABI.cpp.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm169.tmp
+CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm16A.tmp
+LINK : warning LNK4068: /MACHINE not specified; defaulting to X86
+LINK : warning LNK4068: /MACHINE not specified; defaulting to X86
+
+
+Determining if files malloc.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm170.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm171.tmp
+
+
+Determining if files memory.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm17C.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm17D.tmp
+
+
+Determining if files stdlib.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm184.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm185.tmp
+
+
+Determining if files string.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm18C.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm18D.tmp
+
+
+Determining if files sys/stat.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm193.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm194.tmp
+
+
+Determining if files sys/types.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm19A.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm19B.tmp
+
+
+Determining if files errno.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A5.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A6.tmp
+
+
+Determining if files fcntl.h exist passed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1AC.tmp
+CheckIncludeFiles.c
+Linking C executable cmTryCompileExec.exe
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E vs_link_exe C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  /nologo @CMakeFiles\cmTryCompileExec.dir\objects1.rsp @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1AD.tmp
+
+

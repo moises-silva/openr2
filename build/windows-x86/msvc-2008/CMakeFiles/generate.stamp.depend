@@ -1,0 +1,21 @@
+# CMake generation dependency list for this directory.
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/CMakeLists.txt
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeSystem.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeCCompiler.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeCXXCompiler.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/Platform/Windows.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/Platform/Windows-cl.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeCPlatform.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeCXXPlatform.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/Platform/cl.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeRCCompiler.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake 2.8/share/cmake-2.8/Modules/CheckIncludeFiles.cmake
+C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/config.h.cmake.in

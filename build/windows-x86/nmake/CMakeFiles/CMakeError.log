@@ -1,0 +1,301 @@
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: cl 
+Build flags: 
+Id flags: 
+
+The output was:
+The system cannot find the file specified
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: cl 
+Build flags: 
+Id flags: -c
+
+The output was:
+The system cannot find the file specified
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: cl 
+Build flags: 
+Id flags: -Aa
+
+The output was:
+The system cannot find the file specified
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: cl 
+Build flags: 
+Id flags: 
+
+The output was:
+The system cannot find the file specified
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: cl 
+Build flags: 
+Id flags: -c
+
+The output was:
+The system cannot find the file specified
+
+
+Determining the version of compiler failed with the following output:
+CreateProcessError: The system cannot find the file specified.
+
+for command: cl /nologo -EP "C:\Program Files\CMake 2.8\share\cmake-2.8\Modules\CMakeTestNMakeCLVersion.c"
+
+Determining if this is a free VC compiler failed with the following output:
+CreateProcessError: The system cannot find the file specified.
+
+for command: cl /nologo /MD /EHsc "C:\Program Files\CMake 2.8\share\cmake-2.8\Modules\CMakeTestForFreeVC.cxx" 
+in dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp2
+
+Determining if the C compiler works failed with the following output:
+
+
+Determining if files dlfcn.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm177.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'dlfcn.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <dlfcn.h>
+
+
+int main(){return 0;}
+
+Determining if files inttypes.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm178.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'inttypes.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <inttypes.h>
+
+
+int main(){return 0;}
+
+Determining if files linux/zaptel.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm179.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'linux/zaptel.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <linux/zaptel.h>
+
+
+int main(){return 0;}
+
+Determining if files zaptel/zaptel.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm17A.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'zaptel/zaptel.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <zaptel/zaptel.h>
+
+
+int main(){return 0;}
+
+Determining if files dahdi/user.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm17B.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'dahdi/user.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <dahdi/user.h>
+
+
+int main(){return 0;}
+
+Determining if files stdint.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm183.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'stdint.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <stdint.h>
+
+
+int main(){return 0;}
+
+Determining if files strings.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm18B.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'strings.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <strings.h>
+
+
+int main(){return 0;}
+
+Determining if files sys/time.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A1.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/time.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <sys/time.h>
+
+
+int main(){return 0;}
+
+Determining if files sys/ioctl.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A2.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/ioctl.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <sys/ioctl.h>
+
+
+int main(){return 0;}
+
+Determining if files sys/socket.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A3.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/socket.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <sys/socket.h>
+
+
+int main(){return 0;}
+
+Determining if files unistd.h exist failed with the following output:
+Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/nmake/CMakeFiles/CMakeTmp
+
+Run Build Command:nmake /NOLOGO  "cmTryCompileExec\fast"
+	"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir\build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.8\bin\cmake.exe" -E cmake_progress_report "C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CMakeFiles" 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFiles.c.obj
+	C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe  @C:\DOCUME~1\ARNALD~1\LOCALS~1\Temp\nm1A4.tmp
+CheckIncludeFiles.c
+C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\nmake\CMakeFiles\CMakeTmp\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'unistd.h': No such file or directory
+NMAKE : fatal error U1077: 'C:\PROGRA~1\MICROS~1.0\VC\bin\cl.exe' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files\Microsoft Visual Studio 9.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Source:
+/* */
+#include <unistd.h>
+
+
+int main(){return 0;}
+
