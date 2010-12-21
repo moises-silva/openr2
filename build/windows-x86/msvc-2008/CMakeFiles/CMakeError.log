@@ -1,5 +1,5 @@
 Determining if files dlfcn.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -9,11 +9,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'dlfcn.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -25,7 +25,7 @@ Source:
 int main(){return 0;}
 
 Determining if files inttypes.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -35,11 +35,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'inttypes.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -51,7 +51,7 @@ Source:
 int main(){return 0;}
 
 Determining if files linux/zaptel.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -61,11 +61,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'linux/zaptel.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -77,7 +77,7 @@ Source:
 int main(){return 0;}
 
 Determining if files zaptel/zaptel.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -87,11 +87,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'zaptel/zaptel.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -103,7 +103,7 @@ Source:
 int main(){return 0;}
 
 Determining if files dahdi/user.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -113,11 +113,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'dahdi/user.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -129,7 +129,7 @@ Source:
 int main(){return 0;}
 
 Determining if files stdint.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -139,11 +139,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'stdint.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -155,7 +155,7 @@ Source:
 int main(){return 0;}
 
 Determining if files strings.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -165,11 +165,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'strings.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -181,7 +181,7 @@ Source:
 int main(){return 0;}
 
 Determining if files sys/time.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -191,11 +191,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/time.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -207,7 +207,7 @@ Source:
 int main(){return 0;}
 
 Determining if files sys/ioctl.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -217,11 +217,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/ioctl.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -233,7 +233,7 @@ Source:
 int main(){return 0;}
 
 Determining if files sys/socket.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -243,11 +243,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'sys/socket.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 
@@ -259,7 +259,7 @@ Source:
 int main(){return 0;}
 
 Determining if files unistd.h exist failed with the following output:
-Change Dir: C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008/CMakeFiles/CMakeTmp
+Change Dir: C:/openr2-build/CMakeFiles/CMakeTmp
 
 Run Build Command:C:\PROGRA~1\MICROS~1.0\Common7\IDE\devenv.com CMAKE_TRY_COMPILE.sln /build Debug /project cmTryCompileExec
 
@@ -269,11 +269,11 @@ Copyright (C) Microsoft Corp. All rights reserved.
 1>Compiling...
 1>Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
 1>Copyright (C) Microsoft Corporation.  All rights reserved.
-1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
+1>cl /Od /D "WIN32" /D "_WINDOWS" /D "_DEBUG" /D "CMAKE_INTDIR=\"Debug\"" /D "_MBCS" /FD /RTC1 /MDd /Fo"cmTryCompileExec.dir\Debug\\" /Fd"C:\openr2-build\CMakeFiles\CMakeTmp\Debug/cmTryCompileExec.pdb" /W3 /c /Zi /TC   /Zm1000
 1>   ".\CheckIncludeFiles.c"
 1>CheckIncludeFiles.c
 1>.\CheckIncludeFiles.c(2) : fatal error C1083: Cannot open include file: 'unistd.h': No such file or directory
-1>Build log was saved at "file://c:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
+1>Build log was saved at "file://c:\openr2-build\CMakeFiles\CMakeTmp\cmTryCompileExec.dir\Debug\BuildLog.htm"
 1>cmTryCompileExec - 1 error(s), 0 warning(s)
 ========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
 

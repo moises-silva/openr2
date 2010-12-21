@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="INSTALL"
-	ProjectGUID="{2877BCC9-5AAC-4DCB-A5CD-7A0E0F4A79A5}"
+	ProjectGUID="{CE5D81D3-8D86-4179-A8A5-A659DBEDE474}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -20,7 +20,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				ExceptionHandling="0"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"
 				AssemblerListingLocation="Debug"
@@ -30,7 +30,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -62,7 +62,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				ExceptionHandling="0"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"
 				AssemblerListingLocation="Release"
@@ -72,7 +72,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -104,7 +104,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				ExceptionHandling="0"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"
 				AssemblerListingLocation="MinSizeRel"
@@ -114,7 +114,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -146,7 +146,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				ExceptionHandling="0"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"
 				AssemblerListingLocation="RelWithDebInfo"
@@ -156,7 +156,7 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\.&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\..&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\openr2\msvc&quot;;"
+				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
 				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -181,57 +181,57 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 	</Configurations>
 	<Files>
 			<File
-				RelativePath="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt">
+				RelativePath="C:\openr2.trunk\src\CMakeLists.txt">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; &quot;-HC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk&quot; &quot;-BC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008&quot; --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp"/>
+					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; &quot;-HC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk&quot; &quot;-BC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008&quot; --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp"/>
+					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="MinSizeRel|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; &quot;-HC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk&quot; &quot;-BC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008&quot; --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp"/>
+					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="RelWithDebInfo|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; &quot;-HC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk&quot; &quot;-BC:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/build/windows-x86/msvc-2008&quot; --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\src\CMakeLists.txt&quot;;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp"/>
+					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 			</File>
 		<Filter
 			Name="CMake Rules"
 			Filter="">
 			<File
-				RelativePath="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force.rule">
+				RelativePath="CMakeFiles\INSTALL_force.rule">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
 					Description=" "
 					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+					AdditionalDependencies="CMakeFiles\INSTALL_force.rule"
+					Outputs="CMakeFiles\INSTALL_force"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -239,8 +239,8 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 					Name="VCCustomBuildTool"
 					Description=" "
 					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+					AdditionalDependencies="CMakeFiles\INSTALL_force.rule"
+					Outputs="CMakeFiles\INSTALL_force"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="MinSizeRel|Win32">
@@ -248,8 +248,8 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 					Name="VCCustomBuildTool"
 					Description=" "
 					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+					AdditionalDependencies="CMakeFiles\INSTALL_force.rule"
+					Outputs="CMakeFiles\INSTALL_force"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="RelWithDebInfo|Win32">
@@ -257,8 +257,8 @@ CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -DBUILD_TYPE=$
 					Name="VCCustomBuildTool"
 					Description=" "
 					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="&quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force.rule&quot;"
-					Outputs="C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\INSTALL_force"/>
+					AdditionalDependencies="CMakeFiles\INSTALL_force.rule"
+					Outputs="CMakeFiles\INSTALL_force"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
