@@ -262,7 +262,7 @@ static void on_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t rea
 	pthread_exit((void *)1);
 }
 
-static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
+static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category, int ani_restricted)
 {
 	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
 	chan_group_data_t *confdata = chandata->conf;
@@ -356,7 +356,7 @@ static void on_line_idle(openr2_chan_t *r2chan)
 	printf("USER: making call on chan %d. DNID = %s, CID = %s, CPC = %s\n", 
 			openr2_chan_get_number(r2chan), confdata->dnid, 
 			confdata->cid, openr2_proto_get_category_string(confdata->category));
-	res = openr2_chan_make_call(r2chan, confdata->cid, confdata->dnid, confdata->category);
+	res = openr2_chan_make_call(r2chan, confdata->cid, confdata->dnid, confdata->category, 0);
 	if (-1 == res) {
 		fprintf(stderr, "Error making call on chan %d\n", openr2_chan_get_number(r2chan));
 		return;
