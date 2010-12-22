@@ -76,7 +76,7 @@
 			handle_protocol_error((r2chan), OR2_INVALID_R2_STATE); \
 		} else { \
 			(r2chan)->call_state = OR2_CALL_OFFERED; \
-			EMI((r2chan))->on_call_offered((r2chan), (r2chan)->caller_ani_is_restricted ? NULL : (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan))); \
+			EMI((r2chan))->on_call_offered((r2chan), (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan)), (r2chan)->caller_ani_is_restricted); \
 		} \
 	} while (0)
 
@@ -2028,23 +2028,26 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 		}
 	}
 
-	/* if the pointer to ANI is null, that means the caller ANI is restricted */
-	if (NULL == r2chan->ani_ptr) {
+	/* if the pointer to ANI is NULL, that means the caller ANI must be restricted without sending it at all */
+	if (GI_TONE(r2chan).caller_ani_is_restricted && NULL == r2chan->ani_ptr) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending Restricted ANI\n");
 		r2chan->mf_state = OR2_MF_ANI_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).caller_ani_is_restricted);
-	/* ok, ANI is not restricted, let's see 
-	   if there are still some ANI to send out */
+	/* ok, ANI is not completely restricted, let's see if there are still some ANI to send out */
 	} else if (*r2chan->ani_ptr) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending ANI digit %c\n", *r2chan->ani_ptr);
 		r2chan->mf_state = OR2_MF_ANI_TXD;
 		prepare_mf_tone(r2chan, *r2chan->ani_ptr);
 		r2chan->ani_ptr++;
-	/* if no more ANI, and there is a signal for it, use it */
-	} else if (GI_TONE(r2chan).no_more_ani_available) {
+	/* if no more ANI, ANI is not restricted, and there is a signal for it, use it */
+	} else if (GI_TONE(r2chan).no_more_ani_available && !r2chan->caller_ani_is_restricted) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending more ANI unavailable\n");
 		r2chan->mf_state = OR2_MF_ANI_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).no_more_ani_available);
+	} else if (GI_TONE(r2chan).caller_ani_is_restricted && r2chan->caller_ani_is_restricted) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending Restricted ANI\n");
+		r2chan->mf_state = OR2_MF_ANI_END_TXD;
+		prepare_mf_tone(r2chan, GI_TONE(r2chan).caller_ani_is_restricted);
 	} else {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "No more ANI, expecting timeout from the other side\n");
 		/* the callee should timeout to detect end of ANI and
@@ -2366,14 +2369,16 @@ static void start_dialing_dtmf(openr2_chan_t *r2chan)
 	r2chan->mf_state = OR2_MF_DIALING_DTMF;
 }
 
-int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, openr2_calling_party_category_t category)
+int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, 
+		openr2_calling_party_category_t category, int ani_restricted)
 {
 	const char *digit;
 	int copy_ani = 1, copy_dnis = 1;
 	OR2_CHAN_STACK;
 
-	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requested to make call (ANI=%s, DNIS=%s, category=%s)\n", ani ? ani : "(restricted)", 
-			dnis, openr2_proto_get_category_string(category));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, 
+			"Requested to make call (ANI=%s, DNIS=%s, category=%s, ANI restricted = %s)\n", ani ? ani : "(none)", 
+			dnis, openr2_proto_get_category_string(category), ani_restricted ? "yes" : "no");
 
 	/* we can dial only if we're in IDLE */
 	if (r2chan->call_state != OR2_CALL_IDLE) {
@@ -2435,6 +2440,7 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 	} else {
 		r2chan->ani[0] = '\0';
 	}
+	r2chan->caller_ani_is_restricted = ani_restricted ? 1 : 0;
 	r2chan->ani_ptr = ani ? r2chan->ani : NULL;
 	if (copy_dnis) {
 		strncpy(r2chan->dnis, dnis, sizeof(r2chan->dnis)-1);

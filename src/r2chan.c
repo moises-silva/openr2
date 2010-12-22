@@ -796,12 +796,13 @@ OR2_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *b
 	return wrote;
 }
 
-OR2_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnid, openr2_calling_party_category_t category)
+OR2_DECLARE(int) openr2_chan_make_call(openr2_chan_t *r2chan, const char *ani, const char *dnis, 
+		openr2_calling_party_category_t category, int ani_restricted)
 {
 	int retcode = 0;
 	OR2_CHAN_STACK;
 	openr2_chan_lock(r2chan);
-	retcode = openr2_proto_make_call(r2chan, ani, dnid, category);
+	retcode = openr2_proto_make_call(r2chan, ani, dnis, category, ani_restricted);
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }
