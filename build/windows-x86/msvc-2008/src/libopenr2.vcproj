@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="libopenr2"
-	ProjectGUID="{25EC3F31-0CF7-444D-997B-E50DDD024D12}"
+	ProjectGUID="{6ECB2674-06D6-49BE-8B3D-AEFC641D3876}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions=" /Zm1000"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
 				BasicRuntimeChecks="3"
 				CompileAs="1"
 				DebugInformationFormat="3"
@@ -30,7 +30,7 @@
 				Optimization="0"
 				RuntimeLibrary="3"
 				WarningLevel="3"
-				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Debug\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Debug\&quot;;libopenr2_EXPORTS"
 				AssemblerListingLocation="Debug"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="Debug/libopenr2.pdb"
@@ -39,11 +39,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
-				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Debug\&quot;,libopenr2_EXPORTS"/>
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Debug\&quot;;libopenr2_EXPORTS"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Debug\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Debug\&quot;;libopenr2_EXPORTS"
 				MkTypLibCompatible="FALSE"
 				TargetEnvironment="1"
 				GenerateStublessProxies="TRUE"
@@ -83,14 +83,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions=" /Zm1000"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
 				CompileAs="1"
 				ExceptionHandling="0"
 				InlineFunctionExpansion="2"
 				Optimization="2"
 				RuntimeLibrary="2"
 				WarningLevel="3"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Release\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Release\&quot;;libopenr2_EXPORTS"
 				AssemblerListingLocation="Release"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="Release/libopenr2.pdb"
@@ -99,11 +99,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Release\&quot;,libopenr2_EXPORTS"/>
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Release\&quot;;libopenr2_EXPORTS"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;Release\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;Release\&quot;;libopenr2_EXPORTS"
 				MkTypLibCompatible="FALSE"
 				TargetEnvironment="1"
 				GenerateStublessProxies="TRUE"
@@ -142,14 +142,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions=" /Zm1000"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
 				CompileAs="1"
 				ExceptionHandling="0"
 				InlineFunctionExpansion="1"
 				Optimization="1"
 				RuntimeLibrary="2"
 				WarningLevel="3"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;MinSizeRel\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;;libopenr2_EXPORTS"
 				AssemblerListingLocation="MinSizeRel"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="MinSizeRel/libopenr2.pdb"
@@ -158,11 +158,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;MinSizeRel\&quot;,libopenr2_EXPORTS"/>
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;;libopenr2_EXPORTS"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;MinSizeRel\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;;libopenr2_EXPORTS"
 				MkTypLibCompatible="FALSE"
 				TargetEnvironment="1"
 				GenerateStublessProxies="TRUE"
@@ -201,7 +201,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions=" /Zm1000"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
 				CompileAs="1"
 				DebugInformationFormat="3"
 				ExceptionHandling="0"
@@ -209,7 +209,7 @@
 				Optimization="2"
 				RuntimeLibrary="2"
 				WarningLevel="3"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;;libopenr2_EXPORTS"
 				AssemblerListingLocation="RelWithDebInfo"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="RelWithDebInfo/libopenr2.pdb"
@@ -218,11 +218,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="C:\openr2.trunk\src\.;..;C:\openr2.trunk\src\openr2\msvc;"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;,libopenr2_EXPORTS"/>
+				AdditionalIncludeDirectories="..\..\..\..\src\.;..;..\..\..\..\src\openr2\msvc;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;;libopenr2_EXPORTS"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,HAVE_CONFIG_H,OR2_EXPORTS,__OR2_COMPILING_LIBRARY__,WIN32_LEAN_AND_MEAN,WITHOUT_MM_LIB,CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;,libopenr2_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;OR2_EXPORTS;__OR2_COMPILING_LIBRARY__;WIN32_LEAN_AND_MEAN;WITHOUT_MM_LIB;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;;libopenr2_EXPORTS"
 				MkTypLibCompatible="FALSE"
 				TargetEnvironment="1"
 				GenerateStublessProxies="TRUE"
@@ -254,41 +254,41 @@
 	</Configurations>
 	<Files>
 			<File
-				RelativePath="C:\openr2.trunk\src\CMakeLists.txt">
+				RelativePath="..\..\..\..\src\CMakeLists.txt">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -H../../../.. -B.. --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="..\..\..\..\src\CMakeLists.txt;..\..\..\..\src\CMakeLists.txt;"
 					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -H../../../.. -B.. --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="..\..\..\..\src\CMakeLists.txt;..\..\..\..\src\CMakeLists.txt;"
 					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="MinSizeRel|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -H../../../.. -B.. --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="..\..\..\..\src\CMakeLists.txt;..\..\..\..\src\CMakeLists.txt;"
 					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="RelWithDebInfo|Win32">
 					<Tool
 					Name="VCCustomBuildTool"
-					Description="Building Custom Rule C:/openr2.trunk/src/CMakeLists.txt"
-					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -HC:/openr2.trunk -B.. --check-stamp-file C:\openr2-build\src\CMakeFiles\generate.stamp&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
-					AdditionalDependencies="C:\openr2.trunk\src\CMakeLists.txt;C:\openr2.trunk\src\CMakeLists.txt;"
+					Description="Building Custom Rule C:/Documents and Settings/Arnaldo Pereira/Desktop/openr2.trunk/src/CMakeLists.txt"
+					CommandLine="&quot;C:\Program Files\CMake 2.8\bin\cmake.exe&quot; -H../../../.. -B.. --check-stamp-file &quot;C:\Documents and Settings\Arnaldo Pereira\Desktop\openr2.trunk\build\windows-x86\msvc-2008\src\CMakeFiles\generate.stamp&quot;&#x0D;&#x0A;if errorlevel 1 goto VCReportError"
+					AdditionalDependencies="..\..\..\..\src\CMakeLists.txt;..\..\..\..\src\CMakeLists.txt;"
 					Outputs="CMakeFiles\generate.stamp"/>
 				</FileConfiguration>
 			</File>
@@ -296,31 +296,31 @@
 			Name="Source Files"
 			Filter="">
 			<File
-				RelativePath="C:\openr2.trunk\src\r2chan.c">
+				RelativePath="..\..\..\..\src\r2chan.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2context.c">
+				RelativePath="..\..\..\..\src\r2context.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2log.c">
+				RelativePath="..\..\..\..\src\r2log.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2proto.c">
+				RelativePath="..\..\..\..\src\r2proto.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2utils.c">
+				RelativePath="..\..\..\..\src\r2utils.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2engine.c">
+				RelativePath="..\..\..\..\src\r2engine.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2ioabs.c">
+				RelativePath="..\..\..\..\src\r2ioabs.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\queue.c">
+				RelativePath="..\..\..\..\src\queue.c">
 			</File>
 			<File
-				RelativePath="C:\openr2.trunk\src\r2thread.c">
+				RelativePath="..\..\..\..\src\r2thread.c">
 			</File>
 		</Filter>
 	</Files>
