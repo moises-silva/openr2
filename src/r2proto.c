@@ -494,11 +494,16 @@ static const char *r2state2str(openr2_cas_state_t r2state)
 		return "Answer Received with MF Pending";
 	case OR2_CLEAR_FWD_TXD:
 		return "Clear Forward Transmitted";
+	case OR2_EXECUTING_DOUBLE_ANSWER:
+		return "Executing Double Answer";
+	case OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD:
+		return "Clear Back After Clear Forward Received";
 	case OR2_BLOCKED:
 		return "Blocked";
-	default: 
-		return "*Unknown*";
+	case OR2_INVALID_STATE:
+		return "Invalid";
 	}
+	return "*Unknown*";
 }
 
 static const char *mfstate2str(openr2_mf_state_t mf_state)
@@ -540,10 +545,8 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 
 	case OR2_MF_DETECTING_DTMF:
 		return "Detecting DTMF";
-
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 OR2_EXPORT_SYMBOL
@@ -574,9 +577,8 @@ const char *openr2_proto_get_error(openr2_protocol_error_t error)
 		return "OpenR2 Library BUG";
 	case OR2_INTERNAL_ERROR:
 		return "OpenR2 Internal Error";
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static const char *mfgroup2str(openr2_mf_group_t mf_group)
@@ -608,10 +610,8 @@ static const char *mfgroup2str(openr2_mf_group_t mf_group)
 
 	case OR2_MF_DTMF_BACK_INIT:
 		return "Backward DTMF init";
-
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static const char *callstate2str(openr2_call_state_t state)
@@ -657,9 +657,8 @@ const char *openr2_proto_get_disconnect_string(openr2_call_disconnect_cause_t ca
 		return "Collect Call Rejected";
 	case OR2_CAUSE_FORCED_RELEASE:
 		return "Forced Release";
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static void close_logfile(openr2_chan_t *r2chan);
