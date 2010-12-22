@@ -491,11 +491,16 @@ static const char *r2state2str(openr2_cas_state_t r2state)
 		return "Clear Forward Transmitted";
 	case OR2_SEIZE_TXD_CLEAR_FWD_PENDING:
 		return "Seize Transmitted with Clear Forward Pending";
+	case OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD:
+		return "Clear Back After Clear Forward Received";
+	case OR2_EXECUTING_DOUBLE_ANSWER:
+		return "Executing Double Answer";
 	case OR2_BLOCKED:
 		return "Blocked";
-	default: 
-		return "*Unknown*";
+	case OR2_INVALID_STATE:
+		return "Invalid";
 	}
+	return "*Unknown*";
 }
 
 static const char *mfstate2str(openr2_mf_state_t mf_state)
@@ -538,9 +543,8 @@ static const char *mfstate2str(openr2_mf_state_t mf_state)
 	case OR2_MF_DETECTING_DTMF:
 		return "Detecting DTMF";
 
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
@@ -570,9 +574,8 @@ OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
 		return "OpenR2 Library BUG";
 	case OR2_INTERNAL_ERROR:
 		return "OpenR2 Internal Error";
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static const char *mfgroup2str(openr2_mf_group_t mf_group)
@@ -605,9 +608,8 @@ static const char *mfgroup2str(openr2_mf_group_t mf_group)
 	case OR2_MF_DTMF_BACK_INIT:
 		return "Backward DTMF init";
 
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static const char *callstate2str(openr2_call_state_t state)
@@ -652,9 +654,8 @@ OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconn
 		return "Collect Call Rejected";
 	case OR2_CAUSE_FORCED_RELEASE:
 		return "Forced Release";
-	default:
-		return "*Unknown*";
 	}
+	return "*Unknown*";
 }
 
 static void close_logfile(openr2_chan_t *r2chan);
@@ -2479,13 +2480,14 @@ void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
-	int tone;
+	int tone = GB_TONE(r2chan).line_out_of_order;
 	/* TODO: should we verify that the tone exists? (ie not OR2_MF_TONE_INVALID)? 
 	   and use default line out of order if not or better yet, warning about it?
 	   particularly I am thinking on the case where collect calls do not apply on
 	   some countries and the user may still use OR2_CAUSE_COLLECT_CALL_REJECTED, silly,
 	   but could confuse users */
 	r2chan->mf_state = OR2_MF_DISCONNECT_TXD;
+
 	switch (cause) {
 	case OR2_CAUSE_BUSY_NUMBER:
 		tone = GB_TONE(r2chan).busy_number;
@@ -2505,8 +2507,15 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 	case OR2_CAUSE_COLLECT_CALL_REJECTED:
 		tone = GB_TONE(r2chan).reject_collect_call;
 		break;
-	default:
-		tone = GB_TONE(r2chan).line_out_of_order;
+	case OR2_CAUSE_NO_ANSWER:
+	case OR2_CAUSE_NORMAL_CLEARING:
+	case OR2_CAUSE_FORCED_RELEASE:
+	case OR2_CAUSE_UNSPECIFIED:
+		/* these causes should not be used to send disconnect tones, 
+		 * so let's map it to something that makes sense */
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Cause %s does not make sense in this context, remapping to %s\n", 
+				openr2_proto_get_disconnect_string(cause), openr2_proto_get_disconnect_string(OR2_CAUSE_NETWORK_CONGESTION));
+		tone = GB_TONE(r2chan).network_congestion;
 		break;
 	}
 	prepare_mf_tone(r2chan, tone);
@@ -2634,9 +2643,10 @@ OR2_DECLARE(const char *) openr2_proto_get_category_string(openr2_calling_party_
 		return "Test Equipment";
 	case OR2_CALLING_PARTY_CATEGORY_PAY_PHONE:
 		return "Pay Phone";
-	default:
-		return "*Unknown*";
+	case OR2_CALLING_PARTY_CATEGORY_UNKNOWN:
+		return "*Not known*";
 	}
+	return "*Unknown*";
 }
 
 OR2_DECLARE(openr2_calling_party_category_t) openr2_proto_get_category(const char *category)
