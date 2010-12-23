@@ -64,14 +64,12 @@ IF(DEFINED HAVE_ATTR_VISIBILITY_HIDDEN)
 	or2_cflags(-fvisibility=hidden)
 ENDIF()
 
+# if WANT_R2TEST is defined, build tests binaries
 IF(DEFINED WANT_R2TEST)
-	ADD_EXECUTABLE(r2test r2test.c)
-	TARGET_LINK_LIBRARIES(r2test pthread m ${PROJECT_TARGET})
-#SET_TARGET_PROPERTIES(r2test PROPERTIES COMPILE_FLAGS ${BIN_DEFS})
-
-	ADD_EXECUTABLE(r2dtmf_detect r2dtmf_detect.c)
-	TARGET_LINK_LIBRARIES(r2dtmf_detect pthread m ${PROJECT_TARGET})
-#SET_TARGET_PROPERTIES(r2dtmf_detect PROPERTIES COMPILE_FLAGS ${BIN_DEFS})
+	FOREACH(TEST_TARGET r2test r2dtmf_detect r2mf_detect r2mf_generate)
+		ADD_EXECUTABLE(${TEST_TARGET} ${TEST_TARGET}.c)
+		TARGET_LINK_LIBRARIES(${TEST_TARGET} pthread m ${PROJECT_TARGET})
+	ENDFOREACH(TEST_TARGET)
 ENDIF()
 
 # on windows, we check if winmm is available (guess it's always),

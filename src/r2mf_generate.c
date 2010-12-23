@@ -126,10 +126,10 @@ int main(int argc, char *argv[])
 		if (strlen(argv[i]) == 2) {
 			if (argv[i][0] == 'f' || argv[i][0] == 'F') {
 				txstate = &fwd_txstate;
-				dir = "Forward";
+				dir = (char *)"Forward";
 			} else if (argv[i][0] == 'b' || argv[i][0] == 'B') {
 				txstate = &bwd_txstate;
-				dir = "Backward";
+				dir = (char *)"Backward";
 			} else {
 				fprintf(stderr, "Aborting generation due to invalid MF tone direction in element %d (%c)\n", i, argv[i][0]);
 				break;
