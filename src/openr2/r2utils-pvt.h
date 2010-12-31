@@ -46,7 +46,7 @@ extern "C" {
 
 #define openr2_set_flag(r2chan, flag) (r2chan)->flags |= flag
 #define openr2_clear_flag(r2chan, flag) (r2chan)->flags &= ~flag
-#define openr2_test_flag(r2chan, flag) (r2chan)->flags & flag
+#define openr2_test_flag(r2chan, flag) ((r2chan)->flags & flag)
 
 #define OR2_EXPORT_SYMBOL __attribute__((visibility("default")))
 
