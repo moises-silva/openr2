@@ -130,9 +130,12 @@ static void r2config_china(openr2_context_t *r2context)
 
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 
+	openr2_set_flag(r2context, OR2_ANI_CAN_COME_FIRST);
+	openr2_set_flag(r2context, OR2_FORCE_USE_MAX_ANI);
+
 	/* override max_ani and warn the user if the former value is different from OR2_MAX_ANI */
 	if (r2context->max_ani != OR2_MAX_ANI)
-		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_WARNING, "Overriding max_ani to %d\n", OR2_MAX_ANI);
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Overriding max_ani to %d\n", OR2_MAX_ANI);
 	r2context->max_ani = OR2_MAX_ANI;
 }
 
@@ -1647,9 +1650,12 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan)
 		we don't know that, we could have timeout even before they put off their tone
 		if they never detect our tone */
 
+		if (r2chan->mf_state == OR2_MF_DNIS_RQ_TXD) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "MF cycle timed out, no more DNIS\n");
+		} else if (r2chan->mf_state == OR2_MF_ANI_RQ_TXD) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "MF cycle timed out, no more ANI\n");
+		}
 
-
-		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "MF cycle timed out, no more DNIS\n");
 		/* the other end has run out of DNIS digits and were in a R2 variant that
 		   does not support 'No More DNIS available' signal (ain't that silly?), and
 		   those R2 variants let the backward end to timeout and resume the MF dance,
@@ -1659,7 +1665,7 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan)
 		   our tone */
 		r2chan->timer_ids.mf_back_resume_cycle = openr2_chan_add_timer(r2chan, TIMER(r2chan).mf_back_resume_cycle, 
 				                                               mf_back_resume_cycle, "mf_back_resume_cycle");
-		if (!openr2_test_flag(r2chan, OR2_CHAN_ANI_CAN_COME_FIRST) && !r2chan->r2context->get_ani_first) {
+		if (!openr2_test_flag(r2chan->r2context, OR2_ANI_CAN_COME_FIRST) && !r2chan->r2context->get_ani_first) {
 			/* we were not asked to get the ANI first, hence when this
 		           timeout occurs we know for sure we have not retrieved ANI yet,
 		           let's retrieve it now. */
@@ -1785,7 +1791,7 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 		  	- we can rely on the number of ANI digits we get AND we still didn't get enough of them,
 		  	  which basically means there's no tone for end of ANI digits (or we ignore it)
 		 */
-		if (!tone || (!openr2_test_flag(r2chan, OR2_CHAN_DO_NOT_USE_MAX_ANI) &&
+		if (!tone || (!openr2_test_flag(r2chan->r2context, OR2_FORCE_USE_MAX_ANI) &&
 					(uint32_t)r2chan->r2context->max_ani > r2chan->ani_len)) {
 			r2chan->mf_state = OR2_MF_ANI_RQ_TXD;
 			prepare_mf_tone(r2chan, next_ani_request_tone);
@@ -1836,7 +1842,7 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 		case OR2_MF_SEIZE_ACK_TXD:
 			/* after sending the seize ack, we expect either DNIS or ANI,
 			   depending on the variant */
-			if (r2chan->r2context->get_ani_first && openr2_test_flag(r2chan, OR2_CHAN_ANI_CAN_COME_FIRST)) { 
+			if (r2chan->r2context->get_ani_first && openr2_test_flag(r2chan->r2context, OR2_ANI_CAN_COME_FIRST)) { 
 				mf_receive_expected_ani(r2chan, tone); 
 			} else 
 				mf_receive_expected_dnis(r2chan, tone);

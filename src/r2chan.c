@@ -147,12 +147,6 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	r2chan->number = channo;
 	r2chan->io_buf_size = OR2_CHAN_READ_SIZE;
 
-	/* currently, those flags are used just for China variant */
-	if (r2context->variant == OR2_VAR_CHINA) {
-		openr2_set_flag(r2chan, OR2_CHAN_ANI_CAN_COME_FIRST);
-		openr2_set_flag(r2chan, OR2_CHAN_DO_NOT_USE_MAX_ANI);
-	}
-
 	/* add ourselves to the list of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
 

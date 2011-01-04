@@ -520,12 +520,6 @@ OR2_DECLARE(openr2_variant_t) openr2_context_get_variant(openr2_context_t *r2con
 OR2_DECLARE(void) openr2_context_set_ani_first(openr2_context_t *r2context, int ani_first)
 {
 	OR2_CONTEXT_STACK;
-	/* on China variant, the tone for requesting DNIS digits is the same of the one to request ANI digits
-	   this menas, we don't have control on which one to request first, so get_ani_first option makes no sense */
-	if (r2context->variant == OR2_VAR_CHINA && ani_first) {
-		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_WARNING, "Country variant doesn't support get_ani_first, not enabling it.\n");
-		return;
-	}
 	if (ani_first < 0) {
 		return;
 	}

@@ -95,8 +95,6 @@ typedef struct openr2_chan_timer_ids_s {
 
 typedef enum r2chan_flags_e {
 	OR2_CHAN_CALL_DNIS_CALLBACK = (1 << 0),
-	OR2_CHAN_ANI_CAN_COME_FIRST = (1 << 1),
-	OR2_CHAN_DO_NOT_USE_MAX_ANI = (1 << 2),
 } r2chan_flags_t;
 
 /* R2 channel. Hold the states of the R2 signaling, I/O device etc.

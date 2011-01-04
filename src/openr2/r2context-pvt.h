@@ -66,6 +66,10 @@ typedef struct {
 	int r2_set_call_down;
 } openr2_timers_t;
 
+typedef enum r2context_flags_e {
+	OR2_ANI_CAN_COME_FIRST = (1 << 0),
+	OR2_FORCE_USE_MAX_ANI = (1 << 1),
+} r2context_flags_t;
 
 /* R2 library context. Holds the R2 channel list,
    protocol variant, client interfaces etc */
@@ -170,6 +174,9 @@ typedef struct openr2_context_s {
 
 	/* list of channels that belong to this context */
 	struct openr2_chan_s *chanlist;
+
+	/* context flags */
+	r2context_flags_t flags;
 
 } openr2_context_t;
 
