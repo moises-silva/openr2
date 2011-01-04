@@ -130,7 +130,10 @@ static void r2config_china(openr2_context_t *r2context)
 
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 
+	/* ANI can come before DNIS */
 	openr2_set_flag(r2context, OR2_ANI_CAN_COME_FIRST);
+
+	/* consider MAX_ANI as the number of ANI digits we must retrieve */
 	openr2_set_flag(r2context, OR2_FORCE_USE_MAX_ANI);
 
 	/* override max_ani and warn the user if the former value is different from OR2_MAX_ANI */
