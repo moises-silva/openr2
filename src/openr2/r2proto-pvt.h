@@ -243,12 +243,16 @@ typedef enum {
 	/* Blocked line */
 	OR2_BLOCKED = 400,
 
+	/* We seized the line just before they seized it too! */
+	OR2_DOUBLE_SEIZURE = 500,
 } openr2_cas_state_t;
 
 /* Call States */
 typedef enum {
 	/* ready to accept or make calls */
 	OR2_CALL_IDLE, 
+	/* We started collecting information for an incoming call */
+	OR2_CALL_COLLECTING,
 	/* dialing in progress */
 	OR2_CALL_DIALING, 
 	/* ANI, DNIS and Category transmission done, accept it or reject it */

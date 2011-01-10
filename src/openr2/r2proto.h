@@ -138,7 +138,8 @@ typedef enum {
 	OR2_CAUSE_NORMAL_CLEARING,
 	OR2_CAUSE_COLLECT_CALL_REJECTED,
 	OR2_CAUSE_FORCED_RELEASE,
-	OR2_CAUSE_NUMBER_CHANGED
+	OR2_CAUSE_NUMBER_CHANGED,
+	OR2_CAUSE_GLARE
 } openr2_call_disconnect_cause_t;
 
 /* possible causes of protocol error */

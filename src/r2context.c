@@ -58,6 +58,12 @@ static void on_call_init_default(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call starting at chan %d\n", openr2_chan_get_number(r2chan));
 }
 
+static void on_call_proceed_default(openr2_chan_t *r2chan)
+{
+	OR2_CHAN_STACK;
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "call proceeding at chan %d\n", openr2_chan_get_number(r2chan));
+}
+
 static void on_call_offered_default(openr2_chan_t *r2chan, const char *ani, 
 		const char *dnis, openr2_calling_party_category_t category, int ani_restricted)
 {
@@ -187,6 +193,7 @@ static openr2_transcoder_interface_t default_transcoder = {
 
 static openr2_event_interface_t default_evmanager = {
 	/* .on_call_init */ on_call_init_default,
+	/* .on_call_proceed */ on_call_proceed_default,
 	/* .on_call_offered */ on_call_offered_default,
 	/* .on_call_accepted */ on_call_accepted_default,
 	/* .on_call_answered */ on_call_answered_default,
@@ -225,37 +232,40 @@ OR2_DECLARE(openr2_context_t *) openr2_context_new(openr2_variant_t variant, ope
 		/* fix callmgmt */
 		if (!evmanager->on_call_init) {
 			evmanager->on_call_init = on_call_init_default;
-		}	
+		}
+		if (!evmanager->on_call_proceed) {
+			evmanager->on_call_proceed = on_call_proceed_default;
+		}
 		if (!evmanager->on_call_offered) {
 			evmanager->on_call_offered = on_call_offered_default;
-		}	
+		}
 		if (!evmanager->on_call_accepted) {
 			evmanager->on_call_accepted = on_call_accepted_default;
-		}	
+		}
 		if (!evmanager->on_call_answered) {
 			evmanager->on_call_answered = on_call_answered_default;
-		}	
+		}
 		if (!evmanager->on_call_disconnect) {
 			evmanager->on_call_disconnect = on_call_disconnect_default;
-		}	
+		}
 		if (!evmanager->on_call_end) {
 			evmanager->on_call_end = on_call_end_default;
 		}
 		if (!evmanager->on_call_read) {
 			evmanager->on_call_read = on_call_read_default;
-		}	
+		}
 		if (!evmanager->on_hardware_alarm) {
 			evmanager->on_hardware_alarm = on_hardware_alarm_default;
-		}	
+		}
 		if (!evmanager->on_os_error) {
 			evmanager->on_os_error = on_os_error_default;
-		}	
+		}
 		if (!evmanager->on_protocol_error) {
 			evmanager->on_protocol_error = on_protocol_error_default;
-		}	
+		}
 		if (!evmanager->on_context_log) {
 			evmanager->on_context_log = openr2_log_context_default;
-		}	
+		}
 		if (!evmanager->on_line_idle) {
 			evmanager->on_line_idle = on_line_idle_default;
 		}
