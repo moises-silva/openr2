@@ -677,6 +677,27 @@ OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconn
 	return "*Unknown*";
 }
 
+/* This function is called when our side will no longer do R2 signaling
+   ie, on call end and on protocol error, to fix the rx signal state */
+static void fix_rx_signal(openr2_chan_t *r2chan)
+{
+	/* if the last received signal is clear forward, we may not see
+	   a bit change to idle if clear forward and idle
+	   use the same bit pattern (AFAIK this is always the case), 
+	   change it to idle now that the call has ended */
+	if (R2(r2chan, CLEAR_FORWARD) == R2(r2chan, IDLE)
+	   && r2chan->cas_rx_signal == OR2_CAS_CLEAR_FORWARD) {
+		r2chan->cas_rx_signal = OR2_CAS_IDLE;
+	} 
+	/* also could happen protocol error because of an idle signal
+	   in an invalid stage. On protocol error the cas_rx_signal 
+	   is set to invalid to promote displaying the hex value, but its 
+	   time to restore it */
+	else if (r2chan->cas_read == R2(r2chan, IDLE)) {
+		r2chan->cas_rx_signal = OR2_CAS_IDLE;
+	}
+}
+
 static void close_logfile(openr2_chan_t *r2chan);
 static void openr2_proto_init(openr2_chan_t *r2chan)
 {
@@ -705,6 +726,7 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 	r2chan->mf_read_tone = 0;
 	r2chan->logname[0] = '\0';
 	openr2_set_flag(r2chan, OR2_CHAN_CALL_DNIS_CALLBACK);
+	fix_rx_signal(r2chan);
 	close_logfile(r2chan);
 }
 
@@ -732,27 +754,6 @@ int openr2_proto_set_blocked(openr2_chan_t *r2chan)
 	return 0;
 }
 
-/* This function is called when our side will no longer do R2 signaling
-   ie, on call end and on protocol error, to fix the rx signal state */
-static void fix_rx_signal(openr2_chan_t *r2chan)
-{
-	/* if the last received signal is clear forward, we may not see
-	   a bit change to idle if clear forward and idle
-	   use the same bit pattern (AFAIK this is always the case), 
-	   change it to idle now that the call is end */
-	if (R2(r2chan, CLEAR_FORWARD) == R2(r2chan, IDLE)
-	   && r2chan->cas_rx_signal == OR2_CAS_CLEAR_FORWARD) {
-		r2chan->cas_rx_signal = OR2_CAS_IDLE;
-	} 
-	/* also could happen protocol error because of an idle signal
-	   in an invalid stage. On protocol error the cas_rx_signal 
-	   is set to invalid to promote displaying the hex value, but its 
-	   time to restore it */
-	else if (r2chan->cas_read == R2(r2chan, IDLE)) {
-		r2chan->cas_rx_signal = OR2_CAS_IDLE;
-	}
-}
-
 static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t reason)
 {
 	OR2_CHAN_STACK;
@@ -770,7 +771,6 @@ static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t
 	/* mute anything we may have */
 	MFI(r2chan)->mf_select_tone(r2chan->mf_write_handle, 0);
 	openr2_proto_set_idle(r2chan);
-	fix_rx_signal(r2chan);
 	EMI(r2chan)->on_protocol_error(r2chan, reason);
 }
 
@@ -1055,7 +1055,6 @@ static void report_call_end(openr2_chan_t *r2chan)
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Call ended\n");
 	openr2_proto_set_idle(r2chan);
 	EMI(r2chan)->on_call_end(r2chan);
-	fix_rx_signal(r2chan);
 }
 
 static void r2_metering_pulse(openr2_chan_t *r2chan)
