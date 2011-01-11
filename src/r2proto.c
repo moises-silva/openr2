@@ -71,7 +71,7 @@
 
 #define OFFER_CALL(r2chan) \
 	do { \
-		if ((r2chan)->call_state != OR2_CALL_IDLE) { \
+		if ((r2chan)->call_state != OR2_CALL_COLLECTING) { \
 			openr2_log((r2chan), OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot offer call in state %s\n", callstate2str((r2chan)->call_state)); \
 			handle_protocol_error((r2chan), OR2_INVALID_R2_STATE); \
 		} else { \
