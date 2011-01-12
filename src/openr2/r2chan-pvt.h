@@ -67,6 +67,9 @@ typedef struct openr2_chan_timer_ids_s {
 	/* Seize timer id */
 	int r2_seize;
 
+	/* Seize persist id */
+	int r2_seize_persist;
+
 	/* Answer timer id */
 	int r2_answer;
 

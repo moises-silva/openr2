@@ -240,6 +240,9 @@ typedef enum {
 	/* We sent seize, but before getting seize ack a clear forward was attempted */
 	OR2_SEIZE_TXD_CLEAR_FWD_PENDING = 310,
 
+	/* We detected glare and we're waiting for the persist seize to expire or receive clear forward */
+	OR2_DOUBLE_SEIZURE_CLEAR_FWD_PENDING = 311,
+
 	/* Blocked line */
 	OR2_BLOCKED = 400,
 

@@ -927,6 +927,7 @@ OR2_DECLARE(int) openr2_context_configure_from_advanced_file(openr2_context_t *r
 		LOADTIMER(timers.mf_back_resume_cycle)
 		LOADTIMER(timers.mf_fwd_safety)
 		LOADTIMER(timers.r2_seize)
+		LOADTIMER(timers.r2_seize_persist)
 		LOADTIMER(timers.r2_answer)
 		LOADTIMER(timers.r2_metering_pulse)
 		LOADTIMER(timers.r2_double_answer)

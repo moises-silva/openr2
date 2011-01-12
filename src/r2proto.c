@@ -393,6 +393,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->timers.mf_fwd_safety = 30000;
 
 	r2context->timers.r2_seize = 2000;
+	r2context->timers.r2_seize_persist = 150;
 	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
 	r2context->timers.r2_answer_delay = 150;
@@ -504,6 +505,8 @@ static const char *r2state2str(openr2_cas_state_t r2state)
 		return "Clear Forward Transmitted";
 	case OR2_SEIZE_TXD_CLEAR_FWD_PENDING:
 		return "Seize Transmitted with Clear Forward Pending";
+	case OR2_DOUBLE_SEIZURE_CLEAR_FWD_PENDING:
+		return "Double Seizure with Clear Forward Pending";
 	case OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD:
 		return "Clear Back After Clear Forward Received";
 	case OR2_EXECUTING_DOUBLE_ANSWER:
@@ -1288,11 +1291,18 @@ handlecas:
 		break;
 
 	case OR2_DOUBLE_SEIZURE:
+	case OR2_DOUBLE_SEIZURE_CLEAR_FWD_PENDING:
 		if (cas == R2(r2chan, CLEAR_FORWARD)) {
-			/* the other end cleared their end but we have not done so yet, do not report call end yet  */
-			CAS_LOG_RX(CLEAR_FORWARD);
-			r2_set_state(r2chan, OR2_CLEAR_FWD_RXD);
-			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Remote end cleared after glare, still waiting local clearing\n");
+			if (r2chan->r2_state == OR2_DOUBLE_SEIZURE) {
+				CAS_LOG_RX(CLEAR_FORWARD);
+				/* the other end cleared their end but we have not done so yet, do not report call end yet  */
+				r2_set_state(r2chan, OR2_CLEAR_FWD_RXD);
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Remote end cleared after glare, still waiting local clearing\n");
+			} else {
+				CAS_LOG_RX(IDLE);
+				openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Remote end cleared after glare, completing local clearing\n");
+				report_call_end(r2chan);
+			}
 		} else {
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
@@ -2594,6 +2604,12 @@ static void r2_set_call_down(openr2_chan_t *r2chan)
 	report_call_end(r2chan);
 }
 
+static void r2_seize_persist_expired(openr2_chan_t *r2chan)
+{
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Seize persist timer expired, disconnecting call.\n");
+	send_clear_forward(r2chan);
+}
+
 static int send_clear_forward(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
@@ -2680,6 +2696,16 @@ int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_c
 			 * until the seizing ack is recognized, but what if is not recognized? stay there forever?
 			 * */
 			r2_set_state(r2chan, OR2_SEIZE_TXD_CLEAR_FWD_PENDING);
+		} else if (r2chan->r2_state == OR2_DOUBLE_SEIZURE) {
+			/* On double seizure we cancelled the seize ack timer already, but we must wait at least 100ms 
+			 * for the other end to detect our seize before clearing the call. Since the other end has not sent
+			 * yet clear forward (otherwise we would be in OR2_CLEAR_FWD_RXD state, there is a chance they have
+			 * not realized we also seized the line, let's wait the 100ms the spec mentions, although we are really
+			 * waiting a bit more than 100ms since the seize signal was set before 
+			 */
+			r2_set_state(r2chan, OR2_DOUBLE_SEIZURE_CLEAR_FWD_PENDING);
+			r2chan->timer_ids.r2_seize_persist = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_seize_persist, 
+					r2_seize_persist_expired, "r2_seize_persist_expired");
 		} else if (r2chan->r2_state == OR2_CLEAR_FWD_RXD) {
 				/* even if we're the forward side, during call collision
 				 * we may receive the clear fwd signal from the other end, at that situation
