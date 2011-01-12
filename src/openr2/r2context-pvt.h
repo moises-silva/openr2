@@ -64,6 +64,8 @@ typedef struct {
 	int dtmf_start_dial;
 	/* Put the channel back to IDLE state after sending a CLEAR FORWARD */
 	int r2_set_call_down;
+	/* time the seize signal must persist */
+	int r2_seize_persist;
 } openr2_timers_t;
 
 typedef enum r2context_flags_e {

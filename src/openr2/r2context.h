@@ -68,6 +68,7 @@ typedef struct {
 /* Event Management interface. Users should provide
    this interface to handle library events like call starting, new call, read audio etc. */
 typedef void (*openr2_handle_new_call_func)(openr2_chan_t *r2chan);
+typedef void (*openr2_handle_call_proceed_func)(openr2_chan_t *r2chan);
 typedef void (*openr2_handle_call_offered_func)(openr2_chan_t *r2chan, const char *ani, const char *dnis, 
 		openr2_calling_party_category_t category, int ani_restricted);
 typedef void (*openr2_handle_call_accepted_func)(openr2_chan_t *r2chan, openr2_call_mode_t mode);
@@ -89,6 +90,9 @@ typedef struct {
 	/* A new call has just started. We will start to 
 	   receive the ANI and DNIS */
 	openr2_handle_new_call_func on_call_init;
+
+	/* Call is proceeding */
+	openr2_handle_call_proceed_func on_call_proceed;
 
 	/* New call is ready to be accepted or rejected */
 	openr2_handle_call_offered_func on_call_offered;
