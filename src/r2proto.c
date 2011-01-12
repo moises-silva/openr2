@@ -1265,6 +1265,7 @@ handlecas:
 			 * for a minimum of 100ms, we will move back to idle in 100ms or when the other end moves to idle,
 			 * whatever happens first */
 			r2_set_state(r2chan, OR2_DOUBLE_SEIZURE);
+			openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.r2_seize);
 			report_call_disconnection(r2chan, OR2_CAUSE_GLARE);
 			/*
 			 * at this point we have 2 possible paths to idle
