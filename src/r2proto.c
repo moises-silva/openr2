@@ -392,7 +392,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	/* this was 10000 but someone from mx reported that Telmex needs more time in international calls */
 	r2context->timers.mf_fwd_safety = 30000;
 
-	r2context->timers.r2_seize = 8000;
+	r2context->timers.r2_seize = 2000;
 	r2context->timers.r2_answer = 60000; 
 	r2context->timers.r2_metering_pulse = 0;
 	r2context->timers.r2_answer_delay = 150;
@@ -400,7 +400,7 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 
 	/* if, after we send clear forward, the other side does not go back to IDLE, we go back to IDLE
 	 * after this period of time anyways */
-	r2context->timers.r2_set_call_down = 500;
+	r2context->timers.r2_set_call_down = 3000;
 
 	/* DTMF start dialing timer */
 	r2context->timers.dtmf_start_dial = 500;
@@ -1259,7 +1259,7 @@ handlecas:
 			EMI(r2chan)->on_call_proceed(r2chan);
 		} else if (cas == R2(r2chan, SEIZE)) {
 			CAS_LOG_RX(SEIZE);
-			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Double seize (glare) detected!");
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Double seize (glare) detected!\n");
 			/* ITU Q.400-Q490 3.2.7.1 Procedures under normal conditions 
 			 * It is said that we must release the connection, but, we must maintain the seize state
 			 * for a minimum of 100ms, we will move back to idle in 100ms or when the other end moves to idle,
