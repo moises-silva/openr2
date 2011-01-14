@@ -340,6 +340,13 @@ static int zt_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 	return 0;
 }
 
+static int zt_get_alarm_state(openr2_chan_t *r2chan, int *alarm)
+{
+	*alarm = 0;
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "DAHDI get alarm state not implemented\n");
+	return 0;
+}
+
 static openr2_io_interface_t zt_io_interface = 
 {
 	.open = zt_open,
@@ -351,7 +358,8 @@ static openr2_io_interface_t zt_io_interface =
 	.read = zt_read,
 	.setup = zt_setup,
 	.wait = zt_wait,
-	.get_oob_event = zt_get_oob_event
+	.get_oob_event = zt_get_oob_event,
+	.get_alarm_state = zt_get_alarm_state
 };
 
 openr2_io_interface_t *openr2_io_get_zt_interface()
@@ -450,6 +458,12 @@ int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event)
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int block)
 {
 	IO(r2chan)->wait(r2chan, flags, block);
+	return rc;
+}
+
+int openr2_io_get_alarm_state(openr2_chan_t *r2chan, int *alarm)
+{
+	IO(r2chan)->get_alarm_state(r2chan, alarm);
 	return rc;
 }
 

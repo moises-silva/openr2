@@ -46,6 +46,7 @@ int openr2_io_read(openr2_chan_t *r2chan, const void *buf, int size);
 int openr2_io_setup(openr2_chan_t *r2chan);
 int openr2_io_wait(openr2_chan_t *r2chan, int *flags, int wait);
 int openr2_io_get_oob_event(openr2_chan_t *r2chan, openr2_oob_event_t *event);
+int openr2_io_get_alarm_state(openr2_chan_t *r2chan, int *alarm);
 openr2_io_interface_t *openr2_io_get_zt_interface(void);
 openr2_io_interface_t *openr2_io_get_dummy_interface(void);
 

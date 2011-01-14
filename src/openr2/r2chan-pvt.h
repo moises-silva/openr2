@@ -174,7 +174,8 @@ typedef struct openr2_chan_s {
 	int inalarm;
 
 	/* Private buffer to store the string CAS representation */
-	char cas_buff[10];
+	char cas_rx_buff[10];
+	char cas_tx_buff[10];
 
 	/* R2 context this channel belongs to */
 	struct openr2_context_s *r2context;

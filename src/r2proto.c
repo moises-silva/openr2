@@ -473,6 +473,8 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 static const char *r2state2str(openr2_cas_state_t r2state)
 {
 	switch (r2state) {
+	case OR2_INIT:
+		return "Init";
 	case OR2_IDLE:
 		return "Idle";
 	case OR2_SEIZE_ACK_TXD:
@@ -592,6 +594,8 @@ OR2_DECLARE(const char *) openr2_proto_get_error(openr2_protocol_error_t error)
 		return "OpenR2 Library BUG";
 	case OR2_INTERNAL_ERROR:
 		return "OpenR2 Internal Error";
+	case OR2_ALARM_RAISED:
+		return "Alarm Raised";
 	}
 	return "*Unknown*";
 }
@@ -1180,14 +1184,13 @@ int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 
 handlecas:
 
-	r2chan->cas_read = cas;
-	/* if were in alarm, just save the read bits and set the 
-	   CAS signal to invalid, since the bits cannot mean anything
-	   when in alarm */
+	/* if we're in alarm, ignore the CAS event since the bits cannot mean anything when in alarm */
 	if (r2chan->inalarm) {
-		r2chan->cas_rx_signal = OR2_CAS_INVALID;
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "CAS ignored while in alarm\n");
 		return 0;
 	}
+
+	r2chan->cas_read = cas;
 	/* ok, bits have changed, we need to know in which 
 	   CAS state we are to know what to do */
 	switch (r2chan->r2_state) {
@@ -1211,9 +1214,11 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_SEIZE_ACK_TXD:
 	case OR2_ANSWER_TXD:
+	case OR2_EXECUTING_DOUBLE_ANSWER:
 		/* if call setup already started or the call is answered 
 		   the only valid bit pattern is a clear forward, everything
 		   else is protocol error */
@@ -1225,7 +1230,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_SEIZE_TXD:
 	case OR2_SEIZE_TXD_CLEAR_FWD_PENDING:
 		/* if we transmitted a seize we expect the seize ACK */
@@ -1238,7 +1244,7 @@ handlecas:
 				if (send_clear_forward(r2chan)) {
 					openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Forward!, cannot disconnect call nicely! may be try again?\n");
 				}
-				break;
+				return 0;
 			}
 			r2_set_state(r2chan, OR2_SEIZE_ACK_RXD);
 			/* check if this is DTMF R2 */
@@ -1288,7 +1294,7 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
 
 	case OR2_DOUBLE_SEIZURE:
 	case OR2_DOUBLE_SEIZURE_CLEAR_FWD_PENDING:
@@ -1307,7 +1313,7 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
 
 	case OR2_CLEAR_BACK_TXD:
 	case OR2_FORCED_RELEASE_TXD:
@@ -1318,7 +1324,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_ACCEPT_RXD:
 		/* once we got MF ACCEPT tone, we expect the CAS Answer 
 		   or some disconnection signal, anything else, protocol error */
@@ -1337,7 +1344,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_SEIZE_ACK_RXD:
 		/* In MFC-R2 This state means we're during call setup (ANI/DNIS transmission) and the ACCEPT signal
 		   has not been received, which requires some special handling, read below for more info ...
@@ -1371,7 +1379,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_ANSWER_RXD_MF_PENDING:
 	case OR2_ANSWER_RXD:
 		if (cas == R2(r2chan, CLEAR_BACK)) {
@@ -1400,7 +1409,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_CLEAR_BACK_TONE_RXD:
 		if (cas == R2(r2chan, IDLE)) {
 			CAS_LOG_RX(IDLE);
@@ -1409,7 +1419,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_CLEAR_FWD_TXD:
 		if (cas == R2(r2chan, IDLE)) {
 			CAS_LOG_RX(IDLE);
@@ -1423,7 +1434,7 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
 
 	case OR2_CLEAR_BACK_AFTER_CLEAR_FWD_RXD:
 		if (cas == R2(r2chan, IDLE)) {
@@ -1433,7 +1444,7 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
 	case OR2_CLEAR_BACK_RXD:
 		/* we got clear back but we have not transmitted clear fwd yet, then, the only
 		   reason for CAS change is a possible metering pulse, if we are not detecting a metering
@@ -1449,7 +1460,8 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
 		}
-		break;
+		return 0;
+
 	case OR2_BLOCKED:
 		/* we're blocked, unless they are setting IDLE, we don't care */
 		if (cas == R2(r2chan, IDLE)) {
@@ -1459,13 +1471,36 @@ handlecas:
 			CAS_LOG_RX(INVALID);
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Doing nothing on CAS change, we're blocked.\n");
 		}	
-		break;
+		return 0;
 
-	default:
+	case OR2_INIT:
+		/* on initialization, only IDLE and BLOCK make sense */
+		if (cas == R2(r2chan, IDLE)) {
+			CAS_LOG_RX(IDLE);
+			EMI(r2chan)->on_line_idle(r2chan);
+		} else if (cas == R2(r2chan, BLOCK)) {
+			CAS_LOG_RX(BLOCK);
+			EMI(r2chan)->on_line_blocked(r2chan);
+			return 0;
+		} else {
+			CAS_LOG_RX(INVALID);
+			handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
+		}	
+		return 0;
+
+	case OR2_INVALID_STATE:
 		CAS_LOG_RX(INVALID);
 		handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
+		return 0;
+
+	case OR2_CLEAR_FWD_RXD:
+	case OR2_FORCED_RELEASE_RXD:
 		break;
 	}
+
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Do not know what to do with state %d.\n", r2chan->r2_state);
+	CAS_LOG_RX(INVALID);
+	handle_protocol_error(r2chan, OR2_INVALID_R2_STATE);
 	return 0;
 }
 
@@ -2450,6 +2485,11 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 			"Requested to make call (ANI=%s, DNIS=%s, category=%s, ANI restricted = %s)\n", ani ? ani : "(none)", 
 			dnis, openr2_proto_get_category_string(category), ani_restricted ? "yes" : "no");
 
+	if (r2chan->inalarm) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot make call while in alarm\n");
+		return -1;
+	}
+
 	/* we can dial only if we're in IDLE */
 	if (r2chan->call_state != OR2_CALL_IDLE) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Call state should be IDLE but is '%s'\n", openr2_proto_get_call_state_string(r2chan));
@@ -2827,14 +2867,19 @@ const char *openr2_proto_get_rx_cas_string(openr2_chan_t *r2chan)
 		return cas_names[r2chan->cas_rx_signal];
 	}
 	/* this is obviously not thread-safe, oh well ... */
-	snprintf(r2chan->cas_buff, sizeof(r2chan->cas_buff), "0x%02X", r2chan->cas_read);
-	return r2chan->cas_buff;
+	snprintf(r2chan->cas_rx_buff, sizeof(r2chan->cas_rx_buff), "0x%02X", r2chan->cas_read);
+	return r2chan->cas_rx_buff;
 }
 
 const char *openr2_proto_get_tx_cas_string(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	return cas_names[r2chan->cas_tx_signal];
+	if (r2chan->cas_tx_signal != OR2_CAS_INVALID && !r2chan->inalarm) {
+		return cas_names[r2chan->cas_tx_signal];
+	}
+	/* this is obviously not thread-safe, oh well ... */
+	snprintf(r2chan->cas_tx_buff, sizeof(r2chan->cas_tx_buff), "0x%02X", r2chan->cas_write);
+	return r2chan->cas_tx_buff;
 }
 
 const char *openr2_proto_get_call_state_string(openr2_chan_t *r2chan)
@@ -2885,5 +2930,35 @@ OR2_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *n
 	}
 	*numvariants = sizeof(r2variants)/sizeof(r2variants[0]);
 	return r2variants;
+}
+
+int openr2_proto_handle_alarm_state(openr2_chan_t *r2chan)
+{
+	/* we shuld not log unless we're somehow sure the user already has knowledge of this channel 
+	 * (this is almost always the case, however, during creation of the channel the alarms are also
+	 * checked and at that point the user still has not a copy of this channel */
+	if (r2chan->inalarm) {
+		/* if in alarm, we need to drop any call violently :) */
+		if (r2chan->call_state != OR2_CALL_IDLE) {
+			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Dropping call in state %s due to alarm\n", callstate2str(r2chan->call_state));
+			handle_protocol_error(r2chan, OR2_ALARM_RAISED);
+		}
+		/* invalidate all R2/CAS signaling, but keep the state */
+		r2chan->cas_read = 0x00;
+		r2chan->cas_raw_read = 0x00;
+		r2chan->cas_rx_signal = OR2_CAS_INVALID;
+
+		r2chan->cas_write = 0x00;
+		r2chan->cas_tx_signal = OR2_CAS_INVALID;
+	} else {
+		/* if recovering from alarm, we need to check the CAS bits again, if we were blocked, we keep blocked */
+		if (r2chan->r2_state != OR2_BLOCKED) {
+			openr2_proto_set_idle(r2chan);
+		} else {
+			openr2_proto_set_blocked(r2chan);
+		}
+		openr2_proto_handle_cas(r2chan);
+	}
+	return 0;
 }
 

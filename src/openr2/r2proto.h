@@ -38,6 +38,18 @@ extern "C" {
 #define OR2_STOP_DNIS_REQUEST 0
 #define OR2_CONTINUE_DNIS_REQUEST 1
 
+#define OR2_IO_READ      (1 << 0)
+#define OR2_IO_WRITE     (1 << 1)
+#define OR2_IO_OOB_EVENT (1 << 2)
+
+/* Out of Band events */
+typedef enum {
+	OR2_OOB_EVENT_NONE,
+	OR2_OOB_EVENT_CAS_CHANGE,
+	OR2_OOB_EVENT_ALARM_ON,
+	OR2_OOB_EVENT_ALARM_OFF
+} openr2_oob_event_t;
+
 /* 
    This are known as Multi Frequency signals ( MF signals). the same 15 inter-register signals 
    are used for the distinct groups with distinct meanings for each group.
@@ -155,7 +167,8 @@ typedef enum {
 	OR2_INVALID_MF_STATE,
 	OR2_INVALID_MF_GROUP,
 	OR2_LIBRARY_BUG,
-	OR2_INTERNAL_ERROR
+	OR2_INTERNAL_ERROR,
+	OR2_ALARM_RAISED
 } openr2_protocol_error_t;
 
 /* possible calling party categories */

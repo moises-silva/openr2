@@ -147,18 +147,6 @@ typedef struct {
 	openr2_handle_call_log_created_func on_call_log_created;
 } openr2_event_interface_t;
 
-#define OR2_IO_READ      (1 << 0)
-#define OR2_IO_WRITE     (1 << 1)
-#define OR2_IO_OOB_EVENT (1 << 2)
-
-/* Out of Band events */
-typedef enum {
-	OR2_OOB_EVENT_NONE,
-	OR2_OOB_EVENT_CAS_CHANGE,
-	OR2_OOB_EVENT_ALARM_ON,
-	OR2_OOB_EVENT_ALARM_OFF
-} openr2_oob_event_t;
-
 typedef openr2_io_fd_t (*openr2_io_open_func)(openr2_context_t* r2context, int channo);
 typedef int (*openr2_io_close_func)(openr2_chan_t *r2chan);
 typedef int (*openr2_io_set_cas_func)(openr2_chan_t *r2chan, int cas);
@@ -169,6 +157,7 @@ typedef int (*openr2_io_read_func)(openr2_chan_t *r2chan, const void *buf, int s
 typedef int (*openr2_io_setup_func)(openr2_chan_t *r2chan);
 typedef int (*openr2_io_wait_func)(openr2_chan_t *r2chan, int *flags, int block);
 typedef int (*openr2_io_get_oob_event_func)(openr2_chan_t *r2chan, openr2_oob_event_t *event);
+typedef int (*openr2_io_get_alarm_state_func)(openr2_chan_t *r2chan, int *alarm);
 typedef struct {
 	openr2_io_open_func open;
 	openr2_io_close_func close;
@@ -180,6 +169,7 @@ typedef struct {
 	openr2_io_setup_func setup;
 	openr2_io_wait_func wait;
 	openr2_io_get_oob_event_func get_oob_event;
+	openr2_io_get_alarm_state_func get_alarm_state;
 } openr2_io_interface_t;
 
 typedef enum {

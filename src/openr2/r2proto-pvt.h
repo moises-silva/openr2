@@ -179,6 +179,9 @@ typedef enum {
 	/* just some invalid state */
 	OR2_INVALID_STATE = -1,
 
+	/* channel created but no particular state yet */
+	OR2_INIT = 0,
+
 	/* we are waiting to start or receive a call */
 	OR2_IDLE = 100,
 
@@ -344,6 +347,7 @@ int openr2_proto_set_cas_signal(struct openr2_chan_s *r2chan, openr2_cas_signal_
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);
 void openr2_proto_handle_mf_tone(struct openr2_chan_s *r2chan, int tone);
 void openr2_proto_handle_dtmf_end(struct openr2_chan_s *r2chan);
+int openr2_proto_handle_alarm_state(struct openr2_chan_s *r2chan);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

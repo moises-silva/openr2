@@ -812,7 +812,7 @@ OR2_DECLARE(int) openr2_context_set_io_type(openr2_context_t *r2context, openr2_
 		if (!internal_io_interface) {
 			/* use dummy io interface and print a notice message. we expect the user to set his implementation, by later
 			   calling openr2_context_set_io_type() again */
-			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_NOTICE, "Unavailable default I/O interface, using dummy.\n");
+			openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Unavailable default I/O interface, using dummy\n");
 			internal_io_interface = openr2_io_get_dummy_interface();
 		}
 		r2context->io_type = io_type;

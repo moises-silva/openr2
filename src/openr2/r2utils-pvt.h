@@ -81,6 +81,13 @@ char *openr2_ctime_r(const time_t *timep, char *buf);
 int gettimeofday(struct timeval *tp, void *nothing);
 #endif
 
+#define openr2_assert(assertion, msg) \
+	do { \
+		if (!(assertion)) { \
+			openr2_log_generic(OR2_GENERIC_LOG, OR2_LOG_ERROR, msg); \
+		} \
+	} while (0);
+
 #if defined(__cplusplus)
 } /* endif extern "C" */
 #endif

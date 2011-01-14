@@ -65,9 +65,10 @@
 				       return retproperty;
 
 
-static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, int openchan)
+static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, int openchan, openr2_io_fd_t chanfd)
 {
 	openr2_chan_t *r2chan = NULL;
+	int alarm_state = 0;
 #ifdef OR2_MF_DEBUG
 	char logfile[1024];
 #endif
@@ -128,6 +129,9 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 	/* start the timer id in 1 to avoid confusion when memset'ing */
 	r2chan->timer_id = 1;
 
+	/* we do not start blocked nor idle  */
+	r2chan->r2_state = OR2_INIT;
+
 	/* open channel only if requested */
 	if (openchan) {
 		/* channel fd */
@@ -142,6 +146,9 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 			return NULL;
 		}
 		r2chan->fd_created = 1;
+	} else {
+		r2chan->fd = chanfd;
+		r2chan->fd_created = 0;
 	}	
 
 	r2chan->number = channo;
@@ -149,6 +156,13 @@ static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo,
 
 	/* add ourselves to the list of channels in the context */
 	openr2_context_add_channel(r2context, r2chan);
+
+	/* check for alarms */
+	openr2_io_get_alarm_state(r2chan, &alarm_state);
+	if (alarm_state) {
+		r2chan->inalarm = alarm_state;
+		openr2_proto_handle_alarm_state(r2chan);
+	}
 
 	OR2_CHAN_STACK;
 	return r2chan;
@@ -193,7 +207,7 @@ OR2_DECLARE(openr2_chan_t *) openr2_chan_new(openr2_context_t *r2context, int ch
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
-	return __openr2_chan_new(r2context, channo, 1);
+	return __openr2_chan_new(r2context, channo, 1, NULL);
 }
 
 OR2_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context, openr2_io_fd_t chanfd, int channo)
@@ -204,14 +218,10 @@ OR2_DECLARE(openr2_chan_t *) openr2_chan_new_from_fd(openr2_context_t *r2context
 		r2context->last_error = OR2_LIBERR_INVALID_CHAN_NUMBER;
 		return NULL;
 	}
-	r2chan = __openr2_chan_new(r2context, channo, 0);
+	r2chan = __openr2_chan_new(r2context, channo, 0, chanfd);
 	if (!r2chan) {
 		return NULL;
 	}
-	openr2_chan_lock(r2chan);
-	r2chan->fd = chanfd;
-	r2chan->fd_created = 0;
-	openr2_chan_unlock(r2chan);
 	return r2chan;
 }
 
@@ -240,7 +250,11 @@ static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_
 	case OR2_OOB_EVENT_ALARM_OFF:
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, (event == OR2_OOB_EVENT_ALARM_ON) ? "Alarm Raised\n" : "Alarm Cleared\n");
 		r2chan->inalarm = (event == OR2_OOB_EVENT_ALARM_ON) ? 1 : 0;
+
+		/* give the user first a chance to do something */
 		EMI(r2chan)->on_hardware_alarm(r2chan, r2chan->inalarm);
+
+		openr2_proto_handle_alarm_state(r2chan);
 		break;
 	default:
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Unhandled OOB event %d\n", event);
@@ -346,6 +360,11 @@ tryagain:
 	} else if (OR2_MF_OFF_STATE != r2chan->mf_state && 
 			MFI(r2chan)->mf_want_generate(r2chan->mf_write_handle, r2chan->mf_write_tone) ) {
 		interesting_events |= OR2_IO_WRITE;
+	}
+
+	if (r2chan->inalarm) {
+		/* if we're in alarm, clear any other events and just poll for OOB */
+		interesting_events = OR2_IO_OOB_EVENT;
 	}
 
 	/* ask the I/O layer to poll for the requested events immediately, no blocking */
@@ -651,7 +670,11 @@ OR2_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan)
 	int retcode = 0;
 	OR2_CHAN_STACK;
 	openr2_chan_lock(r2chan);
+	if (r2chan->inalarm) {
+		goto done;
+	}
 	retcode = openr2_proto_set_idle(r2chan);
+done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }
@@ -661,7 +684,11 @@ OR2_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
 	int retcode = 0;
 	OR2_CHAN_STACK;
 	openr2_chan_lock(r2chan);
+	if (r2chan->inalarm) {
+		goto done;
+	}
 	retcode = openr2_proto_set_blocked(r2chan);
+done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }
