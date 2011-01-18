@@ -2628,10 +2628,16 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 	case OR2_CAUSE_GLARE:
 		/* these causes should not be used to send disconnect tones, 
 		 * so let's map it to something that makes sense */
-		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Cause %s does not make sense in this context, remapping to %s\n", 
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Cause %s does not make sense in this context, remapping to %s\n", 
 				openr2_proto_get_disconnect_string(cause), openr2_proto_get_disconnect_string(OR2_CAUSE_NETWORK_CONGESTION));
 		tone = GB_TONE(r2chan).network_congestion;
 		break;
+	}
+	if (tone == OR2_MF_TONE_INVALID) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Tone for cause %s could not be determined, using cause %s\n", 
+				openr2_proto_get_disconnect_string(cause), openr2_proto_get_disconnect_string(OR2_CAUSE_NETWORK_CONGESTION));
+		tone = GB_TONE(r2chan).network_congestion;
+		openr2_assert(tone != OR2_MF_TONE_INVALID, "No network congestion tone was found\n");
 	}
 	prepare_mf_tone(r2chan, tone);
 }
