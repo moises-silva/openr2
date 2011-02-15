@@ -41,10 +41,11 @@ struct openr2_chan_s;
 
 /* R2 protocol timers */
 typedef struct {
-	/* Max amount of time our backward MF signal can last */
+	/* Max amount of time the backward MF cycle can last. 
+	 * A cycle begins when sending a backward tone and ends 
+	 * when receiving the next forward tone */
 	int mf_back_cycle;
-	/* Amount of time we set a MF signal ON to resume the MF cycle 
-	   with a MF pulse */
+	/* Amount of time we set a backward MF signal ON to resume the MF cycle with an MF pulse */
 	int mf_back_resume_cycle;
 	/* Safety FORWARD timer */
 	int mf_fwd_safety;
