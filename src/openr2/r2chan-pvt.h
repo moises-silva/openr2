@@ -27,7 +27,7 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#include "r2engine.h"
+#include "r2engine-pvt.h"
 #include "r2log.h"
 #include "r2chan.h"
 #include "r2proto-pvt.h"

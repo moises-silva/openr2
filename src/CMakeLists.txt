@@ -100,6 +100,7 @@ INSTALL(FILES
 		openr2/r2exports.h
 		openr2/r2thread.h
 		openr2/r2declare.h
+		openr2/r2engine.h
 	DESTINATION include/openr2
 )
 

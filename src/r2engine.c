@@ -44,7 +44,9 @@
 #include "openr2/r2declare.h"
 #include "openr2/fast_convert.h"
 #include "openr2/r2utils-pvt.h"
-#include "openr2/r2engine.h"
+#include "openr2/r2engine-pvt.h"
+
+#define OR2_MAX_DTMF_DIGITS 128
 
 #if !defined(M_PI)
 /* C99 systems may not define M_PI */
