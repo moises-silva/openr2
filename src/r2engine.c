@@ -165,7 +165,7 @@ static const float r2_mf_back_frequencies[] =
    Use '0' for this, so the codes match the digits 0-9. */
 static const char r2_mf_positions[] = "1247B-358C--69D---0E----F";
 
-int openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples)
+OR2_DECLARE(int) openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples)
 {
     int len;
 
@@ -181,7 +181,7 @@ int openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples)
     return len;
 }
 
-int openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit)
+OR2_DECLARE(int) openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit)
 {
     char *cp;
 
@@ -200,7 +200,7 @@ int openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit)
     return 0;
 }
 
-openr2_mf_tx_state_t *openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd)
+OR2_DECLARE(openr2_mf_tx_state_t *) openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd)
 {
     int i;
     const mf_digit_tones_t *tones;
@@ -252,7 +252,7 @@ openr2_mf_tx_state_t *openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd)
     return s;
 }
 
-int openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples)
+OR2_DECLARE(int) openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples)
 {
     float energy[6];
     float famp;
@@ -386,7 +386,7 @@ int openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples)
     return hit_digit;
 }
 
-openr2_mf_rx_state_t *openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd)
+OR2_DECLARE(openr2_mf_rx_state_t *) openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd)
 {
     int i;
     static int initialised = FALSE;

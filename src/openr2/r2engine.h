@@ -48,11 +48,11 @@ typedef struct openr2_dtmf_tx_state openr2_dtmf_tx_state_t;
 typedef struct openr2_dtmf_rx_state openr2_dtmf_rx_state_t;
 
 /* MF Rx routines */
-OR2_DECLARE(openr2_mf_rx_state_t) *openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd);
+OR2_DECLARE(openr2_mf_rx_state_t *) openr2_mf_rx_init(openr2_mf_rx_state_t *s, int fwd);
 OR2_DECLARE(int) openr2_mf_rx(openr2_mf_rx_state_t *s, const int16_t amp[], int samples);
 
 /* MF Tx routines */
-OR2_DECLARE(openr2_mf_tx_state_t) *openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd);
+OR2_DECLARE(openr2_mf_tx_state_t *) openr2_mf_tx_init(openr2_mf_tx_state_t *s, int fwd);
 OR2_DECLARE(int) openr2_mf_tx(openr2_mf_tx_state_t *s, int16_t amp[], int samples);
 OR2_DECLARE(int) openr2_mf_tx_put(openr2_mf_tx_state_t *s, char digit);
 
