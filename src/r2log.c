@@ -41,13 +41,14 @@
 void openr2_log_generic_default(const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
+	time_t currsec;
 	struct tm currtime_tm;
-	time_t currsec = time(NULL);
 	int res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		fprintf(stderr, "gettimeofday failed!\n");
 		return;
-	} 
+	}
+	currsec = currtime.tv_sec;
 	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
 		fprintf(stderr, "openr2_localtime_r failed!\n");
 		return;
@@ -85,13 +86,14 @@ OR2_DECLARE(void) openr2_generic_set_logging_func(openr2_generic_logging_func_t 
 void openr2_log_channel_default(openr2_chan_t *r2chan, const char *file, const char *function, unsigned int line, openr2_log_level_t level, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
+	time_t currsec;
 	struct tm currtime_tm;
-	time_t currsec = time(NULL);
 	int res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		fprintf(stderr, "gettimeofday failed!\n");
 		return;
-	} 
+	}
+	currsec = currtime.tv_sec;
 	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
 		fprintf(stderr, "openr2_localtime_r failed!\n");
 		return;
@@ -109,13 +111,14 @@ void openr2_log_channel_default(openr2_chan_t *r2chan, const char *file, const c
 static void log_at_file(openr2_chan_t *r2chan, const char *fmt, va_list ap)
 {
 	struct timeval currtime;
+	time_t currsec;
 	struct tm currtime_tm;
-	time_t currsec = time(NULL);
 	int res = gettimeofday(&currtime, NULL);
 	if (-1 == res) {
 		fprintf(stderr, "gettimeofday failed!\n");
 		return;
-	} 
+	}
+	currsec = currtime.tv_sec;
 	if (NULL == openr2_localtime_r(&currsec, &currtime_tm)) {
 		fprintf(stderr, "openr2_localtime_r failed!\n");
 		return;
