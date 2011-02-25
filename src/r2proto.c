@@ -1045,7 +1045,12 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s\n", openr2_proto_get_disconnect_string(cause));
+	/* help the user a bit if unallocated number is the cause */
+	if (r2chan->r2context->variant == OR2_VAR_BRAZIL && cause == OR2_CAUSE_UNALLOCATED_NUMBER) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s or Collect Call Blocked\n", openr2_proto_get_disconnect_string(cause));
+	} else {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s\n", openr2_proto_get_disconnect_string(cause));
+	}
 	r2chan->call_state = OR2_CALL_DISCONNECTED;
 	EMI(r2chan)->on_call_disconnect(r2chan, cause);
 }
