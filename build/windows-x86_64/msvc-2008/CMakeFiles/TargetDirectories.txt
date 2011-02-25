@@ -1,3 +1,0 @@
-E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008/CMakeFiles/ALL_BUILD.dir
-E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008/CMakeFiles/ZERO_CHECK.dir
-E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/msvc-2008/src/CMakeFiles/libopenr2.dir

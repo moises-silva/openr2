@@ -1,1 +1,0 @@
-E:/Documents and Settings/Administrator/Desktop/openr2.trunk.rw/build/windows-x86_64/nmake/src/CMakeFiles/libopenr2.dir
