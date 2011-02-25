@@ -107,11 +107,8 @@ static void r2config_brazil(openr2_context_t *r2context)
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
 	r2context->mf_gb_tones.accept_call_no_charge = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_6; /* holding? */
-	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_7;
 	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_3;
-	/* use out of order for unallocated, I could not find a special
-	   tone for unallocated number on the Brazil spec */
-	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7; /* was 8, but TONE_7 for unallocated in Brazil according to Marcia from ANATEL */
+	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_7; 
 }
 
 static void r2config_china(openr2_context_t *r2context)
@@ -440,7 +437,6 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->mf_gb_tones.unallocated_number = OR2_MF_TONE_5;
 	r2context->mf_gb_tones.line_out_of_order = OR2_MF_TONE_8;
 	r2context->mf_gb_tones.special_info_tone = OR2_MF_TONE_2;
-	r2context->mf_gb_tones.reject_collect_call = OR2_MF_TONE_INVALID;
 	r2context->mf_gb_tones.number_changed = OR2_MF_TONE_INVALID;
 
 	/* Group C tones. Similar to Group A but for Mexico */
@@ -674,8 +670,6 @@ OR2_DECLARE(const char *) openr2_proto_get_disconnect_string(openr2_call_disconn
 		return "Normal Clearing";
 	case OR2_CAUSE_NO_ANSWER:
 		return "No Answer";
-	case OR2_CAUSE_COLLECT_CALL_REJECTED:
-		return "Collect Call Rejected";
 	case OR2_CAUSE_FORCED_RELEASE:
 		return "Forced Release";
 	case OR2_CAUSE_GLARE:
@@ -2320,9 +2314,6 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 	} else if (tone == GB_TONE(r2chan).line_out_of_order) {
 		r2_set_state(r2chan, OR2_CLEAR_BACK_TONE_RXD);
 		report_call_disconnection(r2chan, OR2_CAUSE_OUT_OF_ORDER);
-	} else if (tone == GB_TONE(r2chan).reject_collect_call) {
-		r2_set_state(r2chan, OR2_CLEAR_BACK_TONE_RXD);
-		report_call_disconnection(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
 	} else {
 		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
@@ -2595,11 +2586,7 @@ void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
 	int tone = GB_TONE(r2chan).line_out_of_order;
-	/* TODO: should we verify that the tone exists? (ie not OR2_MF_TONE_INVALID)? 
-	   and use default line out of order if not or better yet, warning about it?
-	   particularly I am thinking on the case where collect calls do not apply on
-	   some countries and the user may still use OR2_CAUSE_COLLECT_CALL_REJECTED, silly,
-	   but could confuse users */
+
 	r2chan->mf_state = OR2_MF_DISCONNECT_TXD;
 
 	switch (cause) {
@@ -2617,9 +2604,6 @@ static void send_disconnect(openr2_chan_t *r2chan, openr2_call_disconnect_cause_
 		break;
 	case OR2_CAUSE_OUT_OF_ORDER:
 		tone = GB_TONE(r2chan).line_out_of_order;
-		break;
-	case OR2_CAUSE_COLLECT_CALL_REJECTED:
-		tone = GB_TONE(r2chan).reject_collect_call;
 		break;
 	case OR2_CAUSE_NO_ANSWER:
 	case OR2_CAUSE_NORMAL_CLEARING:
