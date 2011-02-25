@@ -67,17 +67,21 @@ extern "C" {
 #define __inline__ __inline
 #endif
 #endif /* _MSC_VER */
+/* I purposely decided to use __cdecl for OR2_DECLARE, saving a pop instruction is not worth the nightmare
+   of matching possible callers, better use good old safe defaults. The problem that incited this change
+   was that r2engine APIs were exported at some point, adding OR2_DECLARE() around them, since at
+   that point in time the calling convention was __stdcall for exported functions, some callbacks started
+   failing at runtime because the callbacks were not declared as __stdcall, adapter functions could be created
+   or the callbacks could be declared as __stdcall forcing users to declare its callbacks like that, but again,
+   saving a pop asm instruction just does not seem worth it */	
 #if defined(OR2_DECLARE_STATIC)
-#define OR2_DECLARE(type)            type __stdcall
-#define OR2_DECLARE_NONSTD(type)     type __cdecl
+#define OR2_DECLARE(type)            type __cdecl
 #define OR2_DECLARE_DATA
 #elif defined(OR2_EXPORTS)
-#define OR2_DECLARE(type)            __declspec(dllexport) type __stdcall
-#define OR2_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
+#define OR2_DECLARE(type)            __declspec(dllexport) type __cdecl
 #define OR2_DECLARE_DATA             __declspec(dllexport)
 #else
-#define OR2_DECLARE(type)            __declspec(dllimport) type __stdcall
-#define OR2_DECLARE_NONSTD(type)     __declspec(dllimport) type __cdecl
+#define OR2_DECLARE(type)            __declspec(dllimport) type __cdecl
 #define OR2_DECLARE_DATA             __declspec(dllimport)
 #endif
 #define EX_DECLARE_DATA             __declspec(dllexport)
