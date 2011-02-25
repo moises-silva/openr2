@@ -270,7 +270,7 @@ static void on_call_offered(openr2_chan_t *r2chan, const char *ani, const char *
 			openr2_chan_get_number(r2chan), ani ? ani : "(restricted)", dnis, category);
 	/* if collect calls are not allowed and this is a collect call, reject it */
 	if (!confdata->collect_calls && category == OR2_CALLING_PARTY_CATEGORY_COLLECT_CALL) {
-		openr2_chan_disconnect_call(r2chan, OR2_CAUSE_COLLECT_CALL_REJECTED);
+		openr2_chan_disconnect_call(r2chan, OR2_CAUSE_UNALLOCATED_NUMBER);
 		return;
 	}
 	if (confdata->charge_calls) {
