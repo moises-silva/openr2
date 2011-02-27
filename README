@@ -31,7 +31,12 @@ Support, bugs and limitations:
 - If you have a question that is related to the usage of openr2 in Asterisk, send an e-mail to
   the asterisk-r2 mailing list:  http://lists.digium.com/pipermail/asterisk-r2/
 
+- If you have a qustion that is related to the usage of openr2 in FreeSWITCH, send an e-mail to
+  the freeswitch-users mailing list: http://lists.freeswitch.org/mailman/listinfo/freeswitch-users
+
 - Any other bugs, questions or suggestions may be sent to my e-mail. 
+  Please do not send me emails requesting support. Use the appropiate mailing list for that.
+  If you are willing to pay for support you can check openr2 support contacts: http://www.libopenr2.org/?module=pages&title=support
 
 Moises Silva <moy@sangoma.com>
 
