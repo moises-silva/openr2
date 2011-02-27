@@ -52,10 +52,6 @@ ELSE()
 	ADD_DEFINITIONS(-std=c99 -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes) # -pedantic
 ENDIF()
 
-IF(DEFINED WANT_OR2_TRACE_STACKS)
-	or2_cflags(-DOR2_TRACE_STACKS)
-ENDIF()
-
 IF(DEFINED HAVE_SVNVERSION)
 	or2_cflags(-DREVISION=\"$(shell svnversion -n .)\")
 ENDIF()

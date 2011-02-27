@@ -84,7 +84,6 @@
 
 static void r2config_argentina(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_15;
 	r2context->mf_g1_tones.no_more_ani_available = OR2_MF_TONE_12;
@@ -94,7 +93,6 @@ static void r2config_argentina(openr2_context_t *r2context)
 
 static void r2config_brazil(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
 	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
 
@@ -113,7 +111,6 @@ static void r2config_brazil(openr2_context_t *r2context)
 
 static void r2config_china(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	/* In the ITU line signaling specifications, the C and D bits are set to 0 and
 	   1 respectively, in China they are both set to 1. However, they are never
 	   used, so their value never changes during a call */
@@ -143,13 +140,11 @@ static void r2config_china(openr2_context_t *r2context)
 
 static void r2config_itu(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 	return;
 }
 
 static void r2config_mexico(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 
 	/* Telmex, Avantel and most telcos in Mexico send DNIS first and ANI at the end, however
 	   this can be modified by the user because I know of at least 1 telco (Maxcom)
@@ -185,7 +180,6 @@ static void r2config_mexico(openr2_context_t *r2context)
 
 static void r2config_venezuela(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 
 	r2context->mf_ga_tones.request_next_ani_digit = OR2_MF_TONE_9;
 
@@ -195,7 +189,6 @@ static void r2config_venezuela(openr2_context_t *r2context)
 
 static void r2config_colombia(openr2_context_t *r2context)
 {
-	OR2_CONTEXT_STACK;
 
 	/*
 	 * The CAS protocols reference manual from Natural Microsystems
@@ -320,7 +313,6 @@ static openr2_variant_entry_t r2variants[] =
 
 static void turn_off_mf_engine(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* this is not needed for DTMF R2 mf engine, but does not hurt either */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
 
@@ -335,7 +327,6 @@ static void turn_off_mf_engine(openr2_chan_t *r2chan)
 static int set_cas_signal(openr2_chan_t *r2chan, openr2_cas_signal_t signal)
 {
 	int res, cas;
-	OR2_CHAN_STACK;
 	if (signal == OR2_CAS_INVALID) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot set INVALID signal\n");
 		return -1;
@@ -362,7 +353,6 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 {
 	unsigned i = 0;
 	unsigned limit = sizeof(r2variants)/sizeof(r2variants[0]);
-	OR2_CONTEXT_STACK;
 	/* if we don't know that variant, return failure */
 	for (i = 0; i < limit; i++) {
 		if (variant == r2variants[i].id) {
@@ -702,7 +692,6 @@ static void fix_rx_signal(openr2_chan_t *r2chan)
 static void close_logfile(openr2_chan_t *r2chan);
 static void openr2_proto_init(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* cancel any event we could be waiting for */
 	openr2_chan_cancel_all_timers(r2chan);
 
@@ -733,7 +722,6 @@ static void openr2_proto_init(openr2_chan_t *r2chan)
 
 int openr2_proto_set_idle(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_proto_init(r2chan);
 	if (set_cas_signal(r2chan, OR2_CAS_IDLE)) {
 		r2chan->r2context->last_error = OR2_LIBERR_CANNOT_SET_IDLE;
@@ -745,7 +733,6 @@ int openr2_proto_set_idle(openr2_chan_t *r2chan)
 
 int openr2_proto_set_blocked(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_proto_init(r2chan);
 	r2_set_state(r2chan, OR2_BLOCKED);
 	if (set_cas_signal(r2chan, OR2_CAS_BLOCK)) {
@@ -757,7 +744,6 @@ int openr2_proto_set_blocked(openr2_chan_t *r2chan)
 
 static void handle_protocol_error(openr2_chan_t *r2chan, openr2_protocol_error_t reason)
 {
-	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, 
 			"Protocol error. Reason = %s, R2 State = %s, "
 			"MF state = %s, MF Group = %s, CAS = 0x%02X\n"
@@ -905,8 +891,6 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 
 static void handle_incoming_call(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
-
 	open_logfile(r2chan, 1);
 
 	if (!DETECT_DTMF(r2chan)) {
@@ -953,7 +937,6 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 
 static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	handle_protocol_error(r2chan, OR2_FWD_SAFETY_TIMEOUT);
 }
 
@@ -961,7 +944,6 @@ static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan);
 static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 {
 	int ret;
-	OR2_CHAN_STACK;
 	/* put silence only if we have a write tone */
 	if (!tone && r2chan->mf_write_tone) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_MF_TRACE, "MF Tx >> %c [OFF]\n", r2chan->mf_write_tone);
@@ -999,7 +981,6 @@ static void prepare_mf_tone(openr2_chan_t *r2chan, int tone)
 static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 {
 	int a_offset = abs(offset);
-	OR2_CHAN_STACK;
 	switch (offset) {
 	case -1:
 	case -2:
@@ -1044,7 +1025,6 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 
 static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
-	OR2_CHAN_STACK;
 	/* help the user a bit if unallocated number is the cause */
 	if (r2chan->r2context->variant == OR2_VAR_BRAZIL && cause == OR2_CAUSE_UNALLOCATED_NUMBER) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Far end disconnected. Reason: %s or Collect Call Blocked\n", openr2_proto_get_disconnect_string(cause));
@@ -1057,7 +1037,6 @@ static void report_call_disconnection(openr2_chan_t *r2chan, openr2_call_disconn
 
 static void report_call_end(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Call ended\n");
 	openr2_proto_set_idle(r2chan);
 	EMI(r2chan)->on_call_end(r2chan);
@@ -1065,7 +1044,6 @@ static void report_call_end(openr2_chan_t *r2chan)
 
 static void r2_metering_pulse(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 }
 
@@ -1140,7 +1118,6 @@ int openr2_proto_handle_cas(openr2_chan_t *r2chan)
 	int cas, res;
 	openr2_cas_state_t out_r2_state = OR2_INVALID_STATE;
 	openr2_call_disconnect_cause_t out_disconnect_cause = OR2_CAUSE_NORMAL_CLEARING;
-	OR2_CHAN_STACK;
 
 	/* if we have CAS persistence check and we're here because of the timer expired
 	   then we don't need to read the CAS again, let's go directly to handle the bits */
@@ -1534,7 +1511,6 @@ static int get_tone_from_mode(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 
 int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
-	OR2_CHAN_STACK;
 	if (OR2_CALL_OFFERED != r2chan->call_state) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Cannot accept call if the call has not been offered!\n");
 		return -1;
@@ -1551,7 +1527,6 @@ int openr2_proto_accept_call(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 
 static int send_clear_backward(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	r2_set_state(r2chan, OR2_CLEAR_BACK_TXD);
 	turn_off_mf_engine(r2chan);
 	return set_cas_signal(r2chan, OR2_CAS_CLEAR_BACK);	
@@ -1559,7 +1534,6 @@ static int send_clear_backward(openr2_chan_t *r2chan)
 
 static int send_forced_release(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	r2_set_state(r2chan, OR2_FORCED_RELEASE_TXD);
 	turn_off_mf_engine(r2chan);
 	return set_cas_signal(r2chan, OR2_CAS_FORCED_RELEASE);	
@@ -1567,7 +1541,6 @@ static int send_forced_release(openr2_chan_t *r2chan)
 
 static void double_answer_handler(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (r2chan->r2_state == OR2_ANSWER_TXD) {
 		if (send_clear_backward(r2chan)) {
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send Clear Backward!, cannot send double answer!\n");
@@ -1589,7 +1562,6 @@ static void double_answer_handler(openr2_chan_t *r2chan)
 
 static int openr2_proto_do_answer(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (!IS_DTMF_R2(r2chan) && r2chan->call_state != OR2_CALL_ACCEPTED) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot answer call if the call is not accepted first\n");
 		return -1;
@@ -1606,7 +1578,6 @@ static int openr2_proto_do_answer(openr2_chan_t *r2chan)
 
 int openr2_proto_answer_call(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (openr2_proto_do_answer(r2chan)) {
 		return -1;
 	}
@@ -1619,7 +1590,6 @@ int openr2_proto_answer_call(openr2_chan_t *r2chan)
 
 int openr2_proto_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode_t mode)
 {
-	OR2_CHAN_STACK;
 	if (openr2_proto_do_answer(r2chan)) {
 		return -1;
 	}
@@ -1633,7 +1603,6 @@ int openr2_proto_answer_call_with_mode(openr2_chan_t *r2chan, openr2_answer_mode
 static void request_calling_party_category(openr2_chan_t *r2chan)
 {
 	int tone = GA_TONE(r2chan).request_category ? GA_TONE(r2chan).request_category : GA_TONE(r2chan).request_category_and_change_to_gc;
-	OR2_CHAN_STACK;
 	r2chan->mf_group = GA_TONE(r2chan).request_category ? OR2_MF_GA : OR2_MF_GC;
 	r2chan->mf_state = OR2_MF_CATEGORY_RQ_TXD;
 	prepare_mf_tone(r2chan, tone);
@@ -1641,7 +1610,6 @@ static void request_calling_party_category(openr2_chan_t *r2chan)
 
 static openr2_calling_party_category_t tone2category(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (GII_TONE(r2chan).national_subscriber == r2chan->caller_category) {
 		return OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER;
 
@@ -1669,7 +1637,6 @@ static void bypass_change_to_g2(openr2_chan_t *r2chan)
 	/* Most variants of MFC/R2 offer a way to go directly to the call accepted state,
 	   bypassing the use of group B and II tones */
 	int accept_tone = GA_TONE(r2chan).address_complete_charge_setup;
-	OR2_CHAN_STACK;
 	r2chan->mf_state = OR2_MF_ACCEPTED_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "By-passing B/II signals, accept the call with signal 0x%X\n", accept_tone);
 	prepare_mf_tone(r2chan, accept_tone);
@@ -1682,7 +1649,6 @@ static void request_change_to_g2(openr2_chan_t *r2chan)
 	   or Group A (All the world, including Mexico) */
 	int change_tone = (OR2_MF_GC == r2chan->mf_group) ? GC_TONE(r2chan).request_change_to_g2
 		                                          : GA_TONE(r2chan).request_change_to_g2;
-	OR2_CHAN_STACK;
 	r2chan->mf_group = OR2_MF_GB;
 	r2chan->mf_state = OR2_MF_CHG_GII_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requesting change to Group II with signal 0x%X\n", change_tone);
@@ -1691,7 +1657,6 @@ static void request_change_to_g2(openr2_chan_t *r2chan)
 
 static void try_change_to_g2(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (r2chan->r2context->immediate_accept) {
 		bypass_change_to_g2(r2chan);
 		return;
@@ -1701,7 +1666,6 @@ static void try_change_to_g2(openr2_chan_t *r2chan)
 
 static void try_request_calling_party_category(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (r2chan->r2context->skip_category) {
 		try_change_to_g2(r2chan);
 		return;
@@ -1711,20 +1675,17 @@ static void try_request_calling_party_category(openr2_chan_t *r2chan)
 
 static void set_silence(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	prepare_mf_tone(r2chan, 0);
 	r2chan->mf_write_tone = 0;
 }
 
 static void mf_back_resume_cycle(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	set_silence(r2chan);
 }
 
 static void mf_back_cycle_timeout_expired(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (OR2_MF_TONE_INVALID == GI_TONE(r2chan).no_more_dnis_available
 	     && r2chan->mf_group == OR2_MF_GA
 	     && (r2chan->mf_state == OR2_MF_DNIS_RQ_TXD || r2chan->mf_state == OR2_MF_ANI_RQ_TXD)) {
@@ -1772,7 +1733,6 @@ static void request_next_dnis_digit(openr2_chan_t *r2chan)
 	openr2_mf_tone_t request_tone = (OR2_MF_GC == r2chan->mf_group) 
 		                      ? GC_TONE(r2chan).request_next_dnis_digit_and_change_to_ga
 		                      : GA_TONE(r2chan).request_next_dnis_digit;
-	OR2_CHAN_STACK;
 	r2chan->mf_group = OR2_MF_GA;
 	r2chan->mf_state = OR2_MF_DNIS_RQ_TXD;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Requesting next DNIS with signal 0x%X.\n", request_tone);
@@ -1782,7 +1742,6 @@ static void request_next_dnis_digit(openr2_chan_t *r2chan)
 static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 {
 	int rc;
-	OR2_CHAN_STACK;
 	if (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone) {
 		if (r2chan->dnis_len == STR_LEN(r2chan->dnis)){
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Dropping DNIS digit %c, exceeded max DNIS length of %d\n", tone, STR_LEN(r2chan->dnis));
@@ -1833,7 +1792,6 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 
 static int category2tone(openr2_chan_t *r2chan, openr2_calling_party_category_t category)
 {
-	OR2_CHAN_STACK;
 	switch (category) {
 	case OR2_CALLING_PARTY_CATEGORY_NATIONAL_SUBSCRIBER:
 		return GII_TONE(r2chan).national_subscriber;
@@ -1859,7 +1817,6 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 	int next_ani_request_tone = GC_TONE(r2chan).request_next_ani_digit ? 
 		                    GC_TONE(r2chan).request_next_ani_digit : 
 				    GA_TONE(r2chan).request_next_ani_digit;
-	OR2_CHAN_STACK;
 	/* no tone, just request next ANI if needed, otherwise
 	   switch to Group B/II  */
 	if (!tone || (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone)) {
@@ -1917,7 +1874,6 @@ static void mf_receive_expected_ani(openr2_chan_t *r2chan, int tone)
 
 static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	/* Cancel MF back timer since we got a response from the forward side */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
 	switch (r2chan->mf_group) {
@@ -2020,7 +1976,6 @@ static void handle_forward_mf_tone(openr2_chan_t *r2chan, int tone)
 
 static void ready_to_answer(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* mode not important here, the BACKWARD side accepted the call so they already know that. 
 	   (we could save the tone they used to accept and pass the call type) */
 	EMI(r2chan)->on_call_accepted(r2chan, OR2_CALL_UNKNOWN);
@@ -2028,7 +1983,6 @@ static void ready_to_answer(openr2_chan_t *r2chan)
 
 static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	/* we just got silence. Let's silence our side as well.
 	   depending on the MF hooks implementation this may be
 	   immediate or not */
@@ -2094,7 +2048,6 @@ static void handle_forward_mf_silence(openr2_chan_t *r2chan)
 
 static void handle_backward_mf_tone(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	/* if we had a safety timer, clean it up */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_fwd_safety);
 
@@ -2105,7 +2058,6 @@ static void handle_backward_mf_tone(openr2_chan_t *r2chan, int tone)
 
 static void mf_send_category(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	r2chan->mf_state = OR2_MF_CATEGORY_TXD;
 	r2chan->category_sent = 1;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending category %s\n", 
@@ -2116,7 +2068,6 @@ static void mf_send_category(openr2_chan_t *r2chan)
 static void mf_send_ani(openr2_chan_t *r2chan)
 {
 	/* TODO: Handle sending of previous ANI digits */
-	OR2_CHAN_STACK;
 
 	/* before trying to send, check if we already said we don't have more ANI */
 	if (r2chan->mf_state == OR2_MF_ANI_END_TXD) {
@@ -2165,13 +2116,11 @@ static void mf_send_ani(openr2_chan_t *r2chan)
 
 static void r2_answer_timeout_expired(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	report_call_disconnection(r2chan, OR2_CAUSE_NO_ANSWER);
 }
 
 static openr2_call_mode_t get_mode_from_tone(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	if (tone == GB_TONE(r2chan).accept_call_with_charge) {
 		return OR2_CALL_WITH_CHARGE;
 	} else if (GB_TONE(r2chan).accept_call_no_charge) {
@@ -2188,7 +2137,6 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 {
 	openr2_mf_state_t previous_mf_state;
 	openr2_call_state_t previous_call_state;
-	OR2_CHAN_STACK;
 	if (r2chan->r2_state == OR2_ANSWER_RXD_MF_PENDING) {
 		/* they answered before we even detected they accepted,
 		   lets just call on_call_accepted and immediately
@@ -2227,7 +2175,6 @@ static void handle_accept_tone(openr2_chan_t *r2chan, openr2_call_mode_t mode)
 
 static int handle_dnis_request(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	if (tone == GA_TONE(r2chan).request_next_dnis_digit) {
 		mf_send_dnis(r2chan, 1);
 		return 1;
@@ -2253,7 +2200,6 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 	openr2_mf_tone_t request_category_tone = GA_TONE(r2chan).request_category ?
 						 GA_TONE(r2chan).request_category :
 						 GA_TONE(r2chan).request_category_and_change_to_gc;
-	OR2_CHAN_STACK;
 	if (handle_dnis_request(r2chan, tone)) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Group A DNIS request handled\n");
 	} else if (r2chan->category_sent && (tone == GA_TONE(r2chan).request_next_ani_digit)) {
@@ -2278,7 +2224,6 @@ static void handle_group_a_request(openr2_chan_t *r2chan, int tone)
 
 static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	if (tone == GC_TONE(r2chan).request_next_ani_digit) {
 		mf_send_ani(r2chan);
 	} else if (tone == GC_TONE(r2chan).request_change_to_g2) {
@@ -2299,7 +2244,6 @@ static void handle_group_c_request(openr2_chan_t *r2chan, int tone)
 
 static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	if (tone == GB_TONE(r2chan).accept_call_with_charge 
 	    || tone == GB_TONE(r2chan).accept_call_no_charge
 	    || tone == GB_TONE(r2chan).special_info_tone) {
@@ -2326,7 +2270,6 @@ static void handle_group_b_request(openr2_chan_t *r2chan, int tone)
 
 static void handle_backward_mf_silence(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	/* the backward side has muted its tone, it is time to take
 	   action depending on the tone they sent */
 	switch (r2chan->mf_group) {
@@ -2361,7 +2304,6 @@ static int check_threshold(openr2_chan_t *r2chan, int tone)
 	int res = 0;
 	int tone_threshold = 0;
 	struct timeval currtime = {0, 0};
-	OR2_CHAN_STACK;
 	if (r2chan->r2context->mf_threshold) {
 		if (r2chan->mf_threshold_tone != tone) {
 			res = gettimeofday(&r2chan->mf_threshold_time, NULL);
@@ -2391,7 +2333,6 @@ static int check_threshold(openr2_chan_t *r2chan, int tone)
 
 void openr2_proto_handle_mf_tone(openr2_chan_t *r2chan, int tone)
 {
-	OR2_CHAN_STACK;
 	if (tone) {
 
 		/* since we get a continuous tone, this tone might be one that we
@@ -2456,14 +2397,12 @@ void openr2_proto_handle_mf_tone(openr2_chan_t *r2chan, int tone)
 
 static void seize_timeout_expired(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_WARNING, "Seize Timeout Expired!\n");
 	handle_protocol_error(r2chan, OR2_SEIZE_TIMEOUT);
 }
 
 static void start_dialing_dtmf(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Dialing %s with DTMF/R2 (tone on = %d, tone off = %d)\n", 
 			r2chan->dnis, r2chan->r2context->dtmf_on, r2chan->r2context->dtmf_off);
 	r2chan->dialing_dtmf = 1;
@@ -2475,7 +2414,6 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 {
 	const char *digit;
 	int copy_ani = 1, copy_dnis = 1;
-	OR2_CHAN_STACK;
 
 	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, 
 			"Requested to make call (ANI=%s, DNIS=%s, category=%s, ANI restricted = %s)\n", ani ? ani : "(none)", 
@@ -2575,7 +2513,6 @@ int openr2_proto_make_call(openr2_chan_t *r2chan, const char *ani, const char *d
 
 void openr2_proto_handle_dtmf_end(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	turn_off_mf_engine(r2chan);
 	if (r2chan->direction == OR2_DIR_FORWARD) {
 		/* we will not get bit notification of call accepted for DTMF R2, report progress now */
@@ -2647,8 +2584,6 @@ static void r2_seize_persist_expired(openr2_chan_t *r2chan)
 
 static int send_clear_forward(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
-
 	/* we don't rely on the other end to send us a reply for the CLEAR FORWARD we're about to send
 	 * so, we set this timer to ensure we bring this channel back to idle 
 	 * For MFC-R2 this is mostly a safety timer, for DTMF-R2 though I think this is a must */
@@ -2672,7 +2607,6 @@ static int send_clear_forward(openr2_chan_t *r2chan)
    should be called. */
 int openr2_proto_disconnect_call(openr2_chan_t *r2chan, openr2_call_disconnect_cause_t cause)
 {
-	OR2_CHAN_STACK;
 	/* cannot drop a call when there is none to drop */
 	if (r2chan->call_state == OR2_CALL_IDLE) {
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Cannot disconnect call when we don't have a call to disconnect\n");
@@ -2845,19 +2779,16 @@ OR2_DECLARE(const char *) openr2_proto_get_variant_string(openr2_variant_t varia
 
 openr2_cas_signal_t openr2_proto_get_rx_cas(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return r2chan->cas_rx_signal;
 }
 
 openr2_cas_signal_t openr2_proto_get_tx_cas(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return r2chan->cas_tx_signal;
 }
 
 const char *openr2_proto_get_rx_cas_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (r2chan->cas_rx_signal != OR2_CAS_INVALID && !r2chan->inalarm) {
 		return cas_names[r2chan->cas_rx_signal];
 	}
@@ -2868,7 +2799,6 @@ const char *openr2_proto_get_rx_cas_string(openr2_chan_t *r2chan)
 
 const char *openr2_proto_get_tx_cas_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	if (r2chan->cas_tx_signal != OR2_CAS_INVALID && !r2chan->inalarm) {
 		return cas_names[r2chan->cas_tx_signal];
 	}
@@ -2879,25 +2809,21 @@ const char *openr2_proto_get_tx_cas_string(openr2_chan_t *r2chan)
 
 const char *openr2_proto_get_call_state_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return callstate2str(r2chan->call_state);
 }
 
 const char *openr2_proto_get_r2_state_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return r2state2str(r2chan->r2_state);
 }
 
 const char *openr2_proto_get_mf_state_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return mfstate2str(r2chan->mf_state);
 }
 
 const char *openr2_proto_get_mf_group_string(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return mfgroup2str(r2chan->mf_group);
 }
 
@@ -2908,13 +2834,11 @@ OR2_DECLARE(const char *) openr2_proto_get_call_mode_string(openr2_call_mode_t m
 
 int openr2_proto_get_tx_mf_signal(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return r2chan->mf_write_tone;
 }
 
 int openr2_proto_get_rx_mf_signal(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
 	return r2chan->mf_read_tone;
 }
 

@@ -1,7 +1,4 @@
 AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes -DHAVE_GETTIMEOFDAY
-if WANT_OR2_TRACE_STACKS
-AM_CFLAGS += -DOR2_TRACE_STACKS
-endif
 
 if HAVE_SVNVERSION
 AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
@@ -16,8 +13,8 @@ nobase_include_HEADERS = openr2/r2chan.h \
 		         openr2/r2utils.h \
 		         openr2/r2log.h \
 		         openr2/r2exports.h \
-				 openr2/r2thread.h \
-				 openr2/r2declare.h
+			 openr2/r2thread.h \
+			 openr2/r2declare.h
 
 libopenr2_la_SOURCES = r2chan.c r2context.c r2log.c r2proto.c r2utils.c \
 		       r2engine.c r2ioabs.c queue.c r2thread.c \
