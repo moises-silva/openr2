@@ -23,6 +23,13 @@
 #ifndef _OPENR2_H_
 #define _OPENR2_H_
 
+/* Be nice and check for users trying to use openr2 2.x with Asterisk version <= 1.8 */
+#ifdef ASTERISK_VERSION_NUM
+#if ASTERISK_VERSION_NUM < 11000
+#error "You cannot use openr2 2.x with Asterisk < 1.10, please use latest openr2 1.x version"
+#endif
+#endif
+
 #include <openr2/r2context.h>
 #include <openr2/r2chan.h>
 #include <openr2/r2proto.h>
