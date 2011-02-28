@@ -29,7 +29,7 @@ extern "C" {
 
 #include "openr2/r2declare.h"
 
-#define OR2_LIB_INTERFACE 4
+#define OR2_LIB_INTERFACE 5
 #define OR2_LIB_REVISION 0
 #define OR2_LIB_AGE 0
 OR2_DECLARE(const char *) openr2_get_version(void);
