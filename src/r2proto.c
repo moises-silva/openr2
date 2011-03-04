@@ -65,6 +65,7 @@
 
 #define OFFER_CALL(r2chan) \
 (r2chan)->call_state = OR2_CALL_OFFERED; \
+(r2chan)->caller_category = !((r2chan)->caller_category) ? (r2chan)->mf_read_tone : (r2chan)->caller_category; \
 EMI((r2chan))->on_call_offered((r2chan), (r2chan)->caller_ani_is_restricted ? NULL : (r2chan)->ani, (r2chan)->dnis, tone2category((r2chan)))
 
 static void r2config_argentina(openr2_context_t *r2context)
