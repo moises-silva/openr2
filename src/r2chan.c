@@ -655,11 +655,7 @@ OR2_DECLARE(int) openr2_chan_set_idle(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	openr2_chan_lock(r2chan);
-	if (r2chan->inalarm) {
-		goto done;
-	}
 	retcode = openr2_proto_set_idle(r2chan);
-done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }
@@ -668,11 +664,7 @@ OR2_DECLARE(int) openr2_chan_set_blocked(openr2_chan_t *r2chan)
 {
 	int retcode = 0;
 	openr2_chan_lock(r2chan);
-	if (r2chan->inalarm) {
-		goto done;
-	}
 	retcode = openr2_proto_set_blocked(r2chan);
-done:
 	openr2_chan_unlock(r2chan);
 	return retcode;
 }
