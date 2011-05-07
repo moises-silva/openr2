@@ -108,7 +108,7 @@ AC_CHECK_HEADERS([dahdi/user.h],[],[nodahdiuser=yes])
 
 if [test "x$nozaptel" = xyes] && [test "x$nozaptelzaptel" = xyes] && [test "x$nodahdiuser" = xyes]
 then
-	AC_MSG_RESULT([Zaptel or DAHDI headers are not presetn. Zaptel/DAHDI support will not be enabled])
+	AC_MSG_RESULT([Zaptel or DAHDI headers are not present. Zaptel/DAHDI support will not be enabled])
 fi
 
 AC_ARG_WITH([r2test], [AS_HELP_STRING([--without-r2test], 

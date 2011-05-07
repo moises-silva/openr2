@@ -11601,8 +11601,8 @@ done
 
 if test "x$nozaptel" = xyes && test "x$nozaptelzaptel" = xyes && test "x$nodahdiuser" = xyes
 then
-	echo "$as_me:$LINENO: result: Zaptel or DAHDI headers are not presetn. Zaptel/DAHDI support will not be enabled" >&5
-echo "${ECHO_T}Zaptel or DAHDI headers are not presetn. Zaptel/DAHDI support will not be enabled" >&6
+	echo "$as_me:$LINENO: result: Zaptel or DAHDI headers are not present. Zaptel/DAHDI support will not be enabled" >&5
+echo "${ECHO_T}Zaptel or DAHDI headers are not present. Zaptel/DAHDI support will not be enabled" >&6
 fi
 
 
