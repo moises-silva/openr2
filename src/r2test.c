@@ -43,6 +43,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include "openr2/openr2.h"
+#include "openr2/r2engine.h"
 
 /* max groups of channels */
 #define MAX_GROUPS 50
@@ -83,6 +84,7 @@ typedef struct {
 	int audio_stop;
 	int frame_counter;
 	int called;
+	int is_wav;
 	struct chan_group_data_s *conf;
 } r2chan_data_t;
 
@@ -215,26 +217,46 @@ static void close_audiofp(openr2_chan_t *r2chan)
 	}
 }
 
+#define WAVE_HEADER_LEN 44
 static int get_audio(openr2_chan_t *r2chan, unsigned char *buf, int length)
 {
 	int ret;
+	short linear_buf[length];
 	r2chan_data_t *chandata = openr2_chan_get_client_data(r2chan);
+
 	if (chandata->audiofp == NULL) {
 		printf("USER: no file opened yet, let's open it...\n");
 		if (!(chandata->audiofp = fopen(chandata->conf->audiofile, "rb"))) {
 			fprintf(stderr, "USER: Cannot open the '%s' audio file.\n", chandata->conf->audiofile);
 			chandata->audio_stop = 1;
 			return(-1);
-		}	
-	}	
-	ret = fread(buf, 1, length, chandata->audiofp);
+		}
+		if (strstr(chandata->conf->audiofile, ".wav")) {
+			printf("USER: Skipping wav header and assuming 8khz L16 audio...\n");
+			fseek(chandata->audiofp, WAVE_HEADER_LEN, SEEK_SET);
+			chandata->is_wav = 1;
+		}
+	}
+
+	if (chandata->is_wav) {
+		ret = fread(linear_buf, 2, length, chandata->audiofp);
+	} else {
+		ret = fread(buf, 1, length, chandata->audiofp);
+	}
+
 	if (ferror(chandata->audiofp)) {
 		fprintf(stderr, "USER: Error reading file audio: %s\n", strerror(errno));
 	} else if (feof(chandata->audiofp)) {
 		printf("USER: end of file\n");
 		close_audiofp(r2chan);
 		return 0;
-	} 
+	} else if (chandata->is_wav) {
+		/* transcode samples to alaw */
+		int i = 0;
+		for (i = 0; i < ret; i++) {
+			buf[i] = openr2_linear_to_alaw(linear_buf[i]);
+		}
+	}
 	return(ret);
 }
 
