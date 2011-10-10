@@ -10220,7 +10220,7 @@ fi
 echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_RealFile'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$as_ac_RealFile'}'`" >&6
 if test `eval echo '${'$as_ac_RealFile'}'` = yes; then
-  libdir='$(exec_prefix)/lib64'
+  libdir='${exec_prefix}/lib64'
 fi
 
         ;;
