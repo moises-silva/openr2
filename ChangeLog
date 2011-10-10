@@ -1,6 +1,53 @@
-2011-01-29 23:39  moy
+2011-10-10 05:34  moy
 
-	* ChangeLog: updated ChangeLog in preparation for 1.3.1 release
+	* configure, configure.in: bumped version
+
+2011-10-10 05:20  moy
+
+	* src/Makefile.am, src/Makefile.in: I think we can remove -Werror
+	  now just in case new compilers decide to bitch about something
+	  else
+
+2011-10-10 05:16  moy
+
+	* configure, configure.in: build: fix bogus variable assignment in
+	  configure.in
+
+2011-10-10 05:14  moy
+
+	* Makefile.in, aclocal.m4, config.guess, config.h.in, config.sub,
+	  configure, ltmain.sh, src/Makefile.in: updated build files
+
+2011-10-10 05:14  moy
+
+	* bootstrap: updated bootstrap script
+
+2011-08-26 21:14  moy
+
+	* doc/intro-openr2-es.wav, src/r2test.c: added new wav audio file
+	  and r2test support to read wav files
+
+2011-07-25 19:55  moy
+
+	* doc/asterisk/br/README: README typo
+
+2011-06-06 04:56  moy
+
+	* src/queue.c: fix compilation with newer gcc compilers - unused
+	  variable
+
+2011-03-04 05:45  moy
+
+	* src/r2proto.c: bug fix - incoming register does not set the
+	  caller category when skip category request option is set
+
+2011-01-30 04:39  moy
+
+	* ChangeLog: changelog again
+
+2011-01-30 04:38  moy
+
+	* ChangeLog: updated changelog
 
 2010-12-22 16:12  moy
 
@@ -20,6 +67,10 @@
 2010-09-06 21:38  alexandre.alencar
 
 	* libopenr2.spec: updated spec file for 1.3.1
+
+2010-09-05 22:37  moy
+
+	* ChangeLog: updated ChangeLog in preparation for 1.3.1 release
 
 2010-07-29 03:25  moy
 
