@@ -219,9 +219,9 @@ sharedstatedir = @sharedstatedir@
 svnversioncommand = @svnversioncommand@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings \
-	-Wunused-variable -Wstrict-prototypes -Wmissing-prototypes \
-	$(am__append_1) $(am__append_2)
+AM_CFLAGS = -std=c99 -pedantic -Wall -Wwrite-strings -Wunused-variable \
+	-Wstrict-prototypes -Wmissing-prototypes $(am__append_1) \
+	$(am__append_2)
 lib_LTLIBRARIES = libopenr2.la
 include_HEADERS = openr2/openr2.h 
 nobase_include_HEADERS = openr2/r2chan.h \
