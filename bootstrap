@@ -1,6 +1,2 @@
-#!/bin/bash
-autoheader
-libtoolize --force --copy
-aclocal
-automake -f --copy --add-missing
-autoconf
+#!/bin/sh -ex
+autoreconf -fi
