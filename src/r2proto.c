@@ -313,6 +313,11 @@ static openr2_variant_entry_t r2variants[] =
 
 static void turn_off_mf_engine(openr2_chan_t *r2chan)
 {
+	if (r2chan->mf_state == OR2_MF_OFF_STATE) {
+		/* twiddle */
+		return;
+	}
+
 	/* this is not needed for DTMF R2 mf engine, but does not hurt either */
 	openr2_chan_cancel_timer(r2chan, &r2chan->timer_ids.mf_back_cycle);
 
@@ -320,8 +325,30 @@ static void turn_off_mf_engine(openr2_chan_t *r2chan)
 	r2chan->dialing_dtmf = 0;
 	r2chan->detecting_dtmf = 0;
 
+	/* 
+	 AAstra requested this specific change.
+	 In the good ol' days MF engines were expensive (space or cost) and some equipment
+	 had/have limited number of MF receivers/generators shared across all CAS
+	 channels based on earlang's statistical load calculation. We must
+	 therefore release the MF engines here if needed */
+	if (MFI(r2chan)->mf_read_dispose) {
+		MFI(r2chan)->mf_read_dispose(r2chan->mf_read_handle);
+		r2chan->mf_read_handle = NULL;
+	}
+
+	if (MFI(r2chan)->mf_write_dispose) {
+		MFI(r2chan)->mf_write_dispose(r2chan->mf_write_handle);
+		r2chan->mf_write_handle = NULL;
+	}
+
 	/* set the MF state to OFF */
 	r2chan->mf_state = OR2_MF_OFF_STATE;
+}
+
+void openr2_proto_destroy(openr2_chan_t *r2chan)
+{
+	/* de-allocate MF engines if needed */
+	turn_off_mf_engine(r2chan);
 }
 
 static int set_cas_signal(openr2_chan_t *r2chan, openr2_cas_signal_t signal)
@@ -891,6 +918,8 @@ static void on_dtmf_received(void *user_data, const char *digits, int len)
 
 static void handle_incoming_call(openr2_chan_t *r2chan)
 {
+	void *mf_read_handle = NULL;
+	void *mf_write_handle = NULL;
 	open_logfile(r2chan, 1);
 
 	if (!DETECT_DTMF(r2chan)) {
@@ -898,16 +927,18 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 		   let's init our MF engine, if we fail initing the MF engine
 		   there is no point sending the seize ack, lets ignore the
 		   call, the other end should timeout anyway */
-		if (!MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0)) {
+		if (!(mf_write_handle = MFI(r2chan)->mf_write_init(r2chan->mf_write_handle, 0))) {
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to init MF writer\n");
 			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 			return;
 		}
-		if (!MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1)) {
+		if (!(mf_read_handle = MFI(r2chan)->mf_read_init(r2chan->mf_read_handle, 1))) {
 			openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to init MF reader\n");
 			handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
 			return;
 		}
+		r2chan->mf_write_handle = mf_write_handle;
+		r2chan->mf_read_handle = mf_read_handle;
 		r2chan->mf_state = OR2_MF_SEIZE_ACK_TXD;
 		r2chan->mf_group = OR2_MF_BACK_INIT;
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Initialized R2 MF detector\n");

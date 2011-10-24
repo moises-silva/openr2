@@ -347,6 +347,7 @@ int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_va
 void openr2_proto_handle_mf_tone(struct openr2_chan_s *r2chan, int tone);
 void openr2_proto_handle_dtmf_end(struct openr2_chan_s *r2chan);
 int openr2_proto_handle_alarm_state(struct openr2_chan_s *r2chan);
+void openr2_proto_destroy(struct openr2_chan_s *r2chan);
 
 #if defined(__cplusplus)
 } /* endif extern "C" */

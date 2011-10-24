@@ -595,15 +595,13 @@ void openr2_chan_cancel_all_timers(openr2_chan_t *r2chan)
 OR2_DECLARE(void) openr2_chan_delete(openr2_chan_t *r2chan)
 {
 	openr2_chan_lock(r2chan);
-	if (MFI(r2chan)->mf_read_dispose) {
-		MFI(r2chan)->mf_read_dispose(r2chan->mf_read_handle);
-	}	
-	if (MFI(r2chan)->mf_write_dispose) {
-		MFI(r2chan)->mf_write_dispose(r2chan->mf_write_handle);
-	}	
+
+	/* let know the protocol layer this channel is going down */
+	openr2_proto_destroy(r2chan);
+
 	if (r2chan->fd_created) {
 		openr2_io_close(r2chan);
-	}	
+	}
 	if (r2chan->logfile) {
 		fclose(r2chan->logfile);
 	}
