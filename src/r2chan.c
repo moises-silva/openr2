@@ -64,6 +64,7 @@
 				       openr2_chan_unlock(r2chan); \
 				       return retproperty;
 
+static int openr2_chan_handle_media(openr2_chan_t *r2chan, uint8_t *read_buf, int res);
 
 static openr2_chan_t *__openr2_chan_new(openr2_context_t *r2context, int channo, int openchan, openr2_io_fd_t chanfd)
 {
@@ -254,6 +255,10 @@ static int openr2_chan_handle_oob_event(openr2_chan_t *r2chan, openr2_oob_event_
 
 		openr2_proto_handle_alarm_state(r2chan);
 		break;
+	case OR2_OOB_EVENT_TONE_CHANGE:
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Handling tone change event\n");
+		openr2_chan_handle_media(r2chan, NULL, 0);
+		break;
 	default:
 		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_NOTICE, "Unhandled OOB event %d\n", event);
 		break;
@@ -308,6 +313,50 @@ OR2_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan)
 	return ret;
 }
 
+/* Note that this function can be called with an IO empty buffer (res = 0), which means
+ * hardware is taking care of the IO and we must just call the tone detection callbacks, etc
+ * but we don't have any media to transcode or anything */
+static int openr2_chan_handle_media(openr2_chan_t *r2chan, uint8_t *read_buf, int res)
+{
+	unsigned i;
+	int tone_result = 0;
+	int16_t tone_buf[OR2_CHAN_READ_SIZE];
+	/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
+	if (r2chan->mf_state != OR2_MF_OFF_STATE) {
+		if (res) {
+			/* assuming ALAW codec */
+			for (i = 0; i < (uint32_t) res; i++) {
+				tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
+			}
+#ifdef OR2_MF_DEBUG
+			write(r2chan->mf_read_fd, tone_buf, res*2);
+#endif
+		}
+		if (r2chan->detecting_dtmf) {
+			DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
+			res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
+			if (!res) {
+				r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
+				if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
+					openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF detection\n");
+					openr2_proto_handle_dtmf_end(r2chan);
+					goto done;
+				}
+			}
+		} else {
+			tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
+			if ( tone_result != -1 ) {
+				openr2_proto_handle_mf_tone(r2chan, tone_result);
+			}
+		}
+	} else if (r2chan->answered) {
+		EMI(r2chan)->on_call_read(r2chan, read_buf, res);
+	}
+
+done:
+	return 0;
+}
+
 /*! \brief simple mask to determine what the user wants to process */
 #define OR2_CHAN_PROCESS_OOB (1 << 0)
 #define OR2_CHAN_PROCESS_MF (1 << 1)
@@ -328,9 +377,9 @@ OR2_DECLARE(int) openr2_chan_run_schedule(openr2_chan_t *r2chan)
 /*! \brief main processing of signaling to check for incoming events, respond to them and dispatch user events */
 static int openr2_chan_process(openr2_chan_t *r2chan, int processing_mask)
 {
-	int interesting_events, res, tone_result, wrote;
-	openr2_oob_event_t event;
 	unsigned i;
+	int interesting_events, res, wrote;
+	openr2_oob_event_t event;
 	uint8_t read_buf[OR2_CHAN_READ_SIZE];
 	int16_t tone_buf[OR2_CHAN_READ_SIZE];
 	/* just one return point in this function, set retcode and call goto done when done */
@@ -395,38 +444,8 @@ tryagain:
 			/* if nothing was read, continue, may be there is a priority event (ie DAHDI read ELAST) */
 			goto tryagain;
 		}
-		/* if the DTMF or MF detector is enabled, we are supposed to detect tones */
-		if (r2chan->mf_state != OR2_MF_OFF_STATE) {
-			/* assuming ALAW codec */
-			for (i = 0; i < (uint32_t) res; i++) {
-				tone_buf[i] = TI(r2chan)->alaw_to_linear(read_buf[i]);
-			}	
-#ifdef OR2_MF_DEBUG	
-			write(r2chan->mf_read_fd, tone_buf, res*2);
-#endif
-			if (r2chan->detecting_dtmf) {
-				DTMF(r2chan)->dtmf_rx(r2chan->dtmf_read_handle, tone_buf, res);
-				res = DTMF(r2chan)->dtmf_rx_status(r2chan->dtmf_read_handle);
-				if (!res) {
-					r2chan->dtmf_silence_samples += OR2_CHAN_READ_SIZE;
-					if (r2chan->dtmf_silence_samples == OR2_DTMF_MAX_SILENCE_SAMPLES) {
-						openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Done with DTMF detection\n");
-						openr2_proto_handle_dtmf_end(r2chan);
-						goto checkwrite;
-					}
-				}
-			} else {
-				tone_result = MFI(r2chan)->mf_detect_tone(r2chan->mf_read_handle, tone_buf, res);
-				if ( tone_result != -1 ) {
-					openr2_proto_handle_mf_tone(r2chan, tone_result);
-				} 
-			}
-		} else if (r2chan->answered) {
-			EMI(r2chan)->on_call_read(r2chan, read_buf, res);
-		}
+		openr2_chan_handle_media(r2chan, read_buf, res);
 	}
-
-checkwrite:
 
 	/* we only write MF or DTMF tones here. Speech write is responsibility of the user, she should call openr2_chan_write for that */
 	if (r2chan->dialing_dtmf && (OR2_IO_WRITE & interesting_events)) {
