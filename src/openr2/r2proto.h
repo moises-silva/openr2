@@ -92,6 +92,7 @@ typedef enum {
 /* MFC/R2 variants */
 typedef enum {
 	OR2_VAR_ARGENTINA = 0,
+	OR2_VAR_BOLIVIA = 10,
 	OR2_VAR_BRAZIL = 20,
 	OR2_VAR_CHINA = 40,
 	OR2_VAR_CZECH = 60,

@@ -77,6 +77,14 @@ static void r2config_argentina(openr2_context_t *r2context)
 	r2context->timers.r2_metering_pulse = 400;
 }
 
+static void r2config_bolivia(openr2_context_t *r2context)
+{
+	OR2_CONTEXT_STACK;
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_12;
+	r2context->mf_ga_tones.request_dnis_minus_3 = OR2_MF_TONE_INVALID;
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_9;
+}
+
 static void r2config_brazil(openr2_context_t *r2context)
 {
 	OR2_CONTEXT_STACK;
@@ -243,6 +251,13 @@ static openr2_variant_entry_t r2variants[] =
 		.name = "AR",
 		.country = "Argentina",
 		.config = r2config_argentina,
+	},	
+	/* BOLIVIA */ 
+	{
+		.id = OR2_VAR_BOLIVIA,
+		.name = "BO",
+		.country = "Bolivia",
+		.config = r2config_bolivia,
 	},	
 	/* BRAZIL */ 
 	{
