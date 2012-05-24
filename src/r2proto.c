@@ -172,6 +172,7 @@ static void r2config_mexico(openr2_context_t *r2context)
 	/* Mexico has no signal when running out of DNIS, 
 	   timeout is used instead*/
 	r2context->mf_g1_tones.no_more_dnis_available = OR2_MF_TONE_INVALID;
+	r2context->mf_g1_tones.caller_ani_is_restricted = OR2_MF_TONE_15;
 }
 
 static void r2config_venezuela(openr2_context_t *r2context)
