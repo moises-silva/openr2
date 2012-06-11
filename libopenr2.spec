@@ -48,6 +48,7 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 chrpath --delete $RPM_BUILD_ROOT%{_bindir}/r2test
+chrpath --delete $RPM_BUILD_ROOT%{_bindir}/r2dtmf_detect
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 %clean
@@ -66,6 +67,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/README.asterisk
 %doc %dir doc/asterisk
 %{_bindir}/r2test
+%{_bindir}/r2dtmf_detect
 %{_libdir}/*.so.*
 %{_mandir}/man5/r2test.conf.5.gz
 %{_mandir}/man8/r2test.8.gz
