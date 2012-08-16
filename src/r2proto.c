@@ -87,6 +87,7 @@ static void r2config_brazil(openr2_context_t *r2context)
 
 	r2context->mf_ga_tones.address_complete_charge_setup = OR2_MF_TONE_INVALID;
 	r2context->mf_ga_tones.request_dnis_minus_1 = OR2_MF_TONE_9;
+	r2context->mf_ga_tones.request_all_dnis_again = OR2_MF_TONE_2;
 
 	r2context->mf_gb_tones.accept_call_with_charge = OR2_MF_TONE_1;
 	r2context->mf_gb_tones.busy_number = OR2_MF_TONE_2;
