@@ -717,9 +717,12 @@ int openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_s
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to write to channel\n");
 			EMI(r2chan)->on_os_error(r2chan, myerrno);
 			break;
+		} else if (res == -1) {
+			/* EAGAIN received, so let's try again */
+			continue;
 		}
 		wrote += res;
-	}	
+	}
 	return wrote;
 }
 
