@@ -1,9 +1,5 @@
 AM_CFLAGS = -std=c99 -pedantic -Wall -Werror -Wwrite-strings -Wunused-variable -Wstrict-prototypes -Wmissing-prototypes -DHAVE_GETTIMEOFDAY
 
-if HAVE_SVNVERSION
-AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
-endif
-
 lib_LTLIBRARIES = libopenr2.la
 
 include_HEADERS = openr2/openr2.h 

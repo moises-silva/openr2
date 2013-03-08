@@ -129,17 +129,12 @@ AC_ARG_WITH([trace-stacks], [AS_HELP_STRING([--with-trace-stacks],
 			[with_tracestacks=no])
 AM_CONDITIONAL([WANT_OR2_TRACE_STACKS], [test "x$with_tracestacks" != xno])
 
-AC_PATH_PROGS(svnversioncommand,svnversion)
-
 if [test "x$svnversioncommand" = "x"]
 then
 	openr2_revision="(release)"
 else
 	openr2_revision="svnversion -n"
 fi
-
-AM_CONDITIONAL([HAVE_SVNVERSION], [test "x$svnversioncommand" != "x"])
-
 
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
