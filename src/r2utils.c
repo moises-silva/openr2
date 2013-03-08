@@ -45,12 +45,12 @@ const char *openr2_get_version(void)
 #endif
 }
 
-/* REVISION will be only defined if built via SVN */
+/* GIT_REVISION is currently never set, need some autotools magic to export it to the build flags */
 OR2_EXPORT_SYMBOL
 const char *openr2_get_revision()
 {
-#ifdef REVISION
-	return REVISION;
+#ifdef GIT_REVISION
+	return GIT_REVISION;
 #else
 	return "(release)";
 #endif

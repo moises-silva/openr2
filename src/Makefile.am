@@ -3,10 +3,6 @@ if WANT_OR2_TRACE_STACKS
 AM_CFLAGS += -DOR2_TRACE_STACKS
 endif
 
-if HAVE_SVNVERSION
-AM_CFLAGS += -DREVISION=\"$(shell svnversion -n .)\"
-endif
-
 lib_LTLIBRARIES = libopenr2.la
 
 include_HEADERS = openr2/openr2.h 
