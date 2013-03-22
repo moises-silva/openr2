@@ -1062,7 +1062,15 @@ static void report_call_end(openr2_chan_t *r2chan)
 static void r2_metering_pulse(openr2_chan_t *r2chan)
 {
 	OR2_CHAN_STACK;
-	report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+	openr2_log(r2chan, OR2_LOG_DEBUG, "Metering pulse timeout expired in state %s\n", openr2_proto_get_r2_state_string(r2chan));
+	if (r2chan->r2_state == OR2_FORCED_RELEASE_RXD) {
+		report_call_disconnection(r2chan, OR2_CAUSE_FORCED_RELEASE);
+	} else if (r2chan->r2_state == OR2_CLEAR_BACK_RXD) {
+		report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+	} else {
+		openr2_log(r2chan, OR2_LOG_ERROR, "Unexpected state on metering pulse timeout expiration: %s\n", openr2_proto_get_r2_state_string(r2chan));
+		report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
+	}
 }
 
 #define CAS_LOG_RX(signal_name) r2chan->cas_rx_signal = OR2_CAS_##signal_name; \
@@ -1343,7 +1351,7 @@ handlecas:
 				/* if the variant may have metering pulses, this clear back could be not really
 				   a clear back but a metering pulse, lets put the timer. If the CAS signal does not
 				   come back to ANSWER then is really a clear back */
-				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse, 
+				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse,
 						r2_metering_pulse, "r2_metering_pulse");
 			} else {
 				report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
@@ -1357,7 +1365,15 @@ handlecas:
 		} else if (cas == R2(r2chan, FORCED_RELEASE)) {
 			CAS_LOG_RX(FORCED_RELEASE);
 			r2chan->r2_state = OR2_FORCED_RELEASE_RXD;
-			report_call_disconnection(r2chan, OR2_CAUSE_FORCED_RELEASE);
+			if (TIMER(r2chan).r2_metering_pulse) {
+				/* if the variant may have metering pulses, this forced release could be not really
+				   a release but a metering pulse, lets put the timer. If the CAS signal does not
+				   come back to ANSWER then is really a clear back */
+				r2chan->timer_ids.r2_metering_pulse = openr2_chan_add_timer(r2chan, TIMER(r2chan).r2_metering_pulse,
+						r2_metering_pulse, "r2_metering_pulse");
+			} else {
+				report_call_disconnection(r2chan, OR2_CAUSE_FORCED_RELEASE);
+			}
 		} else {
 			CAS_LOG_RX(INVALID);
 			handle_protocol_error(r2chan, OR2_INVALID_CAS_BITS);
@@ -1400,7 +1416,8 @@ handlecas:
 		break;
 
 	case OR2_CLEAR_BACK_RXD:
-		/* we got clear back but we have not transmitted clear fwd yet, then, the only
+	case OR2_FORCED_RELEASE_RXD:
+		/* we got clear back or forced release but we have not transmitted clear fwd yet, then, the only
 		   reason for CAS change is a possible metering pulse, if we are not detecting a metering
 		   pulse then is a protocol error */
 		if (TIMER(r2chan).r2_metering_pulse && cas == R2(r2chan, ANSWER)) {
