@@ -1,3 +1,73 @@
+-- OpenR2 1.3.3
+commit 6acc542a2ee4c6ce6c130336be838f0fb4007fb6
+Author: Moises Silva <moises.silva@gmail.com>
+Date:   Fri Mar 22 11:24:24 2013 -0400
+
+    Fix for dropped calls in Argentina (Denwa)
+    
+    Allow receiving metering pulses with forced release
+    
+    Not sure if what they are seeing is really a metering pulse or
+    a glitch in the line leading to 0x00 CAS pattern, but pretending
+    is a metering pulse will avoid dropping the call
+    
+    We tried using cas_persistance_check timer to 500ms, and that seemed to solve
+    the issue of dropped calls, but incoming calls would not work anymore, most likely
+    because the other end time out for the seize is less than 500ms
+
+commit 43363350bb25508f67a31dbe14bed1b92729d339
+Author: Moises Silva <moises.silva@gmail.com>
+Date:   Fri Mar 8 13:08:03 2013 -0500
+
+    Regenerate build files via ./bootstrap
+
+commit df1283d6dc01b0b68a63529b77b1507b100f0e85
+Author: Moises Silva <moises.silva@gmail.com>
+Date:   Fri Mar 8 13:03:19 2013 -0500
+
+    Removed old svn version detection. Need some autotools magic to get git revision when available.
+
+commit 82b01a40ec645750d86c6751bdf5f05a613770e5
+Author: Moises Silva <moy@sangoma.com>
+Date:   Tue Feb 26 14:13:00 2013 -0500
+
+    Fix longstanding bug in openr2_chan_write() API, this API is really not used
+    that much as the majority of the users of openr2 have a direct access to the IO
+    layer and they write directly to the device without using this API so that's the
+    reason we had never seen this bug before in the field. I only found it by chance
+    when inspecting the code.
+
+    The issue is if EAGAIN is returned from write(), we would still do the written +=
+    calculation, which would actually decrement the written count, no good :)
+
+commit 33f6d3c49a87f3fe799574117857ba7a73320105
+Author: Moises Silva <moy@sangoma.com>
+Date:   Tue Feb 26 11:58:22 2013 -0500
+
+    Fix CREDITS file
+
+commit 5448a237bd2ea97e0efd3856813501da287aec47
+Author: Moises Silva <moises.silva@gmail.com>
+Date:   Thu Aug 16 11:46:31 2012 -0400
+
+    Fix for Brazilian variant homologation
+    Signal A-2 is used to repeat all DNIS from the beginning
+
+commit 982d8da96fc4a3a723d345574d5a5a721bb9f438
+Author: Moises Silva <moises.silva@gmail.com>
+Date:   Mon Jun 11 12:37:02 2012 -0400
+
+    Added dtmf detection utility to libopenr2.spec
+
+commit 8031ec19aa3dab0e11f06d56cff970b121530fc2
+Author: Moises Silva <moy@sangoma.com>
+Date:   Thu May 24 12:32:53 2012 -0400
+
+    Fix caller ani restricted tone for Mexico variant
+
+
+-- OpenR2 1.3.2 (old SVN changelogs)
+
 2011-10-10 05:34  moy
 
 	* configure, configure.in: bumped version
