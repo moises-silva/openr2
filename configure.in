@@ -10,13 +10,13 @@
 # see http://sources.redhat.com/autobook/autobook/autobook_91.html for details
 # more info on versioning: http://www.nondot.org/sabre/Mirrored/libtool-2.1a/libtool_6.html#SEC33
 
-AC_INIT([OpenR2], [1.3.2])
+AC_INIT([OpenR2], [1.3.3])
 
 m4_include(config/ax_check_real_file.m4)
 
 # final lib name will be: libopenr2-<current - age>,<age>,<revision>.so
 OPENR2_LT_CURRENT=4
-OPENR2_LT_REVISION=1
+OPENR2_LT_REVISION=2
 OPENR2_LT_AGE=1
 
 AC_SUBST(OPENR2_LT_CURRENT)
@@ -124,13 +124,6 @@ AC_ARG_WITH([trace-stacks], [AS_HELP_STRING([--with-trace-stacks],
 	                [],
 			[with_tracestacks=no])
 AM_CONDITIONAL([WANT_OR2_TRACE_STACKS], [test "x$with_tracestacks" != xno])
-
-if [test "x$svnversioncommand" = "x"]
-then
-	openr2_revision="(release)"
-else
-	openr2_revision="svnversion -n"
-fi
 
 AC_CONFIG_FILES([Makefile
 		src/Makefile])
