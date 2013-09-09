@@ -23,6 +23,7 @@
  * Cleiber Marques da Silva <cleibermarques@hotmail.com>
  * Humberto Figuera <hfiguera@gmail.com>
  * Afonso Zimmermann <afonso.zimmermann@gmail.com>
+ * Gustavo Cremella <gcremella@gmail.com>
  *
  */
 
@@ -1026,7 +1027,8 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 		r2chan->mf_state = OR2_MF_DNIS_TXD;
 		prepare_mf_tone(r2chan, r2chan->dnis[r2chan->dnis_index]);
 	/* if no more DNIS, and there is a signal for it, use it */
-	} else if (GI_TONE(r2chan).no_more_dnis_available) {
+	} else if (GI_TONE(r2chan).no_more_dnis_available &&
+	            (r2chan->mf_state != OR2_MF_DNIS_END_TXD && r2chan->mf_state != OR2_MF_WAITING_TIMEOUT)) {
 		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
 		r2chan->mf_state = OR2_MF_DNIS_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).no_more_dnis_available);
