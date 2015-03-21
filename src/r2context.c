@@ -834,11 +834,13 @@ int openr2_context_configure_from_advanced_file(openr2_context_t *r2context, con
 
 		/* misc settings */
 		LOADSETTING(mf_threshold)
+
+		/* CAS R2 bits */
+		LOADSETTING(cas_r2_bits)
+		LOADSETTING(cas_nonr2_bits)
 	}
 	r2context->configured_from_file = 1;
 	fclose(variant_file);
 	return 0;
 }
-#undef LOADTONE
-#undef LOADTIMER
 
