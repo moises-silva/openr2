@@ -279,6 +279,10 @@ static int openr2_chan_handle_zap_event(openr2_chan_t *r2chan, int event)
 	case OR2_HW_EVENT_NO_ALARM:
 		openr2_log(r2chan, OR2_LOG_DEBUG, (event == OR2_HW_EVENT_ALARM) ? "Alarm Raised\n" : "Alarm Cleared\n");
 		r2chan->inalarm = (event == OR2_HW_EVENT_ALARM) ? 1 : 0;
+		if (!r2chan->inalarm) {
+			/* Go idle just after coming out of an alarm */
+			openr2_chan_set_idle(r2chan);
+		}
 		EMI(r2chan)->on_hardware_alarm(r2chan, r2chan->inalarm);
 		break;
 	default:
