@@ -10,13 +10,13 @@
 # see http://sources.redhat.com/autobook/autobook/autobook_91.html for details
 # more info on versioning: http://www.nondot.org/sabre/Mirrored/libtool-2.1a/libtool_6.html#SEC33
 
-AC_INIT([OpenR2], [1.3.3])
+AC_INIT([OpenR2], [1.3.4])
 
 m4_include(config/ax_check_real_file.m4)
 
 # final lib name will be: libopenr2-<current - age>,<age>,<revision>.so
 OPENR2_LT_CURRENT=4
-OPENR2_LT_REVISION=2
+OPENR2_LT_REVISION=3
 OPENR2_LT_AGE=1
 
 AC_SUBST(OPENR2_LT_CURRENT)
