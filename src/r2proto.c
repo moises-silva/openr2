@@ -1043,7 +1043,7 @@ static void mf_send_dnis(openr2_chan_t *r2chan, int offset)
 	/* if no more DNIS, and there is a signal for it, use it */
 	} else if (GI_TONE(r2chan).no_more_dnis_available &&
 	            (r2chan->mf_state != OR2_MF_DNIS_END_TXD && r2chan->mf_state != OR2_MF_WAITING_TIMEOUT)) {
-		openr2_log(r2chan, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Sending unavailable DNIS signal\n");
 		r2chan->mf_state = OR2_MF_DNIS_END_TXD;
 		prepare_mf_tone(r2chan, GI_TONE(r2chan).no_more_dnis_available);
 	} else {
@@ -1079,14 +1079,13 @@ static void report_call_end(openr2_chan_t *r2chan)
 
 static void r2_metering_pulse(openr2_chan_t *r2chan)
 {
-	OR2_CHAN_STACK;
-	openr2_log(r2chan, OR2_LOG_DEBUG, "Metering pulse timeout expired in state %s\n", openr2_proto_get_r2_state_string(r2chan));
+	openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_DEBUG, "Metering pulse timeout expired in state %s\n", openr2_proto_get_r2_state_string(r2chan));
 	if (r2chan->r2_state == OR2_FORCED_RELEASE_RXD) {
 		report_call_disconnection(r2chan, OR2_CAUSE_FORCED_RELEASE);
 	} else if (r2chan->r2_state == OR2_CLEAR_BACK_RXD) {
 		report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 	} else {
-		openr2_log(r2chan, OR2_LOG_ERROR, "Unexpected state on metering pulse timeout expiration: %s\n", openr2_proto_get_r2_state_string(r2chan));
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Unexpected state on metering pulse timeout expiration: %s\n", openr2_proto_get_r2_state_string(r2chan));
 		report_call_disconnection(r2chan, OR2_CAUSE_NORMAL_CLEARING);
 	}
 }
@@ -1523,7 +1522,6 @@ handlecas:
 		return 0;
 
 	case OR2_CLEAR_FWD_RXD:
-	case OR2_FORCED_RELEASE_RXD:
 		break;
 	}
 

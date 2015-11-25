@@ -190,7 +190,6 @@ int queue_read(queue_state_t *s, uint8_t *buf, int len)
 int queue_read_byte(queue_state_t *s)
 {
     int real_len;
-    int to_end;
     int iptr;
     int optr;
     int byte;
@@ -204,7 +203,6 @@ int queue_read_byte(queue_state_t *s)
     if (real_len < 1)
         return -1;
     /*endif*/
-    to_end = s->len - optr;
     byte = s->data[optr];
     if (++optr >= s->len)
         optr = 0;
