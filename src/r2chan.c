@@ -784,6 +784,16 @@ OR2_DECLARE(int) openr2_chan_get_rx_mf_signal(openr2_chan_t *r2chan)
 	return retcode;
 }
 
+
+OR2_DECLARE(int) openr2_chan_ack_call(openr2_chan_t *r2chan)
+{
+	int retcode = 0;
+	openr2_chan_lock(r2chan);
+	retcode = openr2_proto_ack_call(r2chan);
+	openr2_chan_unlock(r2chan);
+	return retcode;
+}
+
 OR2_DECLARE(int) openr2_chan_write(openr2_chan_t *r2chan, const unsigned char *buf, int buf_size)
 {
 	int myerrno;

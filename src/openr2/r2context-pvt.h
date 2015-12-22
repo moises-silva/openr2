@@ -72,6 +72,10 @@ typedef struct {
 typedef enum r2context_flags_e {
 	OR2_ANI_CAN_COME_FIRST = (1 << 0),
 	OR2_FORCE_USE_MAX_ANI = (1 << 1),
+	/* If set the stack sends seize ack automatically
+	 * otherwise the application needs to acknowledge
+	 * explicitly */
+	OR2_AUTO_SEIZE_ACK = (1 << 2),
 } r2context_flags_t;
 
 /* R2 library context. Holds the R2 channel list,

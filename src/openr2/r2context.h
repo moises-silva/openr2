@@ -271,6 +271,7 @@ OR2_DECLARE(int) openr2_context_set_mflib_interface(openr2_context_t *r2context,
 OR2_DECLARE(int) openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder);
 OR2_DECLARE(void) openr2_context_set_max_dnis(openr2_context_t *r2context, int max_dnis);
 OR2_DECLARE(void) openr2_context_set_max_ani(openr2_context_t *r2context, int max_ani);
+OR2_DECLARE(void) openr2_context_set_auto_seize_ack(openr2_context_t *r2context, int enable);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t 

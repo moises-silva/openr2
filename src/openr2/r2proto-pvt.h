@@ -341,6 +341,7 @@ int openr2_proto_answer_call_with_mode(struct openr2_chan_s *r2chan, openr2_answ
 int openr2_proto_disconnect_call(struct openr2_chan_s *r2chan, openr2_call_disconnect_cause_t cause);
 int openr2_proto_handle_cas(struct openr2_chan_s *r2chan);
 int openr2_proto_set_idle(struct openr2_chan_s *r2chan);
+int openr2_proto_ack_call(struct openr2_chan_s *r2chan);
 int openr2_proto_set_blocked(struct openr2_chan_s *r2chan);
 int openr2_proto_set_cas_signal(struct openr2_chan_s *r2chan, openr2_cas_signal_t signal);
 int openr2_proto_configure_context(struct openr2_context_s *r2context, openr2_variant_t variant, int max_ani, int max_dnis);

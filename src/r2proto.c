@@ -427,6 +427,9 @@ int openr2_proto_configure_context(openr2_context_t *r2context, openr2_variant_t
 	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? OR2_MAX_DNIS - 1 : max_dnis;
 	r2context->max_ani = (max_ani >= OR2_MAX_ANI) ? OR2_MAX_ANI - 1 : max_ani;
 
+	/* By default we automatically send seize ack when receiving a call */
+	openr2_set_flag(r2context, OR2_AUTO_SEIZE_ACK);
+
 	/* the forward R2 side always send DNIS first but
 	   most variants continue by asking ANI first
 	   and continuing with DNIS at the end  */
@@ -960,13 +963,11 @@ static void handle_incoming_call(openr2_chan_t *r2chan)
 	r2_set_state(r2chan, OR2_SEIZE_ACK_TXD);
 	r2chan->call_state = OR2_CALL_COLLECTING;
 	r2chan->direction = OR2_DIR_BACKWARD;
-	if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
-		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
-		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
-		return;
-	}
-	/* notify the user that a new call is starting to arrive */
+	/* Notify the user that a new call is starting to arrive */
 	EMI(r2chan)->on_call_init(r2chan);
+	if (openr2_test_flag(r2chan->r2context, OR2_AUTO_SEIZE_ACK)) {
+		openr2_proto_ack_call(r2chan);
+	}
 }
 
 static void mf_fwd_safety_timeout_expired(openr2_chan_t *r2chan)
@@ -2900,6 +2901,17 @@ OR2_DECLARE(const openr2_variant_entry_t *) openr2_proto_get_variant_list(int *n
 	}
 	*numvariants = sizeof(r2variants)/sizeof(r2variants[0]);
 	return r2variants;
+}
+
+/* Send seize ack to an incoming call */
+int openr2_proto_ack_call(openr2_chan_t *r2chan)
+{
+	if (set_cas_signal(r2chan, OR2_CAS_SEIZE_ACK)) {
+		openr2_log(r2chan, OR2_CHANNEL_LOG, OR2_LOG_ERROR, "Failed to send seize ack!, incoming call not proceeding!\n");
+		handle_protocol_error(r2chan, OR2_INTERNAL_ERROR);
+		return -1;
+	}
+	return 0;
 }
 
 int openr2_proto_handle_alarm_state(openr2_chan_t *r2chan)

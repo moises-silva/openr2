@@ -191,6 +191,9 @@ OR2_DECLARE(int) openr2_chan_set_mflib_handles(openr2_chan_t *r2chan, void *mf_w
 /*! \brief set channel's span_id */
 OR2_DECLARE(void) openr2_chan_set_span_id(openr2_chan_t *r2chan, int span_id);
 
+/*! \brief acknowledge incoming call */
+OR2_DECLARE(int) openr2_chan_ack_call(openr2_chan_t *r2chan);
+
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t
 #undef openr2_context_t

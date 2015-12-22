@@ -569,6 +569,15 @@ OR2_DECLARE(void) openr2_context_set_max_dnis(openr2_context_t *r2context, int m
 	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? (OR2_MAX_DNIS - 1) : max_dnis;
 }
 
+OR2_DECLARE(void) openr2_context_set_auto_seize_ack(openr2_context_t *r2context, int enable)
+{
+	if (enable) {
+		openr2_set_flag(r2context, OR2_AUTO_SEIZE_ACK);
+	} else {
+		openr2_clear_flag(r2context, OR2_AUTO_SEIZE_ACK);
+	}
+}
+
 OR2_DECLARE(void) openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 {
 	if (threshold < 0) {
