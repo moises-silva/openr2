@@ -269,6 +269,8 @@ OR2_DECLARE(int) openr2_context_get_dtmf_dialing(openr2_context_t *r2context, in
 OR2_DECLARE(int) openr2_context_set_dtmf_interface(openr2_context_t *r2context, openr2_dtmf_interface_t *dtmf_interface);
 OR2_DECLARE(int) openr2_context_set_mflib_interface(openr2_context_t *r2context, openr2_mflib_interface_t *mflib);
 OR2_DECLARE(int) openr2_context_set_transcoder_interface(openr2_context_t *r2context, openr2_transcoder_interface_t *transcoder);
+OR2_DECLARE(void) openr2_context_set_max_dnis(openr2_context_t *r2context, int max_dnis);
+OR2_DECLARE(void) openr2_context_set_max_ani(openr2_context_t *r2context, int max_ani);
 
 #ifdef __OR2_COMPILING_LIBRARY__
 #undef openr2_chan_t 

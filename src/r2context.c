@@ -553,6 +553,22 @@ OR2_DECLARE(openr2_log_level_t) openr2_context_get_log_level(openr2_context_t *r
 	return r2context->loglevel;
 }
 
+OR2_DECLARE(void) openr2_context_set_max_ani(openr2_context_t *r2context, int max_ani)
+{
+	if (max_ani >= OR2_MAX_ANI) {
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Overriding max_ani to %d\n", OR2_MAX_ANI - 1);
+	}
+	r2context->max_ani = (max_ani >= OR2_MAX_ANI) ? (OR2_MAX_ANI - 1) : max_ani;
+}
+
+OR2_DECLARE(void) openr2_context_set_max_dnis(openr2_context_t *r2context, int max_dnis)
+{
+	if (max_dnis >= OR2_MAX_DNIS) {
+		openr2_log2(r2context, OR2_CONTEXT_LOG, OR2_LOG_DEBUG, "Overriding max_dnis to %d\n", OR2_MAX_DNIS - 1);
+	}
+	r2context->max_dnis = (max_dnis >= OR2_MAX_DNIS) ? (OR2_MAX_DNIS - 1) : max_dnis;
+}
+
 OR2_DECLARE(void) openr2_context_set_mf_threshold(openr2_context_t *r2context, int threshold)
 {
 	if (threshold < 0) {
