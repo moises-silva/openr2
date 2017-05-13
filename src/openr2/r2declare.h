@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2010, Sangoma Technologies
- * Moises Silva <moy@sangoma.com>
+ * Moises Silva <moises.silva@gmail.com>
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without

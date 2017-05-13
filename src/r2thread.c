@@ -17,7 +17,7 @@
  *
  * Contributors: 
  *
- * Moises Silva <moy@sangoma.com>
+ * Moises Silva <moises.silva@gmail.com>
  * Arnaldo Pereira <arnaldo@sangoma.com>
  *
  */

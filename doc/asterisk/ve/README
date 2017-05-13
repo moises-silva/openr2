@@ -3,7 +3,7 @@ Sample Configurations for Venezuela
 
 Here we provide sample working configurations for named Venenzuela telco companies.
 If you get you installation working with another telco not in this list or with
-different params, please send me your config to moy@sangoma.com
+different params, please send me your config to moises.silva@gmail.com
 
 All this settings should go to /etc/asterisk/chan_dahdi.conf or zapata.conf and
 you need to choose only one sample per link.

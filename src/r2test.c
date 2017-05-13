@@ -2,7 +2,7 @@
  * R2Test
  * MFC/R2 call setup program
  *
- * Moises Silva <moy@sangoma.com>
+ * Moises Silva <moises.silva@gmail.com>
  * Copyright (C) 2008 Moises Silva
  *
  * This program is free software: you can redistribute it and/or modify
