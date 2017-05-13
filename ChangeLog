@@ -28,7 +28,7 @@ Date:   Fri Mar 8 13:03:19 2013 -0500
     Removed old svn version detection. Need some autotools magic to get git revision when available.
 
 commit 82b01a40ec645750d86c6751bdf5f05a613770e5
-Author: Moises Silva <moy@sangoma.com>
+Author: Moises Silva <moises.silva@gmail.com>
 Date:   Tue Feb 26 14:13:00 2013 -0500
 
     Fix longstanding bug in openr2_chan_write() API, this API is really not used
@@ -41,7 +41,7 @@ Date:   Tue Feb 26 14:13:00 2013 -0500
     calculation, which would actually decrement the written count, no good :)
 
 commit 33f6d3c49a87f3fe799574117857ba7a73320105
-Author: Moises Silva <moy@sangoma.com>
+Author: Moises Silva <moises.silva@gmail.com>
 Date:   Tue Feb 26 11:58:22 2013 -0500
 
     Fix CREDITS file
@@ -60,7 +60,7 @@ Date:   Mon Jun 11 12:37:02 2012 -0400
     Added dtmf detection utility to libopenr2.spec
 
 commit 8031ec19aa3dab0e11f06d56cff970b121530fc2
-Author: Moises Silva <moy@sangoma.com>
+Author: Moises Silva <moises.silva@gmail.com>
 Date:   Thu May 24 12:32:53 2012 -0400
 
     Fix caller ani restricted tone for Mexico variant
