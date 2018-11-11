@@ -848,8 +848,11 @@ static void open_logfile(openr2_chan_t *r2chan, int backward)
 		currtime = time(NULL);
 		if (openr2_ctime_r(&currtime, timestr)) {
 			timestr[strlen(timestr)-1] = 0; /* remove end of line */
-			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d [openr2 version %s, revision %s]\n", 
-					timestr, r2chan->number, openr2_get_version(), openr2_get_revision());
+			openr2_log(r2chan, OR2_LOG_DEBUG, "Call started at %s on chan %d [version=%s, revision=%s, variant=%s, advanced=%s]\n",
+					timestr, r2chan->number,
+					openr2_get_version(), openr2_get_revision(),
+					r2chan->r2context->variant_name,
+					r2chan->r2context->configured_from_file ? "yes" : "no");
 		} else {
 			openr2_log(r2chan, OR2_LOG_ERROR, "Failed to get call starting time\n");
 		}
@@ -1720,7 +1723,19 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 {
 	OR2_CHAN_STACK;
 	int rc;
-	if (OR2_MF_TONE_10 <= tone && OR2_MF_TONE_9 >= tone) {
+	if (GI_TONE(r2chan).no_more_dnis_available == tone) {
+		/* not sure if we ever could get no more dnis as first DNIS tone
+		   but let's handle it just in case */
+		if (0 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
+			try_request_calling_party_category(r2chan);
+		} else {
+			if (r2chan->r2context->immediate_accept) {
+				bypass_change_to_g2(r2chan);
+			} else {
+				request_change_to_g2(r2chan);
+			}
+		}
+	} else {
 		if (r2chan->dnis_len == STR_LEN(r2chan->dnis)){
 			openr2_log(r2chan, OR2_LOG_WARNING, "Dropping DNIS digit %c, exceeded max DNIS length of %d\n", tone, STR_LEN(r2chan->dnis));
 		} else {
@@ -1749,22 +1764,6 @@ static void mf_receive_expected_dnis(openr2_chan_t *r2chan, int tone)
 		} else {
 			request_next_dnis_digit(r2chan);
 		}
-	} else if (GI_TONE(r2chan).no_more_dnis_available == tone) {
-		/* not sure if we ever could get no more dnis as first DNIS tone
-		   but let's handle it just in case */
-		if (0 == r2chan->dnis_len || !r2chan->r2context->get_ani_first) {
-			try_request_calling_party_category(r2chan);
-		} else {
-			if (r2chan->r2context->immediate_accept) {
-				bypass_change_to_g2(r2chan);
-			} else {
-				request_change_to_g2(r2chan);
-			}
-		}
-	} else {
-		/* we were supposed to handle DNIS, but the tone
-		   is not in the range of valid digits */
-		handle_protocol_error(r2chan, OR2_INVALID_MF_TONE);
 	}
 }
 

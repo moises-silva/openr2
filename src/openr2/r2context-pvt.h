@@ -91,6 +91,9 @@ typedef struct openr2_context_s {
 	/* R2 variant to use in this context channels */
 	openr2_variant_t variant;
 
+	/* R2 variant printable name */
+	const char *variant_name;
+
 	/* CAS signals configured for the variant in use */
 	openr2_cas_signal_t cas_signals[OR2_NUM_CAS_SIGNALS];
 

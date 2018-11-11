@@ -294,6 +294,7 @@ openr2_context_t *openr2_context_new(openr2_mflib_interface_t *mflib, openr2_eve
 	r2context->evmanager = evmanager;
 	r2context->transcoder = transcoder;
 	r2context->variant = variant;
+	r2context->variant_name = openr2_proto_get_variant_string(r2context->variant);
 	r2context->dtmfeng = &default_dtmf_engine;
 	r2context->loglevel = OR2_LOG_ERROR | OR2_LOG_WARNING | OR2_LOG_NOTICE;
 	pthread_mutex_init(&r2context->timers_lock, NULL);
